@@ -25,8 +25,8 @@ events += events_{{ node["var_name"] }}
 {{ create_block(node) }}
 
 {%- if node["data"].get("replacement_times") %}
-events_{{ node["var_name"] }} = {{ node["var_name"] }}.create_reset_events()
-events += events_{{ node["var_name"] }}
+{{ node["var_name"] }}._create_reset_events()
+events += {{ node["var_name"] }}.events
 {%- endif %}
 
 {%- endmacro -%}
