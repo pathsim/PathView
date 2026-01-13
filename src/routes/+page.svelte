@@ -821,7 +821,7 @@
 
 <svelte:head>
 	<title>PathView</title>
-	<link rel="icon" type="image/png" href="/favicon.png">
+	<link rel="icon" type="image/png" href="{base}/favicon.png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -830,7 +830,7 @@
 <div class="app">
 	<!-- Logo overlay in top left -->
 	<button class="logo-overlay" onclick={() => showWelcomeModal = true} use:tooltip={"Welcome"} aria-label="Welcome">
-		<img src="/pathview_logo.png" alt="PathView" />
+		<img src="{base}/pathview_logo.png" alt="PathView" />
 	</button>
 
 	<!-- Canvas takes full screen -->
