@@ -1,0 +1,13 @@
+{
+  "files": [
+    "bouncing-ball.json",
+    "cascade-subsystem.json",
+    "coupled-oscillators.json",
+    "feedback-loop.json",
+    "fmcw.json",
+    "harmonic-oscillator.json",
+    "lowpass-filter.json",
+    "pid-subsystem.json",
+    "vanderpol.json"
+  ]
+}

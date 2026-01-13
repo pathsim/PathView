@@ -1,0 +1,757 @@
+<script lang="ts">
+	import { onDestroy } from 'svelte';
+	import { Handle, Position } from '@xyflow/svelte';
+	import { nodeRegistry, type NodeInstance } from '$lib/nodes';
+	import { getShapeCssClass, isSubsystem } from '$lib/nodes/shapes/index';
+	import { NODE_TYPES } from '$lib/constants/nodeTypes';
+	import { openNodeDialog } from '$lib/stores/nodeDialog';
+	import { graphStore } from '$lib/stores/graph';
+	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
+	import { hoveredHandle, selectedNodeHighlight } from '$lib/stores/hoveredHandle';
+	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
+	import { paramInput } from '$lib/actions/paramInput';
+	import { createRecordingDataState } from '$lib/stores/recordingData.svelte';
+	import PlotPreview from './PlotPreview.svelte';
+
+	interface Props {
+		id: string;
+		data: NodeInstance;
+		selected?: boolean;
+	}
+
+	let { id, data, selected = false }: Props = $props();
+
+	// Get type definition
+	const typeDef = $derived(nodeRegistry.get(data.type));
+	const category = $derived(typeDef?.category || 'Algebraic');
+
+	// Recording node hover preview
+	const isRecordingNode = $derived(category === 'Recording');
+	let isHovered = $state(false);
+	let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+	let hasPreloaded = $state(false); // Keep mounted once preloaded
+	let showPreview = $state(false); // Control visibility
+	let previewsPinned = $state(false);
+
+
+	const unsubscribePinned = pinnedPreviewsStore.subscribe((pinned) => {
+		previewsPinned = pinned;
+	});
+
+	// Shared recording data state (simulation results, ghost traces, etc.)
+	const recordingData = createRecordingDataState();
+
+	// Preview is loading when simulation is starting/running
+	const previewLoading = $derived(recordingData.simPhase === 'starting' || recordingData.simPhase === 'running');
+
+	onDestroy(() => {
+		unsubscribePinned();
+		recordingData.destroy();
+		if (hoverTimeout) clearTimeout(hoverTimeout);
+	});
+
+	// Get plot data for this recording node
+	const plotData = $derived(() => {
+		if (!isRecordingNode) return null;
+		return recordingData.getPlotData(id, data.type);
+	});
+
+	// Get ghost data for this recording node
+	const ghostPlotData = $derived(() => {
+		if (!isRecordingNode) return [];
+		return recordingData.getGhostData(id, data.type);
+	});
+
+	// Sync hasPreloaded when pinned (so unpinning keeps cache)
+	$effect(() => {
+		if (previewsPinned && plotData()) {
+			hasPreloaded = true;
+		}
+	});
+
+	function handleMouseEnter() {
+		if (!isRecordingNode) return;
+		isHovered = true;
+		// Simple delay before showing preview
+		hoverTimeout = setTimeout(() => {
+			if (isHovered) {
+				hasPreloaded = true;
+				showPreview = true;
+			}
+		}, 300);
+	}
+
+	function handleMouseLeave() {
+		isHovered = false;
+		showPreview = false;
+		if (hoverTimeout) {
+			clearTimeout(hoverTimeout);
+			hoverTimeout = null;
+		}
+	}
+
+	// Check if this node allows dynamic ports
+	const allowsDynamicInputs = $derived(typeDef?.ports.maxInputs === null);
+	const allowsDynamicOutputs = $derived(typeDef?.ports.maxOutputs === null);
+
+	// Rotation state (0, 1, 2, 3 = 0°, 90°, 180°, 270°) - stored in node params
+	const rotation = $derived((data.params?.['_rotation'] as number) || 0);
+
+	// Calculate actual port positions based on rotation
+	// 0: inputs left, outputs right (default)
+	// 1: inputs top, outputs bottom
+	// 2: inputs right, outputs left
+	// 3: inputs bottom, outputs top
+	const inputPosition = $derived(() => {
+		switch (rotation) {
+			case 1: return Position.Top;
+			case 2: return Position.Right;
+			case 3: return Position.Bottom;
+			default: return Position.Left;
+		}
+	});
+
+	const outputPosition = $derived(() => {
+		switch (rotation) {
+			case 1: return Position.Bottom;
+			case 2: return Position.Left;
+			case 3: return Position.Top;
+			default: return Position.Right;
+		}
+	});
+
+	// Port is horizontal (left/right) or vertical (top/bottom)
+	const isVertical = $derived(rotation === 1 || rotation === 3);
+
+	// Preview position: opposite side of inputs
+	// rotation 0: inputs left → preview right
+	// rotation 1: inputs top → preview bottom
+	// rotation 2: inputs right → preview left
+	// rotation 3: inputs bottom → preview top
+	const previewPosition = $derived(() => {
+		switch (rotation) {
+			case 1: return 'bottom';
+			case 2: return 'left';
+			case 3: return 'top';
+			default: return 'right';
+		}
+	});
+
+	// Node size constants
+	const NODE_PORT_SPACING = 18; // pixels per port
+	const NODE_BASE_HEIGHT = 36;
+	const NODE_BASE_WIDTH = 90;
+
+	const maxPortsOnSide = $derived(Math.max(data.inputs.length, data.outputs.length));
+
+	// For horizontal layout: height grows with ports; for vertical: width grows
+	const nodeHeight = $derived(isVertical ? NODE_BASE_HEIGHT : Math.max(NODE_BASE_HEIGHT, maxPortsOnSide * NODE_PORT_SPACING + 10));
+	const nodeWidth = $derived(isVertical ? Math.max(NODE_BASE_WIDTH, maxPortsOnSide * NODE_PORT_SPACING + 20) : NODE_BASE_WIDTH);
+
+	// Calculate port positions using percentages for proper centering
+	function getPortPosition(index: number, total: number): string {
+		if (total === 1) return '50%';
+		// Distribute evenly with padding from edges
+		const percent = ((index + 1) / (total + 1)) * 100;
+		return `${percent}%`;
+	}
+
+	// Check if this is a Subsystem or Interface node (using shapes utility)
+	const isSubsystemNode = $derived(isSubsystem(data));
+	const isInterfaceNode = $derived(data.type === NODE_TYPES.INTERFACE);
+	const isSubsystemType = $derived(isSubsystemNode || isInterfaceNode);
+
+	// Handle double-click to open properties dialog or drill into subsystem
+	function handleDoubleClick(event: MouseEvent) {
+		event.stopPropagation();
+		if (isSubsystemNode) {
+			// Drill down into subsystem
+			graphStore.drillDown(id);
+		} else {
+			openNodeDialog(id);
+		}
+	}
+
+	// Add input port
+	function handleAddInput(event: MouseEvent) {
+		event.stopPropagation();
+		graphStore.addInputPort(id);
+	}
+
+	// Get min ports from type definition
+	const minInputs = $derived(typeDef?.ports.minInputs ?? 1);
+	const minOutputs = $derived(typeDef?.ports.minOutputs ?? 1);
+
+	// Remove input port (respects minInputs)
+	function handleRemoveInput(event: MouseEvent) {
+		event.stopPropagation();
+		if (data.inputs.length > minInputs) {
+			graphStore.removeInputPort(id);
+		}
+	}
+
+	// Add output port
+	function handleAddOutput(event: MouseEvent) {
+		event.stopPropagation();
+		graphStore.addOutputPort(id);
+	}
+
+	// Remove output port (respects minOutputs)
+	function handleRemoveOutput(event: MouseEvent) {
+		event.stopPropagation();
+		if (data.outputs.length > minOutputs) {
+			graphStore.removeOutputPort(id);
+		}
+	}
+
+	// Get shape class from unified shapes utility
+	const shapeClass = $derived(() => typeDef ? getShapeCssClass(typeDef) : 'shape-default');
+
+	// Custom node color (defaults to pathsim-blue)
+	const nodeColor = $derived(data.color || 'var(--accent)');
+
+	// Get valid pinned params (filter out any that no longer exist in the type definition)
+	const validPinnedParams = $derived(() => {
+		if (!data.pinnedParams?.length || !typeDef) return [];
+		const paramNames = new Set(typeDef.params.map(p => p.name));
+		return data.pinnedParams.filter(name => paramNames.has(name));
+	});
+
+	// Handle pinned param change
+	function handlePinnedParamChange(paramName: string, value: string) {
+		graphStore.updateNodeParams(id, { [paramName]: value });
+	}
+
+	// Format value for display
+	function formatParamValue(value: unknown): string {
+		if (value === null || value === undefined) return '';
+		if (typeof value === 'object') return JSON.stringify(value);
+		return String(value);
+	}
+
+	// Format default value for placeholder (Python style)
+	function formatDefault(value: unknown): string {
+		if (value === null || value === undefined) return 'None';
+		if (typeof value === 'object') return JSON.stringify(value);
+		return String(value);
+	}
+
+	// Tooltip position for input handles (show tooltip away from node)
+	function getInputTooltipPosition(): 'bottom' | 'left' | 'right' | 'top' {
+		switch (rotation) {
+			case 1: return 'top';    // inputs on top → tooltip above
+			case 2: return 'right';  // inputs on right → tooltip to right
+			case 3: return 'bottom'; // inputs on bottom → tooltip below
+			default: return 'left';  // inputs on left → tooltip to left
+		}
+	}
+
+	// Tooltip position for output handles (show tooltip away from node)
+	function getOutputTooltipPosition(): 'bottom' | 'left' | 'right' | 'top' {
+		switch (rotation) {
+			case 1: return 'bottom'; // outputs on bottom → tooltip below
+			case 2: return 'left';   // outputs on left → tooltip to left
+			case 3: return 'top';    // outputs on top → tooltip above
+			default: return 'right'; // outputs on right → tooltip to right
+		}
+	}
+
+	// Handle mouse events for input handles
+	function handleInputMouseEnter(event: MouseEvent, port: { id: string; name: string }) {
+		hoveredHandle.set({ nodeId: id, handleId: port.id, color: nodeColor });
+		showTooltip(port.name, event.currentTarget as HTMLElement, getInputTooltipPosition());
+	}
+
+	function handleInputMouseLeave(port: { id: string }) {
+		hoveredHandle.set(null);
+		hideTooltip();
+	}
+
+	// Handle mouse events for output handles
+	function handleOutputMouseEnter(event: MouseEvent, port: { id: string; name: string }) {
+		hoveredHandle.set({ nodeId: id, handleId: port.id, color: nodeColor });
+		showTooltip(port.name, event.currentTarget as HTMLElement, getOutputTooltipPosition());
+	}
+
+	function handleOutputMouseLeave(port: { id: string }) {
+		hoveredHandle.set(null);
+		hideTooltip();
+	}
+
+	// Highlight connected edges when node is selected
+	$effect(() => {
+		if (selected) {
+			selectedNodeHighlight.set({ nodeId: id, color: nodeColor });
+		} else {
+			selectedNodeHighlight.update((current) => {
+				if (current?.nodeId === id) return null;
+				return current;
+			});
+		}
+	});
+</script>
+
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="node {shapeClass()}"
+	class:selected
+	class:vertical={isVertical}
+	class:preview-hovered={showPreview}
+	class:subsystem-type={isSubsystemType}
+	data-rotation={rotation}
+	style="min-width: {nodeWidth}px; min-height: {nodeHeight}px; --node-color: {nodeColor};"
+	ondblclick={handleDoubleClick}
+	onmouseenter={handleMouseEnter}
+	onmouseleave={handleMouseLeave}
+>
+	<!-- Plot preview for recording nodes -->
+	{#if (hasPreloaded || previewsPinned) && plotData()}
+		<div
+			class="plot-preview-popup preview-{previewPosition()}"
+			class:visible={showPreview || previewsPinned}
+		>
+			<PlotPreview type={plotData()!.type} data={plotData()!.data} ghostData={ghostPlotData()} />
+		</div>
+	{/if}
+
+	<!-- Glow effect for selected state -->
+	{#if selected}
+		<div class="selection-glow"></div>
+	{/if}
+
+	<!-- Inner wrapper for content clipping -->
+	<div class="node-inner">
+		<!-- Node content -->
+		<div class="node-content">
+			<span class="node-name">{data.name}</span>
+			{#if typeDef}
+				<span class="node-type">{typeDef.name}</span>
+			{/if}
+		</div>
+
+		<!-- Pinned parameters -->
+		{#if validPinnedParams().length > 0 && typeDef}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div class="pinned-params" onclick={(e) => e.stopPropagation()} ondblclick={(e) => e.stopPropagation()}>
+				{#each validPinnedParams() as paramName}
+					{@const paramDef = typeDef.params.find(p => p.name === paramName)}
+					{#if paramDef}
+						<div class="pinned-param">
+							<label for="pinned-{id}-{paramName}">{paramName}</label>
+							<input
+								id="pinned-{id}-{paramName}"
+								type="text"
+								value={formatParamValue(data.params[paramName])}
+								placeholder={formatDefault(paramDef.default)}
+								oninput={(e) => handlePinnedParamChange(paramName, e.currentTarget.value)}
+								onmousedown={(e) => e.stopPropagation()}
+								onfocus={(e) => e.stopPropagation()}
+								use:paramInput
+							/>
+						</div>
+					{/if}
+				{/each}
+			</div>
+		{/if}
+	</div>
+
+	<!-- Port controls for dynamic inputs (only show when selected) -->
+	{#if allowsDynamicInputs && selected}
+		<div class="port-controls port-controls-input" class:port-controls-left={rotation === 0} class:port-controls-top={rotation === 1} class:port-controls-right={rotation === 2} class:port-controls-bottom={rotation === 3}>
+			<button class="port-btn" onclick={handleAddInput} ondblclick={(e) => e.stopPropagation()} title="Add input">+</button>
+			<button class="port-btn" onclick={handleRemoveInput} ondblclick={(e) => e.stopPropagation()} disabled={data.inputs.length <= minInputs} title="Remove input">-</button>
+		</div>
+	{/if}
+
+	<!-- Port controls for dynamic outputs (only show when selected) -->
+	{#if allowsDynamicOutputs && selected}
+		<div class="port-controls port-controls-output" class:port-controls-right={rotation === 0} class:port-controls-bottom={rotation === 1} class:port-controls-left={rotation === 2} class:port-controls-top={rotation === 3}>
+			<button class="port-btn" onclick={handleAddOutput} ondblclick={(e) => e.stopPropagation()} title="Add output">+</button>
+			<button class="port-btn" onclick={handleRemoveOutput} ondblclick={(e) => e.stopPropagation()} disabled={data.outputs.length <= minOutputs} title="Remove output">-</button>
+		</div>
+	{/if}
+
+	<!-- Input handles -->
+	{#key `${rotation}-${data.inputs.length}`}
+		{#each data.inputs as port, i}
+			<Handle
+				type="target"
+				position={inputPosition()}
+				id={port.id}
+				style={isVertical ? `left: ${getPortPosition(i, data.inputs.length)};` : `top: ${getPortPosition(i, data.inputs.length)};`}
+				class="handle handle-input"
+				onmouseenter={(e) => handleInputMouseEnter(e, port)}
+				onmouseleave={() => handleInputMouseLeave(port)}
+			/>
+		{/each}
+	{/key}
+
+	<!-- Output handles -->
+	{#key `${rotation}-${data.outputs.length}`}
+		{#each data.outputs as port, i}
+			<Handle
+				type="source"
+				position={outputPosition()}
+				id={port.id}
+				style={isVertical ? `left: ${getPortPosition(i, data.outputs.length)};` : `top: ${getPortPosition(i, data.outputs.length)};`}
+				class="handle handle-output"
+				onmouseenter={(e) => handleOutputMouseEnter(e, port)}
+				onmouseleave={() => handleOutputMouseLeave(port)}
+			/>
+		{/each}
+	{/key}
+</div>
+
+<style>
+	.node {
+		position: relative;
+		min-width: 90px;
+		min-height: 36px;
+		background: var(--surface-raised);
+		border: 1px solid var(--edge);
+		font-size: 10px;
+		transition: all 0.15s ease;
+		overflow: visible;
+	}
+
+	/* Shape variants */
+	.shape-pill {
+		border-radius: 20px;
+	}
+
+	.shape-rect {
+		border-radius: 4px;
+	}
+
+	.shape-circle {
+		border-radius: 16px;
+	}
+
+	.shape-diamond {
+		border-radius: 4px;
+		transform: rotate(45deg);
+	}
+
+	.shape-diamond .node-content {
+		transform: rotate(-45deg);
+	}
+
+	.shape-mixed {
+		border-radius: 12px 4px 12px 4px;
+	}
+
+	.shape-default {
+		border-radius: 8px;
+	}
+
+	/* Subsystem/Interface dashed border */
+	.node.subsystem-type {
+		border-style: dashed;
+	}
+
+	/* Selection state */
+	.node.selected {
+		border-color: var(--node-color);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--node-color) 25%, transparent);
+	}
+
+	.selection-glow {
+		display: none;
+	}
+
+	/* Bring node to front when preview is hovered */
+	:global(.svelte-flow__node:has(.preview-hovered)) {
+		z-index: 1000 !important;
+	}
+
+	/* Inner wrapper for proper border-radius clipping */
+	.node-inner {
+		border-radius: inherit;
+		overflow: hidden;
+	}
+
+	/* Content */
+	.node-content {
+		padding: 8px 12px;
+		padding-left: 16px;
+		padding-right: 16px;
+		background: var(--surface-raised);
+		text-align: center;
+	}
+
+	.node-name {
+		display: block;
+		font-weight: 600;
+		font-size: 10px;
+		color: var(--node-color);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		letter-spacing: -0.2px;
+	}
+
+	.node-type {
+		display: block;
+		font-size: 8px;
+		color: var(--text-muted);
+		margin-top: 1px;
+	}
+
+	/* Pinned parameters */
+	.pinned-params {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 4px 10px 6px;
+		border-top: 1px solid var(--border);
+		background: var(--surface);
+	}
+
+	.pinned-param {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	.pinned-param label {
+		flex-shrink: 0;
+		font-size: 8px;
+		color: var(--text-disabled);
+		max-width: 50px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.pinned-param input {
+		flex: 1;
+		min-width: 0;
+		height: 20px;
+		padding: 2px 8px;
+		font-size: 9px;
+		font-family: var(--font-mono);
+		background: var(--surface-raised);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		color: var(--text);
+		transition: all var(--transition-fast);
+	}
+
+	.pinned-param input:hover {
+		border-color: var(--border-focus);
+	}
+
+	.pinned-param input:focus {
+		outline: none;
+		border-color: var(--node-color);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--node-color) 20%, transparent);
+	}
+
+	.pinned-param input::placeholder {
+		color: var(--text-muted);
+	}
+
+	/* Port controls (+/- buttons) */
+	.port-controls {
+		position: absolute;
+		display: flex;
+		gap: 2px;
+		z-index: 10;
+	}
+
+	.port-controls-left {
+		left: -24px;
+		top: 50%;
+		transform: translateY(-50%);
+		flex-direction: column;
+	}
+
+	.port-controls-right {
+		right: -24px;
+		top: 50%;
+		transform: translateY(-50%);
+		flex-direction: column;
+	}
+
+	.port-controls-top {
+		top: -24px;
+		left: 50%;
+		transform: translateX(-50%);
+		flex-direction: row;
+	}
+
+	.port-controls-bottom {
+		bottom: -24px;
+		left: 50%;
+		transform: translateX(-50%);
+		flex-direction: row;
+	}
+
+	.port-btn {
+		width: 16px;
+		height: 16px;
+		padding: 0;
+		border: 1px solid var(--node-color);
+		border-radius: var(--radius-sm);
+		background: var(--surface-raised);
+		color: var(--node-color);
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.port-btn:hover:not(:disabled) {
+		background: var(--node-color);
+		color: var(--surface-raised);
+	}
+
+	.port-btn:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+
+	/* Handles - Hollow arrow/pentagon shape with rounded corners */
+	:global(.node .svelte-flow__handle) {
+		width: 10px;
+		height: 8px;
+		background: transparent;
+		border: none;
+		border-radius: 0;
+	}
+
+	/* Outer shape (the border) - rounded pentagon */
+	:global(.node .svelte-flow__handle::before) {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: var(--edge);
+		clip-path: path('M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z');
+		transition: background 0.15s ease, filter 0.15s ease;
+	}
+
+	/* Inner cutout (makes it hollow) - generated by scripts/generate-handle-paths.js */
+	:global(.node .svelte-flow__handle::after) {
+		content: '';
+		position: absolute;
+		inset: 1px;
+		background: var(--surface-raised);
+		clip-path: path('M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z');
+	}
+
+	:global(.node .svelte-flow__handle:hover::before),
+	:global(.node.selected .svelte-flow__handle::before) {
+		background: var(--node-color);
+		filter: drop-shadow(0 0 2px var(--node-color));
+	}
+
+	:global(.node .svelte-flow__handle:hover::after),
+	:global(.node.selected .svelte-flow__handle::after) {
+		display: none;
+	}
+
+	:global(.node .svelte-flow__handle.connecting::before) {
+		background: var(--accent);
+		filter: drop-shadow(0 0 3px var(--accent));
+	}
+
+	:global(.node .svelte-flow__handle.connecting::after) {
+		display: none;
+	}
+
+	/* Arrow pointing right (rotation 0 - default) */
+	:global(.node[data-rotation="0"] .svelte-flow__handle::before) {
+		clip-path: path('M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z');
+	}
+	:global(.node[data-rotation="0"] .svelte-flow__handle::after) {
+		clip-path: path('M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z');
+	}
+
+	/* Arrow pointing down (rotation 1) */
+	:global(.node[data-rotation="1"] .svelte-flow__handle) {
+		width: 8px;
+		height: 10px;
+	}
+	:global(.node[data-rotation="1"] .svelte-flow__handle::before) {
+		clip-path: path('M 1.00 0.00 L 7.00 0.00 Q 8.00 0.00 8.00 1.00 L 8.00 5.00 Q 8.00 6.00 7.29 6.71 L 4.71 9.29 Q 4.00 10.00 3.29 9.29 L 0.71 6.71 Q 0.00 6.00 0.00 5.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z');
+	}
+	:global(.node[data-rotation="1"] .svelte-flow__handle::after) {
+		clip-path: path('M 0.80 0.00 L 5.20 0.00 Q 6.00 0.00 6.00 0.80 L 6.00 3.79 Q 6.00 4.59 5.43 5.15 L 3.57 7.02 Q 3.00 7.59 2.43 7.02 L 0.57 5.15 Q 0.00 4.59 0.00 3.79 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z');
+	}
+
+	/* Arrow pointing left (rotation 2) */
+	:global(.node[data-rotation="2"] .svelte-flow__handle::before) {
+		clip-path: path('M 5.00 0.00 L 9.00 0.00 Q 10.00 0.00 10.00 1.00 L 10.00 7.00 Q 10.00 8.00 9.00 8.00 L 5.00 8.00 Q 4.00 8.00 3.29 7.29 L 0.71 4.71 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 5.00 0.00 Z');
+	}
+	:global(.node[data-rotation="2"] .svelte-flow__handle::after) {
+		clip-path: path('M 4.21 0.00 L 7.20 0.00 Q 8.00 0.00 8.00 0.80 L 8.00 5.20 Q 8.00 6.00 7.20 6.00 L 4.21 6.00 Q 3.41 6.00 2.85 5.43 L 0.98 3.57 Q 0.41 3.00 0.98 2.43 L 2.85 0.57 Q 3.41 0.00 4.21 0.00 Z');
+	}
+
+	/* Arrow pointing up (rotation 3) */
+	:global(.node[data-rotation="3"] .svelte-flow__handle) {
+		width: 8px;
+		height: 10px;
+	}
+	:global(.node[data-rotation="3"] .svelte-flow__handle::before) {
+		clip-path: path('M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z');
+	}
+	:global(.node[data-rotation="3"] .svelte-flow__handle::after) {
+		clip-path: path('M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z');
+	}
+
+	/* Plot preview popup - base styles */
+	.plot-preview-popup {
+		position: absolute;
+		z-index: 1000;
+		pointer-events: none;
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	.plot-preview-popup.visible {
+		opacity: 1;
+		visibility: visible;
+		animation: fadeIn 0.15s ease-out;
+	}
+
+	/* Preview position: right (default, inputs on left) */
+	.plot-preview-popup.preview-right {
+		left: calc(100% + 12px);
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	/* Preview position: left (inputs on right) */
+	.plot-preview-popup.preview-left {
+		right: calc(100% + 12px);
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	/* Preview position: top (inputs on bottom) */
+	.plot-preview-popup.preview-top {
+		bottom: calc(100% + 12px);
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	/* Preview position: bottom (inputs on top) */
+	.plot-preview-popup.preview-bottom {
+		top: calc(100% + 12px);
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+</style>
