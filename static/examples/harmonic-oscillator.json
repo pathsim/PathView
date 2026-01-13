@@ -1,0 +1,335 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2025-12-20T20:09:27.750Z",
+    "modified": "2025-12-20T20:09:27.750Z",
+    "name": "Harmonic Oscillator",
+    "description": "Second-order spring-mass-damper"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "int-vel",
+        "type": "Integrator",
+        "name": "Velocity",
+        "position": {
+          "x": 675,
+          "y": 315
+        },
+        "inputs": [
+          {
+            "id": "int-vel-input-0",
+            "nodeId": "int-vel",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "int-vel-output-0",
+            "nodeId": "int-vel",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "initial_value": 5
+        }
+      },
+      {
+        "id": "int-pos",
+        "type": "Integrator",
+        "name": "Position",
+        "position": {
+          "x": 915,
+          "y": 315
+        },
+        "inputs": [
+          {
+            "id": "int-pos-input-0",
+            "nodeId": "int-pos",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "int-pos-output-0",
+            "nodeId": "int-pos",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "initial_value": 2
+        }
+      },
+      {
+        "id": "amp-damping",
+        "type": "Amplifier",
+        "name": "Damping",
+        "position": {
+          "x": 795,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "amp-damping-input-0",
+            "nodeId": "amp-damping",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "amp-damping-output-0",
+            "nodeId": "amp-damping",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "gain": "0.2",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "amp-spring",
+        "type": "Amplifier",
+        "name": "Spring",
+        "position": {
+          "x": 1035,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "amp-spring-input-0",
+            "nodeId": "amp-spring",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "amp-spring-output-0",
+            "nodeId": "amp-spring",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "gain": "1.5",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "amp-mass",
+        "type": "Amplifier",
+        "name": "1/Mass",
+        "position": {
+          "x": 555,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "amp-mass-input-0",
+            "nodeId": "amp-mass",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "amp-mass-output-0",
+            "nodeId": "amp-mass",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "gain": "-1.25",
+          "_rotation": 3
+        }
+      },
+      {
+        "id": "adder-forces",
+        "type": "Adder",
+        "name": "Forces",
+        "position": {
+          "x": 675,
+          "y": 450
+        },
+        "inputs": [
+          {
+            "id": "adder-forces-input-0",
+            "nodeId": "adder-forces",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          },
+          {
+            "id": "adder-forces-input-1",
+            "nodeId": "adder-forces",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": "adder-forces-output-0",
+            "nodeId": "adder-forces",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "operations": "'++'",
+          "_rotation": 2
+        }
+      },
+      {
+        "id": "f9218e45-2173-4f61-bab0-ee382529e284",
+        "type": "Scope",
+        "name": "Scope",
+        "position": {
+          "x": 795,
+          "y": 240
+        },
+        "inputs": [
+          {
+            "id": "f9218e45-2173-4f61-bab0-ee382529e284-input-0",
+            "nodeId": "f9218e45-2173-4f61-bab0-ee382529e284",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "sampling_rate": null,
+          "t_wait": "0.0",
+          "labels": null,
+          "_rotation": 3
+        }
+      },
+      {
+        "id": "520462c6-afb1-4ba8-8fff-a8503e23bd98",
+        "type": "Scope",
+        "name": "Scope",
+        "position": {
+          "x": 1035,
+          "y": 240
+        },
+        "inputs": [
+          {
+            "id": "520462c6-afb1-4ba8-8fff-a8503e23bd98-input-0",
+            "nodeId": "520462c6-afb1-4ba8-8fff-a8503e23bd98",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "sampling_rate": null,
+          "t_wait": "0.0",
+          "labels": null,
+          "_rotation": 3
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "sourceNodeId": "amp-mass",
+        "sourcePortIndex": 0,
+        "targetNodeId": "int-vel",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c2",
+        "sourceNodeId": "int-vel",
+        "sourcePortIndex": 0,
+        "targetNodeId": "int-pos",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c3",
+        "sourceNodeId": "int-vel",
+        "sourcePortIndex": 0,
+        "targetNodeId": "amp-damping",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c5",
+        "sourceNodeId": "int-pos",
+        "sourcePortIndex": 0,
+        "targetNodeId": "amp-spring",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c7",
+        "sourceNodeId": "amp-damping",
+        "sourcePortIndex": 0,
+        "targetNodeId": "adder-forces",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c8",
+        "sourceNodeId": "amp-spring",
+        "sourcePortIndex": 0,
+        "targetNodeId": "adder-forces",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "c9",
+        "sourceNodeId": "adder-forces",
+        "sourcePortIndex": 0,
+        "targetNodeId": "amp-mass",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "827a8b5f-b400-4009-9e53-f05dfef188e3",
+        "sourceNodeId": "int-vel",
+        "sourcePortIndex": 0,
+        "targetNodeId": "f9218e45-2173-4f61-bab0-ee382529e284",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "621c650a-65c0-4c03-858b-750b20bf5119",
+        "sourceNodeId": "int-pos",
+        "sourcePortIndex": 0,
+        "targetNodeId": "520462c6-afb1-4ba8-8fff-a8503e23bd98",
+        "targetPortIndex": 0
+      }
+    ]
+  },
+  "codeContext": {
+    "code": ""
+  },
+  "simulationSettings": {
+    "duration": "30",
+    "dt": "0.1",
+    "solver": "SSPRK22",
+    "adaptive": true,
+    "atol": "1e-8",
+    "rtol": "0.00001",
+    "ftol": "1e-9",
+    "ghostTraces": 0,
+    "plotResults": true
+  }
+}

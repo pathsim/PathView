@@ -1,0 +1,216 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2025-12-19T09:08:04.556Z",
+    "modified": "2025-12-19T09:08:04.556Z",
+    "name": "Feedback Loop",
+    "description": "Negative feedback with integrator"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "type": "Adder",
+        "name": "Sum (+-)",
+        "position": {
+          "x": 825,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-input-0",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-input-1",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-output-0",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "operations": "'+-'"
+        }
+      },
+      {
+        "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "type": "Amplifier",
+        "name": "Feedback",
+        "position": {
+          "x": 900,
+          "y": 480
+        },
+        "inputs": [
+          {
+            "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f-input-0",
+            "nodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f-output-0",
+            "nodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "gain": "1",
+          "_rotation": 2
+        }
+      },
+      {
+        "id": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "type": "Integrator",
+        "name": "Integrator",
+        "position": {
+          "x": 960,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "353e895d-8dfa-4c17-a752-043d1fc38749-input-0",
+            "nodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "353e895d-8dfa-4c17-a752-043d1fc38749-output-0",
+            "nodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": 0
+        }
+      },
+      {
+        "id": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "type": "Scope",
+        "name": "Output",
+        "position": {
+          "x": 1110,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "c196290c-d86e-473b-b4a9-e1fac84cce98-input-0",
+            "nodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "sampling_rate": null
+        }
+      },
+      {
+        "id": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "type": "StepSource",
+        "name": "Unit Step",
+        "position": {
+          "x": 660,
+          "y": 390
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9-output-0",
+            "nodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "amplitude": 1,
+          "tau": "3",
+          "_rotation": 0
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c47a35bc-3030-4699-ab4a-d7aabca093d8",
+        "sourceNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "sourcePortIndex": 0,
+        "targetNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "8bef47d0-b56f-4c2a-8ccf-50fbdc35c2f8",
+        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "sourcePortIndex": 0,
+        "targetNodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "dbf00304-ed99-450f-b9eb-a74c8c838d7f",
+        "sourceNodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "424c83ec-2f6e-40b5-8715-a2919677b1dd",
+        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "e69b73e0-344a-459d-9b5b-4bd5944fc824",
+        "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "targetPortIndex": 0
+      }
+    ]
+  },
+  "codeContext": {
+    "code": ""
+  },
+  "simulationSettings": {
+    "duration": 10,
+    "dt": 0.01,
+    "solver": "SSPRK22",
+    "atol": 1e-8,
+    "rtol": 0.00001,
+    "ftol": 1e-9,
+    "reset": true,
+    "plotResults": true
+  }
+}

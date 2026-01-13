@@ -1,38 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+.svelte-kit*/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*-MacBook*.ts
+*-MacBook*.js
+
 # Logs
-logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Testing
+coverage/
+
+# Misc
 *.local
+*.bat
+.claude
+CLAUDE.md
+tmpclaude-*
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.pyc
-venv/
-build
-docs/_build
 
-# python 
-__pycache__
-*.py[cod]
-*.pyo
-*.pyd
-.Python
-*.egg
-*.egg-info
-*_version.py
+*.Identifier

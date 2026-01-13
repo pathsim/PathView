@@ -1,37 +1,44 @@
 {
   "name": "pathview",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
+    "extract-blocks": "python scripts/extract-blocks.py",
+    "extract-all": "npm run extract-blocks",
+    "check-generated": "node scripts/check-generated.js",
+    "examples": "node scripts/generate-examples-manifest.js",
+    "dev": "npm run examples && vite dev",
+    "prebuild": "npm run check-generated",
+    "build": "npm run examples && vite build",
     "preview": "vite preview",
-    "start:backend": "python src/backend.py",
-    "start:both": "concurrently \"npm run dev\" \"npm run start:backend\""
-  },
-  "dependencies": {
-    "@codemirror/lang-python": "^6.2.1",
-    "@uiw/codemirror-theme-vscode": "^4.24.2",
-    "@uiw/react-codemirror": "^4.24.2",
-    "@xyflow/react": "^12.8.1",
-    "lz-string": "^1.5.0",
-    "plotly.js": "^3.0.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-plotly.js": "^2.6.0"
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.4.1",
-    "concurrently": "^9.2.0",
-    "eslint": "^9.25.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "vite": "^6.3.5"
+    "@sveltejs/adapter-static": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@types/node": "^22.0.0",
+    "@types/plotly.js": "^3.0.8",
+    "eslint": "^9.0.0",
+    "eslint-plugin-svelte": "^2.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-svelte": "^3.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.0"
+  },
+  "dependencies": {
+    "@codemirror/lang-python": "^6.0.0",
+    "@codemirror/theme-one-dark": "^6.0.0",
+    "@xyflow/svelte": "^1.5.0",
+    "codemirror": "^6.0.0",
+    "katex": "^0.16.0",
+    "plotly.js-dist-min": "^2.35.0",
+    "pyodide": "^0.26.0"
   }
 }
