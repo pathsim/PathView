@@ -1,0 +1,255 @@
+{
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
+  "nodes": [
+    {
+      "id": "1",
+      "type": "stepsource",
+      "position": {
+        "x": 283.4511234320089,
+        "y": -14.228948131394702
+      },
+      "data": {
+        "label": "Source s(t)",
+        "amplitude": "1",
+        "tau": "tau",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": true,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "scope",
+      "position": {
+        "x": 884.901286500961,
+        "y": 70.57000250921425
+      },
+      "data": {
+        "label": "Scope",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "amplifier_reverse",
+      "position": {
+        "x": 539.9858345687064,
+        "y": 394.2551349419692
+      },
+      "data": {
+        "label": "Amp a",
+        "gain": "a",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "integrator",
+      "position": {
+        "x": 522.9520384414344,
+        "y": 208.06441872308315
+      },
+      "data": {
+        "label": "Integrator x(t)",
+        "initial_value": "x0",
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "6",
+      "type": "adder",
+      "position": {
+        "x": 400,
+        "y": 200
+      },
+      "data": {
+        "label": "adder 6",
+        "operations": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e5-4",
+      "source": "5",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e5-2",
+      "source": "5",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-6",
+      "source": "1",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-6",
+      "source": "4",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e6-5",
+      "source": "6",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 7,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "4*tau",
+    "extra_params": "{}"
+  },
+  "globalVariables": [
+    {
+      "id": "1754160227284",
+      "name": "a",
+      "value": "-1",
+      "nameError": false
+    },
+    {
+      "id": "1754160231388",
+      "name": "x0",
+      "value": "2",
+      "nameError": false
+    },
+    {
+      "id": "1754160248756",
+      "name": "tau",
+      "value": "3",
+      "nameError": false
+    }
+  ],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
+}

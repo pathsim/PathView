@@ -1,0 +1,167 @@
+{
+  "nodes": [
+    {
+      "id": "0",
+      "type": "constant",
+      "position": {
+        "x": 219.5,
+        "y": 219.5
+      },
+      "data": {
+        "label": "constant 0",
+        "nodeColor": "#DDE6ED",
+        "value": "-g"
+      },
+      "measured": {
+        "width": 206,
+        "height": 54
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "integrator",
+      "position": {
+        "x": 367.8036110436579,
+        "y": 330.00000000000006
+      },
+      "data": {
+        "label": "integrator_v",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "v0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "integrator",
+      "position": {
+        "x": 639.8036110436578,
+        "y": 322.00000000000006
+      },
+      "data": {
+        "label": "integrator_x",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "x0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "scope",
+      "position": {
+        "x": 903.7342215603948,
+        "y": 264.84964717890483
+      },
+      "data": {
+        "label": "scope 3",
+        "nodeColor": "#DDE6ED",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-1",
+      "source": "0",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-3",
+      "source": "2",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 4,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-16",
+    "dt_max": "0.04",
+    "Solver": "RKBS32",
+    "tolerance_fpi": "1e-16",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "10",
+    "extra_params": "{\"tolerance_lte_rel\": 1e-5, \"tolerance_lte_abs\": 1e-7}"
+  },
+  "globalVariables": [],
+  "events": [
+    {
+      "name": "bounce",
+      "type": "ZeroCrossing",
+      "func_evt": "def func_evt(t):\n    *_, x = integrator_x_2() #get block outputs and states\n    return x",
+      "func_act": "def func_act(t):\n    *_, x = integrator_x_2()\n    *_, v = integrator_v_1()\n    integrator_x_2.engine.set(abs(x))\n    integrator_v_1.engine.set(-b*v)",
+      "tolerance": "1e-8",
+      "id": 1755015764685
+    }
+  ],
+  "pythonCode": "#gravitational acceleration\ng = 9.81\n\n#elasticity of bounce\nb = 0.9\n\n#initial conditions\nx0, v0 = 1, 5"
+}

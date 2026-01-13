@@ -1,0 +1,288 @@
+{
+  "nodes": [
+    {
+      "id": "0",
+      "type": "constant",
+      "position": {
+        "x": 362.0580206745773,
+        "y": 113.03456573089142
+      },
+      "data": {
+        "label": "Heater",
+        "nodeColor": "#DDE6ED",
+        "value": "H"
+      },
+      "measured": {
+        "width": 206,
+        "height": 54
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "constant",
+      "position": {
+        "x": 358.8241979165283,
+        "y": 278.1947482777457
+      },
+      "data": {
+        "label": "ambient",
+        "nodeColor": "#DDE6ED",
+        "value": "a*Ta"
+      },
+      "measured": {
+        "width": 206,
+        "height": 54
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "adder",
+      "position": {
+        "x": 701.2462888781952,
+        "y": 219.1770926972872
+      },
+      "data": {
+        "label": "adder 2",
+        "nodeColor": "#DDE6ED",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "integrator",
+      "position": {
+        "x": 848.807989889327,
+        "y": 225.51709663815075
+      },
+      "data": {
+        "label": "integ",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "Ta",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "amplifier_reverse",
+      "position": {
+        "x": 796.3023843801966,
+        "y": 344.45184195466436
+      },
+      "data": {
+        "label": "amp",
+        "nodeColor": "#DDE6ED",
+        "gain": "-a"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "scope",
+      "position": {
+        "x": 1157.8007854929265,
+        "y": 66.31785200000635
+      },
+      "data": {
+        "label": "scope 5",
+        "nodeColor": "#DDE6ED",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-2",
+      "source": "0",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-3",
+      "source": "2",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-2",
+      "source": "4",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-4",
+      "source": "3",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-5",
+      "source": "3",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-5",
+      "source": "0",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 6,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "0.05",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "30",
+    "extra_params": "{}"
+  },
+  "globalVariables": [],
+  "events": [
+    {
+      "name": "heater_off",
+      "type": "ZeroCrossingUp",
+      "func_evt": "def func_evt(t):\n    *_, x = integ_3()\n    return x - Kp",
+      "func_act": "def func_act(t):\n    heater_0.off()",
+      "tolerance": "1e-8",
+      "id": 1755016407956
+    },
+    {
+      "name": "heater_on",
+      "type": "ZeroCrossingDown",
+      "func_evt": "def func_evt(t):\n    *_, x = integ_3()\n    return x - Km",
+      "func_act": "def func_act(t):\n    heater_0.on()",
+      "tolerance": "1e-8",
+      "id": 1755016519588
+    }
+  ],
+  "pythonCode": "a = 0.3  #thermal capacity of room\nTa = 10  #ambient temperature\nH = 5    #heater power\nKp = 25  #upper temperature threshold\nKm = 23  #lower temperature threshold"
+}

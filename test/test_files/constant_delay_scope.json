@@ -1,0 +1,112 @@
+{
+  "nodes": [
+    {
+      "id": "0",
+      "type": "constant",
+      "position": {
+        "x": 200,
+        "y": 200
+      },
+      "data": {
+        "label": "constant 0",
+        "value": "1"
+      },
+      "measured": {
+        "width": 205,
+        "height": 53
+      }
+    },
+    {
+      "id": "1",
+      "type": "delay",
+      "position": {
+        "x": 454,
+        "y": 280
+      },
+      "data": {
+        "label": "delay 1",
+        "tau": "2"
+      },
+      "measured": {
+        "width": 96,
+        "height": 76
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "scope",
+      "position": {
+        "x": 657,
+        "y": 220
+      },
+      "data": {
+        "label": "scope 2",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "events": [],
+  "edges": [
+    {
+      "id": "e0-1",
+      "source": "0",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 3,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "50.0",
+    "extra_params": "{}"
+  },
+  "globalVariables": []
+}

@@ -1,0 +1,326 @@
+{
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
+  "nodes": [
+    {
+      "id": "1",
+      "type": "integrator",
+      "position": {
+        "x": 501.13753581661877,
+        "y": 120.37249283667622
+      },
+      "data": {
+        "label": "integrator x(t)",
+        "initial_value": "x0",
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "scope",
+      "position": {
+        "x": 725.3982808022922,
+        "y": -45.558739255014345
+      },
+      "data": {
+        "label": "scope 2",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "adder",
+      "position": {
+        "x": 113.96275071633238,
+        "y": 109.59598853868192
+      },
+      "data": {
+        "label": "adder 3",
+        "operations": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "integrator",
+      "position": {
+        "x": 239,
+        "y": 122
+      },
+      "data": {
+        "label": "integrator v(t)",
+        "initial_value": "v0",
+        "reset_times": "",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "7",
+      "type": "amplifier_reverse",
+      "position": {
+        "x": 272.4928366762178,
+        "y": 292.1404011461318
+      },
+      "data": {
+        "label": "Amp 1",
+        "gain": "-c/m",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "8",
+      "type": "amplifier_reverse",
+      "position": {
+        "x": 457.80802292263616,
+        "y": 373.9398280802293
+      },
+      "data": {
+        "label": "Amp 2",
+        "gain": "-k/m",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-1",
+      "source": "4",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-8",
+      "source": "1",
+      "target": "8",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e8-3",
+      "source": "8",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e7-3",
+      "source": "7",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-4",
+      "source": "3",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-2",
+      "source": "4",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-7",
+      "source": "4",
+      "target": "7",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 9,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "25",
+    "extra_params": "{}"
+  },
+  "globalVariables": [
+    {
+      "id": "1754159829210",
+      "name": "x0",
+      "value": "2",
+      "nameError": false
+    },
+    {
+      "id": "1754159834189",
+      "name": "v0",
+      "value": "5",
+      "nameError": false
+    },
+    {
+      "id": "1754159838558",
+      "name": "m",
+      "value": "0.8",
+      "nameError": false
+    },
+    {
+      "id": "1754159842904",
+      "name": "c",
+      "value": "0.2",
+      "nameError": false
+    },
+    {
+      "id": "1754159846822",
+      "name": "k",
+      "value": "1.5",
+      "nameError": false
+    }
+  ],
+  "events": [],
+  "pythonCode": "# Define your Python variables and functions here\n# Example:\n# my_variable = 42\n# def my_function(x):\n#     return x * 2\n"
+}

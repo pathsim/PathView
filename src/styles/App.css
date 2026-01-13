@@ -1,0 +1,491 @@
+/* For customizing the controls icons */
+.react-flow__controls {
+  padding: 6px;
+  display: flex;
+}
+
+.react-flow__controls-button {
+  background-color: #007bff !important;
+  color: white !important;
+  border: none;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #0056b3 !important;
+}
+
+/* Node hover effects */
+.react-flow__node:hover > div {
+  border: 2px solid #78A083 !important;
+  box-shadow: 0 0 8px #78a08366;
+}
+
+/* Default border for divs */
+.react-flow__node > div {
+  border: 2px solid #ccc !important;
+}
+
+
+/* App container */
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar */
+.top-bar {
+  height: 50px;
+  background: #2c2c2c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 15;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Tab button base */
+.tab-btn {
+  padding: 10px 20px;
+  margin: 5px;
+  background-color: #444;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Tab button active state */
+.tab-btn.active {
+  background-color: #78A083;
+}
+
+
+/* Context menu styles */
+.context-menu {
+  position: absolute;
+  background: rgb(73, 71, 71);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.context-menu button:hover {
+  background-color: #f0f0f06c;
+}
+
+.context-menu p {
+  margin: 0.5em;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Documentation HTML rendering styles for dark theme */
+.documentation-content {
+  color: #e8e8e8;
+}
+
+.documentation-content p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+}
+
+.documentation-content h1,
+.documentation-content h2,
+.documentation-content h3,
+.documentation-content h4,
+.documentation-content h5,
+.documentation-content h6 {
+  color: #ffffff;
+  margin: 1em 0 0.5em 0;
+  font-weight: bold;
+}
+
+.documentation-content h2 {
+  font-size: 1.1em;
+  border-bottom: 1px solid #555;
+  padding-bottom: 0.2em;
+}
+
+.documentation-content h3 {
+  font-size: 1.05em;
+}
+
+.documentation-content pre {
+  background-color: #1a1a2e;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 0.8em;
+  overflow-x: auto;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.9em;
+  margin: 0.5em 0;
+}
+
+.documentation-content code {
+  background-color: #1a1a2e;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.9em;
+  color: #ffd700;
+}
+
+.documentation-content pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e8e8e8;
+}
+
+.documentation-content ul,
+.documentation-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.documentation-content li {
+  margin: 0.2em 0;
+}
+
+.documentation-content blockquote {
+  border-left: 3px solid #555;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  font-style: italic;
+  color: #ccc;
+}
+
+.documentation-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+}
+
+.documentation-content th,
+.documentation-content td {
+  border: 1px solid #555;
+  padding: 0.4em;
+  text-align: left;
+}
+
+.documentation-content th {
+  background-color: #333;
+  font-weight: bold;
+}
+
+.documentation-content em {
+  font-style: italic;
+  color: #ddd;
+}
+
+.documentation-content strong {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.documentation-content a {
+  color: #78A083;
+  text-decoration: underline;
+}
+
+.documentation-content a:hover {
+  color: #9bc49f;
+}
+
+/* Docutils-specific classes */
+.documentation-content .field-list {
+  margin: 0.5em 0;
+}
+
+.documentation-content .field-name {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.documentation-content .field-body {
+  margin-left: 1em;
+}
+
+.documentation-content .literal {
+  background-color: #1a1a2e;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  font-family: 'Courier New', Consolas, monospace;
+  color: #ffd700;
+}
+
+.documentation-content .note,
+.documentation-content .warning,
+.documentation-content .tip {
+  background-color: #2a2a3e;
+  border-left: 4px solid #78A083;
+  padding: 0.8em;
+  margin: 0.5em 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.documentation-content .warning {
+  border-left-color: #e74c3c;
+}
+
+.documentation-content .note .first,
+.documentation-content .warning .first,
+.documentation-content .tip .first {
+  margin-top: 0;
+}
+
+.documentation-content .note .last,
+.documentation-content .warning .last,
+.documentation-content .tip .last {
+  margin-bottom: 0;
+}
+
+/* Custom scrollbar styles for sidebar */
+.sidebar-scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1e1e2f;
+}
+
+.sidebar-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-track {
+  background: #1e1e2f;
+  border-radius: 4px;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+  border: 1px solid #1e1e2f;
+}
+
+.sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Smooth scrolling for the sidebar */
+.sidebar-scrollable {
+  scroll-behavior: smooth;
+}
+
+/* Sidebar and drag-and-drop styles */
+.dndflow {
+  display: flex;
+  height: 100%;
+}
+
+.reactflow-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+aside {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+aside .description {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #2c2c2c;
+  border-radius: 5px;
+  color: #ffffff;
+  text-align: center;
+  font-size: 12px;
+}
+
+.dndnode {
+  height: 15px;
+  padding: 10px;
+  border: 1px solid #78A083;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  background-color: #444;
+  color: #ffffff;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.dndnode:hover {
+  background-color: #78A083;
+}
+
+.dndnode.input {
+  background-color: #3498db;
+}
+
+.dndnode.input:hover {
+  background-color: #2980b9;
+}
+
+.dndnode.output {
+  background-color: #e74c3c;
+}
+
+.dndnode.output:hover {
+  background-color: #c0392b;
+}
+
+/* Ensure draggable node text is always visible */
+.dndnode {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+  background-color: #2a2a3e !important;
+  border: 1px solid #555 !important;
+}
+
+/* Override any inherited styles that might hide text */
+.dndnode * {
+  color: inherit !important;
+}
+
+/* Improve readability */
+.dndnode:hover {
+  color: #ffffff !important;
+  background-color: #3a3a4e !important;
+}
+
+.dndnode:active {
+  color: #ffffff !important;
+}
+
+/* Ensure category descriptions are readable */
+.sidebar-description {
+  color: #aaaaaa !important;
+  font-size: 11px !important;
+  margin-bottom: 8px !important;
+  font-style: italic !important;
+}
+
+/* Sidebar node category styles */
+.dndnode.math {
+  border-left: 4px solid #17a2b8 !important;
+  background-color: #1a2a3a !important;
+}
+
+.dndnode.control {
+  border-left: 4px solid #6f42c1 !important;
+  background-color: #2a1f3d !important;
+}
+
+.dndnode.fuel-cycle {
+  border-left: 4px solid #fd7e14 !important;
+  background-color: #3a2a1a !important;
+}
+
+.dndnode.filters {
+  border-left: 4px solid #20c997 !important;
+  background-color: #1a3a2f !important;
+}
+
+.dndnode.others {
+  border-left: 4px solid #ffc107 !important;
+  background-color: #3a3a1a !important;
+}
+
+.dndnode.input {
+  border-left: 4px solid #28a745 !important;
+  background-color: #1a2f1a !important;
+}
+
+.dndnode.output {
+  border-left: 4px solid #dc3545 !important;
+  background-color: #3a1a1a !important;
+}
+
+.dndnode.processing {
+  border-left: 4px solid #007bff !important;
+  background-color: #1a1a3a !important;
+}
+
+/* Hover effects for category headers */
+.category-header:hover {
+  background-color: #3c3c64 !important;
+}
+
+/* Scrollbar styling for sidebar */
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: #2c2c54;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Sidebar transition styles - inspired by strudel-flow */
+.sidebar-container {
+  transition: width 0.8s ease;
+}
+
+.sidebar-container[data-sidebar-state="collapsed"] {
+  width: 0 !important;
+}
+
+.sidebar-container[data-sidebar-state="expanded"] {
+  width: 250px !important;
+}
+
+/* Sidebar trigger button - strudel-flow style */
+.sidebar-trigger {
+  /* Ghost button variant */
+  background-color: transparent !important;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+}
+
+.sidebar-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar-trigger svg {
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+.sidebar-trigger:hover svg {
+  color: #ffffff !important;
+}
+
+.sidebar-trigger:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.sidebar-trigger:active {
+  scale: 0.95;
+}

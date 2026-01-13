@@ -1,0 +1,417 @@
+{
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
+  "nodes": [
+    {
+      "id": "0",
+      "type": "chirpsource",
+      "position": {
+        "x": 333.5804481746493,
+        "y": 283.5
+      },
+      "data": {
+        "label": "chirpsource 0",
+        "nodeColor": "#DDE6ED",
+        "BW": "B",
+        "T": "T",
+        "amplitude": "",
+        "f0": "f_min",
+        "phase": "",
+        "sampling_rate": "",
+        "sig_cum": "",
+        "sig_white": ""
+      },
+      "measured": {
+        "width": 206,
+        "height": 54
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "adder",
+      "position": {
+        "x": 512.9257029406897,
+        "y": 374.38787342763374
+      },
+      "data": {
+        "label": "adder 1",
+        "nodeColor": "#DDE6ED",
+        "operations": ""
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "delay",
+      "position": {
+        "x": 710.3880930005229,
+        "y": 327.82565902611174
+      },
+      "data": {
+        "label": "delay 2",
+        "nodeColor": "#DDE6ED",
+        "tau": "tau"
+      },
+      "measured": {
+        "width": 96,
+        "height": 76
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "multiplier",
+      "position": {
+        "x": 236.0364230167882,
+        "y": 507.36942008161725
+      },
+      "data": {
+        "label": "multiplier 3",
+        "nodeColor": "#DDE6ED"
+      },
+      "measured": {
+        "width": 64,
+        "height": 64
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "butterworthlowpass",
+      "position": {
+        "x": 350.42271490473155,
+        "y": 559.0551849946265
+      },
+      "data": {
+        "label": "butterworthlowpass 4",
+        "nodeColor": "#DDE6ED",
+        "Fc": "f_trg*3",
+        "n": "2"
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "spectrum",
+      "position": {
+        "x": 915.6736822552208,
+        "y": 421.4792618661594
+      },
+      "data": {
+        "label": "spectrum 5",
+        "nodeColor": "#DDE6ED",
+        "alpha": "",
+        "freq": "np.logspace(6, 10, 500)",
+        "labels": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "6",
+      "type": "scope",
+      "position": {
+        "x": 708.2559315424497,
+        "y": 597.9077332699177
+      },
+      "data": {
+        "label": "scope 6",
+        "nodeColor": "#DDE6ED",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-1",
+      "source": "0",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-3",
+      "source": "1",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-6",
+      "source": "1",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-5",
+      "source": "1",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-4",
+      "source": "3",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-6",
+      "source": "3",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-5",
+      "source": "3",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-6",
+      "source": "4",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e4-5",
+      "source": "4",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-3",
+      "source": "2",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-6",
+      "source": "2",
+      "target": "6",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-5",
+      "source": "2",
+      "target": "5",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 7,
+  "solverParams": {
+    "dt": "1e-11",
+    "dt_min": "1e-16",
+    "dt_max": "",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-10",
+    "iterations_max": "200",
+    "log": "true",
+    "simulation_duration": "T",
+    "extra_params": "{}"
+  },
+  "globalVariables": [],
+  "events": [],
+  "pythonCode": "#natural constants (approximately)\nc0 = 3e8\n\n#chirp parameters\nB, T, f_min = 5e9, 5e-7, 1e9\n\n#delay for target emulation\ntau = 2e-9\n\n#for reference, the expected target distance\nR = c0 * tau / 2\n\n#and the corresponding frequency\nf_trg = 2 * R * B / (T * c0)"
+}

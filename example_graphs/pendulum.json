@@ -1,0 +1,236 @@
+{
+  "nodes": [
+    {
+      "id": "0",
+      "type": "integrator",
+      "position": {
+        "x": 31.949874679482008,
+        "y": 259.0878749359728
+      },
+      "data": {
+        "label": "In2",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "phi0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "integrator",
+      "position": {
+        "x": -57.80185604593987,
+        "y": 375.7296757198792
+      },
+      "data": {
+        "label": "In1",
+        "nodeColor": "#DDE6ED",
+        "initial_value": "omega0",
+        "reset_times": ""
+      },
+      "measured": {
+        "width": 200,
+        "height": 48
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "amplifier",
+      "position": {
+        "x": 668.5474040864929,
+        "y": 284.57731162361034
+      },
+      "data": {
+        "label": "amp",
+        "nodeColor": "#DDE6ED",
+        "gain": "-g/l"
+      },
+      "measured": {
+        "width": 90,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "function",
+      "position": {
+        "x": 347.434213365941,
+        "y": 292.6194354154026
+      },
+      "data": {
+        "label": "function 3",
+        "nodeColor": "#DDE6ED",
+        "inputCount": 1,
+        "outputCount": 1,
+        "func": "np.sin"
+      },
+      "measured": {
+        "width": 200,
+        "height": 80
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "scope",
+      "position": {
+        "x": 349.12259412272545,
+        "y": 495.40186575788914
+      },
+      "data": {
+        "label": "scope 4",
+        "nodeColor": "#DDE6ED",
+        "labels": "[ \"angle\", \"angular velocity\"]",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-0",
+      "source": "1",
+      "target": "0",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e1-4",
+      "source": "1",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-3-to_target-0",
+      "source": "0",
+      "target": "3",
+      "sourceHandle": null,
+      "targetHandle": "target-0",
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e0-4",
+      "source": "0",
+      "target": "4",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e3-2-from_source-0",
+      "source": "3",
+      "target": "2",
+      "sourceHandle": "source-0",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    },
+    {
+      "id": "e2-1",
+      "source": "2",
+      "target": "1",
+      "sourceHandle": null,
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 5,
+  "solverParams": {
+    "dt": "0.1",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "RKCK54",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "15",
+    "extra_params": "{\"tolerance_lte_rel\":1e-6, \"tolerance_lte_abs\": 1e-8}"
+  },
+  "globalVariables": [],
+  "events": [],
+  "pythonCode": "import numpy as np\n#initial angle and angular velocity\nphi0, omega0 = 0.9*np.pi, 0\n\n#parameters (gravity, length)\ng, l = 9.81, 1"
+}

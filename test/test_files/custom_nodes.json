@@ -1,0 +1,78 @@
+{
+  "nodes": [
+    {
+      "id": "0",
+      "type": "process",
+      "position": {
+        "x": 567.3899893301207,
+        "y": 237.89224105198554
+      },
+      "data": {
+        "label": "process 0",
+        "residence_time": "1",
+        "source_term": "1",
+        "initial_value": "1"
+      },
+      "measured": {
+        "width": 200,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "splitter2",
+      "position": {
+        "x": 890.8731204009728,
+        "y": 445.4758224672106
+      },
+      "data": {
+        "label": "splitter2 1",
+        "f1": "0.5",
+        "f2": "0.5"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "splitter3",
+      "position": {
+        "x": 1179.758987902621,
+        "y": 412.5260476393971
+      },
+      "data": {
+        "label": "splitter3 2",
+        "f1": "1/3",
+        "f2": "1/3",
+        "f3": "1/3"
+      },
+      "measured": {
+        "width": 120,
+        "height": 120
+      },
+      "selected": true,
+      "dragging": false
+    }
+  ],
+  "events": [],
+  "edges": [],
+  "nodeCounter": 3,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-6",
+    "dt_max": "1.0",
+    "Solver": "SSPRK22",
+    "tolerance_fpi": "1e-6",
+    "iterations_max": "100",
+    "log": "true",
+    "simulation_duration": "50.0",
+    "extra_params": "{}"
+  },
+  "globalVariables": []
+}

@@ -1,0 +1,7 @@
+# Web application dependencies (not needed for core package)
+Flask>=3.1.1
+flask-cors>=6.0.1
+
+# Development dependencies
+sphinx>=4.0.0
+docutils>=0.17.0

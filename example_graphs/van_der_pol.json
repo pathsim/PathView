@@ -1,0 +1,93 @@
+{
+  "version": {
+    "pathsim_version": "0.8.2",
+    "pathview_version": "0.1.dev470+g017515800.d20250812"
+  },
+  "nodes": [
+    {
+      "id": "0",
+      "type": "ode",
+      "position": {
+        "x": 556.9108963492985,
+        "y": 352.7864675462546
+      },
+      "data": {
+        "label": "ode 0",
+        "nodeColor": "#DDE6ED",
+        "inputCount": "2",
+        "outputCount": 1,
+        "func": "lambda x,u,t: np.array([x[1], mu*(1 - x[0]**2)*x[1] - x[0]])",
+        "initial_value": "np.array([2, 0])",
+        "jac": "lambda x,u,t: np.array([[0, 1], [-mu*2*x[0]*x[1]-1, mu*(1 - x[0]**2)]])"
+      },
+      "measured": {
+        "width": 200,
+        "height": 100
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "1",
+      "type": "scope",
+      "position": {
+        "x": 899.75,
+        "y": 331
+      },
+      "data": {
+        "label": "scope 1",
+        "nodeColor": "#DDE6ED",
+        "labels": "",
+        "sampling_rate": "",
+        "t_wait": ""
+      },
+      "measured": {
+        "width": 120,
+        "height": 140
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-1-from_source-0",
+      "source": "0",
+      "target": "1",
+      "sourceHandle": "source-0",
+      "targetHandle": null,
+      "type": "smoothstep",
+      "data": {},
+      "style": {
+        "strokeWidth": 2,
+        "stroke": "#ECDFCC"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "width": 20,
+        "height": 20,
+        "color": "#ECDFCC"
+      }
+    }
+  ],
+  "nodeCounter": 2,
+  "solverParams": {
+    "dt": "0.01",
+    "dt_min": "1e-16",
+    "dt_max": "",
+    "Solver": "GEAR52A",
+    "tolerance_fpi": "1e-8",
+    "iterations_max": "200",
+    "log": "true",
+    "simulation_duration": "4*mu",
+    "extra_params": "{\"tolerance_lte_abs\": 1e-5, \"tolerance_lte_rel\": 1e-3}"
+  },
+  "globalVariables": [
+    {
+      "id": "1755103820369",
+      "name": "mu",
+      "value": "1000",
+      "nameError": false
+    }
+  ],
+  "events": [],
+  "pythonCode": ""
+}
