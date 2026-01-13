@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+    import { base } from '$app/paths';
 	import { scale, fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import Icon from '$lib/components/icons/Icon.svelte';
@@ -26,7 +27,7 @@
 	onMount(async () => {
 		try {
 			// Fetch manifest (just a list of filenames)
-			const manifestRes = await fetch('/examples/manifest.json');
+			const manifestRes = await fetch('{base}/examples/manifest.json');
 			if (!manifestRes.ok) throw new Error('No manifest');
 			const manifest = await manifestRes.json();
 			const files: string[] = manifest.files || [];
@@ -35,12 +36,12 @@
 			const loadedExamples: Example[] = [];
 			for (const filename of files) {
 				try {
-					const fileRes = await fetch(`/examples/${filename}`);
+					const fileRes = await fetch(`{base}/examples/${filename}`);
 					if (fileRes.ok) {
 						const data = await fileRes.json();
 						loadedExamples.push({
 							name: data.metadata?.name || filename.replace('.json', ''),
-							file: `/examples/${filename}`,
+							file: `{base}/examples/${filename}`,
 							nodeCount: data.graph?.nodes?.length || 0,
 							description: data.metadata?.description
 						});
@@ -85,7 +86,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
 	<div class="modal glass-panel" transition:scale={{ start: 0.95, duration: 200, easing: cubicOut }} onclick={(e) => e.stopPropagation()} role="dialog" tabindex="-1">
 		<div class="header">
-			<img src="/pathview_logo.png" alt="PathView" class="logo" />
+			<img src="{base}/pathview_logo.png" alt="PathView" class="logo" />
 		</div>
 
 		<div class="actions">
