@@ -1233,6 +1233,22 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
       "sample_out"
     ]
   },
+  "Splitter": {
+    "blockClass": "Splitter",
+    "description": "Splitter block that splits the input signal into multiple",
+    "docstringHtml": "<p>Splitter block that splits the input signal into multiple\noutputs weighted with the specified fractions.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>The output fractions must sum to one.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>fractions <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">np.ndarray | list</span></dt>\n<dd>fractions to split the input signal into,\nmust sum up to one</dd>\n</dl>\n</div>\n",
+    "params": {
+      "fractions": {
+        "type": "any",
+        "default": null,
+        "description": "fractions to split the input signal into, must sum up to one"
+      }
+    },
+    "inputs": [
+      "in"
+    ],
+    "outputs": []
+  },
   "Subsystem": {
     "blockClass": "Subsystem",
     "description": "Subsystem class that holds its own blocks and connecions and",
@@ -1278,7 +1294,7 @@ export const blockConfig: Record<Exclude<NodeCategory, 'Subsystem'>, string[]> =
   Algebraic: ["Adder", "Multiplier", "Amplifier", "Function", "Sin", "Cos", "Tan", "Tanh", "Abs", "Sqrt", "Exp", "Log", "Log10", "Mod", "Clip", "Pow", "Switch", "LUT", "LUT1D"],
   Mixed: ["SampleHold", "FIR", "ADC", "DAC", "Counter", "CounterUp", "CounterDown", "Relay"],
   Recording: ["Scope", "Spectrum"],
-  Chemical: ["Process", "Bubbler4"],
+  Chemical: ["Process", "Bubbler4", "Splitter"],
 };
 
 export const uiOverrides: Record<string, UIOverride> = 
@@ -1494,5 +1510,9 @@ export const uiOverrides: Record<string, UIOverride> =
   "Spectrum": {
     "maxInputs": null,
     "maxOutputs": 0
+  },
+  "Splitter": {
+    "maxInputs": 1,
+    "maxOutputs": null
   }
 };

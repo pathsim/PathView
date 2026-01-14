@@ -102,7 +102,11 @@ BLOCK_CONFIG = {
         "Spectrum",
     ],
     # Subsystem blocks are manually defined in subsystem.ts but we still extract their docstrings
-    "Chemical": ["Process", "Bubbler4"],
+    "Chemical": [
+        "Process",
+        "Bubbler4",
+        "Splitter",
+    ],
 }
 
 # Extra blocks to extract docstrings from, but not auto-register
@@ -171,6 +175,7 @@ UI_OVERRIDES = {
     # Recording - unlimited inputs, no outputs
     "Scope": {"maxInputs": None, "maxOutputs": 0},
     "Spectrum": {"maxInputs": None, "maxOutputs": 0},
+    "Splitter": {"maxInputs": 1, "maxOutputs": None},
 }
 
 # Parameter overrides - PathSim handles all validation at runtime
