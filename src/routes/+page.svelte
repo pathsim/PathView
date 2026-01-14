@@ -36,6 +36,7 @@
 	import { settingsStore } from '$lib/stores/settings';
 	import { codeContextStore } from '$lib/stores/codeContext';
 	import { themeStore, type Theme } from '$lib/stores/theme';
+	import { backendPreferenceStore, type BackendPreference } from '$lib/stores/backendPreference';
 	import { contextMenuStore, type ContextMenuTarget } from '$lib/stores/contextMenu';
 	import { consoleStore } from '$lib/stores/console';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
@@ -348,6 +349,7 @@
 	let hasRunSimulation = $state(false);
 	let statusText = $state('Ready');
 	let currentTheme = $state<Theme>('dark');
+	let currentBackendPreference = $state<BackendPreference>('pyodide');
 	let consoleLogCount = $state(0);
 	let plotActiveTab = $state(0);
 	let plotViewMode = $state<'tabs' | 'tiles'>('tabs');
@@ -372,6 +374,11 @@
 		const unsubTheme = themeStore.subscribe((theme) => {
 			currentTheme = theme;
 		});
+
+		const unsubBackendPreference = backendPreferenceStore.subscribe((backendPreference) => {
+			console.log("Unsubscribing from the backend preference store")
+			currentBackendPreference = backendPreference
+		})
 
 		const unsubNodeCount = graphStore.nodesArray.subscribe((nodes) => {
 			nodeCount = nodes.length;
@@ -455,6 +462,7 @@
 			unsubPinnedPreviews();
 			unsubContextMenu();
 			unsubTheme();
+			unsubBackendPreference();
 			unsubNodeCount();
 			unsubPyodide();
 			unsubSimulation();
@@ -976,6 +984,15 @@
 				aria-label="Console"
 			>
 				<Icon name="terminal" size={18} />
+			</button>
+			<button
+				class="toggle-btn"
+				onclick={() => backendPreferenceStore.toggle()}
+				use:tooltip={{ text: currentBackendPreference === 'pyodide' ? 'You are using Pyodide Web Assembly' : 'You are using a Flask Web Server', shortcut: "T", position: "right" }}
+				aria-label="Toggle your backend preference"
+			>
+				Bruh
+				<!-- <Icon name={currentTheme === 'dark' ? 'sun' : 'moon'} size={18} /> -->
 			</button>
 		</div>
 
