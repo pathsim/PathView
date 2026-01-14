@@ -14,7 +14,13 @@ These are the custom UI Components that are rendered on the home page
 From what I can see these stores help organize the data organization of multiple data structures whether that includes core data structures like graphs and events or abitrary. Core to all of this functionality is the Svelte writable 
 
 #### **Pyodide and Python Functionality Imports** *(relevant to backend)*
-These are the functions and data structures that setup pyodide's client-side web assembly and run the two functions ```runGraphStreamingSImulation``` and ```validateGraphSimulation```. The goal of the Flask backend will be to provide a Flask alternative to these Pyodide functions. Some functions from pyodide bridge of particular interest are also ```initPyodide``` and ```continueStreamingSimulation```.
+These are the functions and data structures that setup pyodide's client-side web assembly and run the two functions ```runGraphStreamingSImulation``` and ```validateGraphSimulation```. The goal of the Flask backend will be to provide a Flask alternative to these Pyodide functions.
+
+Additionally, some functions imported from lib/pyodide/bridge need to have some clever parallels in the Flask backend infrastructure. That includes these imports:  
+```import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';```  
+```import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';```
+
+I think that a lot of the state handling can be completely removed since we now have the backend running, I just need to try and understand it more. Need to learn how to handle the pyodide and simulation state.
 
 #### **Miscellaneous Imports** *(irrelevant to backend)*
 There are other imports such as imports that handle console specific settings and actions, constants, type imports, and other 
