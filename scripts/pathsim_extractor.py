@@ -75,7 +75,8 @@ def extract_param_description(docstring: str, param_name: str) -> str:
     if not docstring:
         return ""
 
-    pattern = rf"{param_name}\s*:\s*[^\n]*\n\s+(.+?)(?=\n\w|\n\n|$)"
+    # Stop at next param (indented or not), blank line, or end
+    pattern = rf"{param_name}\s*:\s*[^\n]*\n\s+(.+?)(?=\n\s*\w+\s*:|\n\n|$)"
     match = re.search(pattern, docstring, re.DOTALL)
     if match:
         desc = match.group(1).strip()
