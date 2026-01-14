@@ -4,7 +4,7 @@
     "created": "2026-01-14T10:21:54.899Z",
     "modified": "2026-01-14T10:21:54.899Z",
     "name": "Bouncing Ball",
-    "name": "Gravity, Collisions and discrete Events"
+    "description": "Gravity, Collisions and discrete Events"
   },
   "graph": {
     "nodes": [

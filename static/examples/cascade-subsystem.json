@@ -4,7 +4,7 @@
     "created": "2026-01-14T10:23:07.377Z",
     "modified": "2026-01-14T10:23:07.377Z",
     "name": "Cascade PI Controler",
-    "name": "Cascade Control of a Plant modeled as nested Subsystems"
+    "description": "Cascade Control of a Plant modeled as nested Subsystems"
   },
   "graph": {
     "nodes": [
