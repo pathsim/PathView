@@ -1,8 +1,12 @@
 <script lang="ts">
+	// --------------------------- ROOT PAGE IMPORTS | START ---------------------------
+	// Svelte Package imports
 	import { onMount } from 'svelte';
     import { base } from '$app/paths';
 	import { fly, fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+
+	// Svelte Component Imports
 	import FlowCanvas from '$lib/components/FlowCanvas.svelte';
 	import SimulationPanel from '$lib/components/panels/SimulationPanel.svelte';
 	import BlockPropertiesDialog from '$lib/components/dialogs/BlockPropertiesDialog.svelte';
@@ -23,10 +27,9 @@
 	import WelcomeModal from '$lib/components/WelcomeModal.svelte';
 	import SubsystemBreadcrumb from '$lib/components/SubsystemBreadcrumb.svelte';
 	import Icon from '$lib/components/icons/Icon.svelte';
-	import { nodeRegistry } from '$lib/nodes';
-	import { NODE_TYPES } from '$lib/constants/nodeTypes';
-	import { PANEL_GAP, PANEL_TOGGLES_WIDTH, MIN_BOTTOM_PANEL_WIDTH, PANEL_DEFAULTS, NAV_HEIGHT } from '$lib/constants/layout';
-	import { DEFAULT_SIMULATION_SETTINGS } from '$lib/nodes/types';
+	import Tooltip, { tooltip } from '$lib/components/Tooltip.svelte';
+
+	// Stores (and Registry) imports
 	import { graphStore } from '$lib/stores/graph';
 	import { eventStore } from '$lib/stores/events';
 	import { historyStore } from '$lib/stores/history';
@@ -34,19 +37,33 @@
 	import { codeContextStore } from '$lib/stores/codeContext';
 	import { themeStore, type Theme } from '$lib/stores/theme';
 	import { contextMenuStore, type ContextMenuTarget } from '$lib/stores/contextMenu';
-	import { openNodeDialog } from '$lib/stores/nodeDialog';
-	import { openEventDialog } from '$lib/stores/eventDialog';
-	import type { MenuItemType } from '$lib/components/ContextMenu.svelte';
-	import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';
-	import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';
 	import { consoleStore } from '$lib/stores/console';
-	import { newGraph, openFile, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, loadGraphFromUrl, currentFileName } from '$lib/schema/fileOps';
-	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding } from '$lib/stores/viewActions';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
 	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
 	import { clipboardStore } from '$lib/stores/clipboard';
-	import Tooltip, { tooltip } from '$lib/components/Tooltip.svelte';
+	import { nodeRegistry } from '$lib/nodes';
 
+	// Dialog imports
+	import { openNodeDialog } from '$lib/stores/nodeDialog';
+	import { openEventDialog } from '$lib/stores/eventDialog';
+
+	// Constants and type imports
+	import type { MenuItemType } from '$lib/components/ContextMenu.svelte';
+	import { NODE_TYPES } from '$lib/constants/nodeTypes';
+	import { PANEL_GAP, PANEL_TOGGLES_WIDTH, MIN_BOTTOM_PANEL_WIDTH, PANEL_DEFAULTS, NAV_HEIGHT } from '$lib/constants/layout';
+	import { DEFAULT_SIMULATION_SETTINGS } from '$lib/nodes/types';
+
+	// Pyodide and Python Functionality imports
+	import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';
+	import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';
+
+	// Console Specific Settings and Actions
+	import { newGraph, openFile, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, loadGraphFromUrl, currentFileName } from '$lib/schema/fileOps';
+	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding } from '$lib/stores/viewActions';
+
+	// --------------------------- ROOT PAGE IMPORTS | END ---------------------------
+
+	
 	// Track mouse position for paste operations
 	let mousePosition = $state({ x: 0, y: 0 });
 
