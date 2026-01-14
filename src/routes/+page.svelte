@@ -61,6 +61,8 @@
 	// Console Specific Settings and Actions
 	import { newGraph, openFile, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, loadGraphFromUrl, currentFileName } from '$lib/schema/fileOps';
 	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding } from '$lib/stores/viewActions';
+  import { getFlaskBackendUrl } from '$lib/utils/flaskRoutes';
+  import type { ValidationResult } from '$lib/types';
 
 	// --------------------------- ROOT PAGE IMPORTS | END ---------------------------
 
@@ -703,103 +705,129 @@
 		}
 	}
 
-	// Run simulation (auto-initializes if needed)
+	// Run simulation (auto-initializes if needed) - Interacts with "backend"
 	async function handleRun() {
 		// Logging the current backend preference
 		console.log(`The current backend preference is ${currentBackendPreference}`)
 
-		if(currentBackendPreference == "pyodide") {
+		let usingPyodide = currentBackendPreference == "pyodide"
+
+		if(usingPyodide) {
 			// Prevent concurrent simulation runs (synchronous check for rapid key presses)
 			if (simRunning || isRunStarting || pyodideLoading) return;
 
-			// Auto-initialize if not ready
-			if (!pyodideReady) {
-				try {
-					await initPyodide();
-				} catch (error) {
-					console.error('Failed to initialize Pyodide:', error);
-					return;
-				}
-			}
+		} else {
+			// [Since we are working with flask, we just remove the pyodideLoading requirement]
+			if (simRunning || isRunStarting) return;
+		}
 
-			// Set flag synchronously to prevent race conditions during validation
-			isRunStarting = true;
 
+		// Auto-initialize if not ready
+		if (!pyodideReady && usingPyodide) {
 			try {
-				// Run simulation
-				const { nodes, connections } = graphStore.toJSON();
-				if (nodes.length === 0) {
-					statusText = 'Add nodes first';
-					return;
-				}
-
-				// Auto-open console on first run to show progress
-				if (!hasAutoOpenedConsole) {
-					showConsole = true;
-					hasAutoOpenedConsole = true;
-				}
-
-				const codeContext = codeContextStore.getCode();
-
-				// Validate before running
-				try {
-					statusText = 'Validating...';
-					const validation = await validateGraphSimulation(nodes, codeContext);
-
-					if (!validation.valid) {
-						// Show validation errors
-						showConsole = true;
-						consoleStore.error('Validation failed:');
-						for (const err of validation.errors) {
-							if (err.nodeId === '__code_context__') {
-								consoleStore.error(`  Code context: ${err.error}`);
-							} else {
-								const node = nodes.find((n) => n.id === err.nodeId);
-								const nodeName = node?.name || err.nodeId;
-								consoleStore.error(`  ${nodeName}.${err.param}: ${err.error}`);
-							}
-						}
-						statusText = 'Validation failed';
-						return;
-					}
-				} catch (error) {
-					showConsole = true;
-					consoleStore.error(`Validation error: ${error}`);
-					statusText = 'Validation error';
-					return;
-				}
-
-				// Run streaming simulation
-				try {
-					const events = eventStore.toJSON();
-					await runGraphStreamingSimulation(
-						nodes,
-						connections,
-						settingsStore.get(),
-						codeContext,
-						events
-					);
-					// Auto-open results panel only on first run
-					if (!hasAutoOpenedPlot) {
-						showPlot = true;
-						hasAutoOpenedPlot = true;
-					}
-				} catch (error) {
-					// Auto-open console panel to show error details
-					showConsole = true;
-					console.error('Simulation failed:', error);
-				}
-			} finally {
-				isRunStarting = false;
+				await initPyodide();
+			} catch (error) {
+				console.error('Failed to initialize Pyodide:', error);
+				return;
 			}
-		} else if(currentBackendPreference == "flask") {
-			setTimeout(() => {
-				
-			}, timeout);
+		}
+
+		// Set flag synchronously to prevent race conditions during validation
+		isRunStarting = true;
+
+		try {
+			// Run simulation
+			const { nodes, connections } = graphStore.toJSON();
+			if (nodes.length === 0) {
+				statusText = 'Add nodes first';
+				return;
+			}
+
+			// Auto-open console on first run to show progress
+			if (!hasAutoOpenedConsole) {
+				showConsole = true;
+				hasAutoOpenedConsole = true;
+			}
+
+			const codeContext = codeContextStore.getCode();
+
+			// TODO: Add Flask Parallel
+			// Validate before running
+			try {
+				statusText = 'Validating...';
+
+				let validation
+
+				if(usingPyodide) {
+					validation = await validateGraphSimulation(nodes, codeContext);
+				} else {
+					let fetchedData = await fetch(getFlaskBackendUrl()+"/validateGraphSimulation", {
+						method: "POST",
+						body: JSON.stringify({
+							nodes,
+							codeContext
+						}),
+						headers: {
+							"Content-Type":"application/json"
+						}
+					}).then(res => res.json())
+					if(!fetchedData.success) {
+						throw Error(fetchedData.error)
+					} else {
+						validation = fetchedData.data satisfies ValidationResult
+					}
+				}
+
+				if (!validation.valid) {
+					// Show validation errors
+					showConsole = true;
+					consoleStore.error('Validation failed:');
+					for (const err of validation.errors) {
+						if (err.nodeId === '__code_context__') {
+							consoleStore.error(`  Code context: ${err.error}`);
+						} else {
+							const node = nodes.find((n) => n.id === err.nodeId);
+							const nodeName = node?.name || err.nodeId;
+							consoleStore.error(`  ${nodeName}.${err.param}: ${err.error}`);
+						}
+					}
+					statusText = 'Validation failed';
+					return;
+				}
+			} catch (error) {
+				showConsole = true;
+				consoleStore.error(`Validation error: ${error}`);
+				statusText = 'Validation error';
+				return;
+			}
+
+			// TODO: Add Flask Parallel
+			// Run streaming simulation
+			try {
+				const events = eventStore.toJSON();
+				await runGraphStreamingSimulation(
+					nodes,
+					connections,
+					settingsStore.get(),
+					codeContext,
+					events
+				);
+				// Auto-open results panel only on first run
+				if (!hasAutoOpenedPlot) {
+					showPlot = true;
+					hasAutoOpenedPlot = true;
+				}
+			} catch (error) {
+				// Auto-open console panel to show error details
+				showConsole = true;
+				console.error('Simulation failed:', error);
+			}
+		} finally {
+			isRunStarting = false;
 		}
 	}
 
-	// Continue simulation from where it left off (streaming)
+	// Continue simulation from where it left off (streaming) - Interacts with "backend"
 	async function handleContinue() {
 		// Prevent concurrent continue calls (synchronous check for rapid key presses)
 		if (!pyodideReady || !hasRunSimulation || simRunning || isContinuing) return;

@@ -39,6 +39,7 @@
     "@codemirror/theme-one-dark": "^6.0.0",
     "@xyflow/svelte": "^1.5.0",
     "codemirror": "^6.0.0",
+    "dotenv": "^17.2.3",
     "katex": "^0.16.0",
     "plotly.js-dist-min": "^2.35.0",
     "pyodide": "^0.26.0"

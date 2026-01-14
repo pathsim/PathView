@@ -32,7 +32,7 @@ else:
         supports_credentials=True
     )
 
-@app.route("/runGraphStreamingSimulation", options=["POST"])
+@app.route("/runGraphStreamingSimulation", methods=["POST"])
 def runGraphStreamingSimulation():
     try:
         # Not fully implemented yet
@@ -45,14 +45,22 @@ def runGraphStreamingSimulation():
     except Exception as e:
         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
 
-@app.route("/validateGraphSimulation", options=["POST"])
-def validateGraphSimulationy():
+@app.route("/validateGraphSimulation", methods=["POST"])
+def validateGraphSimulation():
+    print("Received a request at /validateGraphSimulation")
+
     try:
         # Not fully implemented yet
+        # - Need access to node registry for node params
 
         data = request.get_json()
+        print("Received the data....")
         nodes, codeContext = data["nodes"], data["codeContext"]
-
+        print("The nodes data produced was: ", nodes)
+        return jsonify({"success": True, data: {
+            "valid": False,
+            "errors": []
+        }})
         pass
     except KeyError as e:
         return jsonify({"success": False, "error": f"Missing key, error: {e}"})
@@ -62,7 +70,7 @@ def validateGraphSimulationy():
 
 # ------------------- STATE DEPENDENT / CHANGING ROUTES ------------------
 
-@app.route("/continueStreamingSimulation", options=["POST"])
+@app.route("/continueStreamingSimulation", methods=["POST"])
 def continueStreamingSimulation():
     try:
         # Not fully implemented yet
@@ -72,7 +80,7 @@ def continueStreamingSimulation():
     except Exception as e:
         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
 
-@app.route("/initialize", options=["GET"])
+@app.route("/initialize", methods=["GET"])
 def initialize():
     try:
         # Not fully implemented yet
@@ -100,6 +108,6 @@ def handle_exception(e):
     return jsonify({"success": False, "error": f"Internal server error: {str(e)}"}), 500
 
 
-if __name__ == "__Main__":
-    port = int(os.getenv("PORT", 800)) 
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000)) 
     app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_ENV") != "production")
