@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-24T13:23:50.390Z",
-    "modified": "2025-12-24T13:23:50.390Z",
+    "created": "2026-01-14T10:33:08.523Z",
+    "modified": "2026-01-14T10:33:08.523Z",
     "name": "Van der Pol",
-    "description": "Nonlinear limit cycle oscillator"
+    "description": "Stiff Nonlinear System"
   },
   "graph": {
     "nodes": [
@@ -416,11 +416,23 @@
         "targetNodeId": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
         "targetPortIndex": 0
       }
+    ],
+    "annotations": [
+      {
+        "id": "892e58cc-029b-4498-b7b5-f54b301028e4",
+        "position": {
+          "x": 915,
+          "y": 240
+        },
+        "content": "# Van der Pol\n\nThis is the Van der Pol system \n\n$$ \\ddot{x} - \\mu (1 - x^2) \\dot{x} + x = 0$$\n\nmodeled as discrete components.\n\nIt is famous for its stiffness which is controled through the paramter $\\mu$. \nFor small values $\\mu \\approx 10$ its not very stiff and explicit integrators such as **RKCK54** can handle it quite well. \nBut for larger values $\\mu > 100$, the gradients become increasingly steep and explicit integrators become inefficient due to their limited (numerical) stability region. \nThen using implicit integrators such as **GEAR52A** or **ESDIRK43** makes sense. ",
+        "width": 215,
+        "height": 355
+      }
     ]
   },
   "events": [],
   "codeContext": {
-    "code": "# initial conditions\nx10, x20 = 2, 0\n\n# van der pol parameter\nmu = 1000 * (1 + 0.1*np.random.rand())"
+    "code": "# initial conditions\nx10, x20 = 2, 0\n\n# van der pol parameter \nmu = 1000"
   },
   "simulationSettings": {
     "duration": "3*mu",
@@ -432,7 +444,7 @@
     "ftol": "1e-8",
     "dt_min": "",
     "dt_max": "",
-    "ghostTraces": 6,
+    "ghostTraces": 0,
     "plotResults": true
   }
 }

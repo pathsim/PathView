@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-22T23:03:32.436Z",
-    "modified": "2025-12-22T23:03:32.436Z",
-    "name": "PID Subsystem",
-    "description": "PID control with plant as subsystem"
+    "created": "2026-01-14T10:35:26.069Z",
+    "modified": "2026-01-14T10:35:26.069Z",
+    "name": "PID Controler",
+    "description": "PID Control of a linear Plant"
   },
   "graph": {
     "nodes": [
@@ -28,7 +28,6 @@
         ],
         "params": {
           "amplitude": "[1, 0.5]",
-          "t_step": 1,
           "tau": "[20+tau_1, 40+tau_2]",
           "_rotation": 3
         }
@@ -131,7 +130,6 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "_rotation": 1
         }
       },
@@ -154,7 +152,6 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "_rotation": 3
         }
       },
@@ -209,7 +206,7 @@
               "name": "Quantity",
               "position": {
                 "x": 240,
-                "y": 150
+                "y": 75
               },
               "inputs": [
                 {
@@ -242,7 +239,7 @@
               "name": "Gain",
               "position": {
                 "x": 240,
-                "y": 270
+                "y": 225
               },
               "inputs": [
                 {
@@ -275,7 +272,7 @@
               "name": "Plant Quantity",
               "position": {
                 "x": 345,
-                "y": 210
+                "y": 150
               },
               "inputs": [
                 {
@@ -289,42 +286,8 @@
               ],
               "outputs": [],
               "params": {
-                "sampling_rate": null,
                 "t_wait": "0.0",
-                "labels": null,
                 "_rotation": 0
-              }
-            },
-            {
-              "id": "b77166e8-665a-4dca-8081-6947e445d0ba",
-              "type": "Tanh",
-              "name": "Saturation",
-              "position": {
-                "x": 240,
-                "y": 60
-              },
-              "inputs": [
-                {
-                  "id": "b77166e8-665a-4dca-8081-6947e445d0ba-input-0",
-                  "nodeId": "b77166e8-665a-4dca-8081-6947e445d0ba",
-                  "name": "in 0",
-                  "direction": "input",
-                  "index": 0,
-                  "color": "#969696"
-                }
-              ],
-              "outputs": [
-                {
-                  "id": "b77166e8-665a-4dca-8081-6947e445d0ba-output-0",
-                  "nodeId": "b77166e8-665a-4dca-8081-6947e445d0ba",
-                  "name": "out 0",
-                  "direction": "output",
-                  "index": 0,
-                  "color": "#969696"
-                }
-              ],
-              "params": {
-                "_rotation": 1
               }
             }
           ],
@@ -344,24 +307,17 @@
               "targetPortIndex": 0
             },
             {
-              "id": "223ff17e-05f3-467b-816c-121896812807",
-              "sourceNodeId": "b77166e8-665a-4dca-8081-6947e445d0ba",
-              "sourcePortIndex": 0,
-              "targetNodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
-              "targetPortIndex": 0
-            },
-            {
-              "id": "55d2ccca-0e0a-4360-9be0-4f43638c0f68",
-              "sourceNodeId": "160f6744-e691-44b9-aac4-49c0a65f76e1",
-              "sourcePortIndex": 0,
-              "targetNodeId": "b77166e8-665a-4dca-8081-6947e445d0ba",
-              "targetPortIndex": 0
-            },
-            {
               "id": "976f3788-0d0f-4133-a8b3-ee43000d5b61",
               "sourceNodeId": "5b62efdd-3988-462c-a240-7c45e938d15c",
               "sourcePortIndex": 0,
               "targetNodeId": "160f6744-e691-44b9-aac4-49c0a65f76e1",
+              "targetPortIndex": 0
+            },
+            {
+              "id": "d68ddbcc-a4fd-42bf-9bc0-cb406ccb6f67",
+              "sourceNodeId": "160f6744-e691-44b9-aac4-49c0a65f76e1",
+              "sourcePortIndex": 0,
+              "targetNodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
               "targetPortIndex": 0
             }
           ]
@@ -386,7 +342,6 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "_rotation": 3
         }
       }
@@ -447,6 +402,18 @@
         "sourcePortIndex": 0,
         "targetNodeId": "4674b251-a882-45b9-baf1-01db4d0f7a22",
         "targetPortIndex": 0
+      }
+    ],
+    "annotations": [
+      {
+        "id": "2e8245a1-8247-4527-acbe-11ffa83669c4",
+        "position": {
+          "x": 1215,
+          "y": 315
+        },
+        "content": "# PID Loop\n\nThe classic PID control loop. The plant is modeled as a subsystem, double click to view the internals.",
+        "width": 200,
+        "height": 115
       }
     ]
   },

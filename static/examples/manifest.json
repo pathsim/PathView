@@ -1,13 +1,11 @@
 {
   "files": [
-    "bouncing-ball.json",
-    "cascade-subsystem.json",
-    "coupled-oscillators.json",
-    "feedback-loop.json",
-    "fmcw.json",
-    "harmonic-oscillator.json",
-    "lowpass-filter.json",
+    "feedback-system.json",
     "pid-subsystem.json",
+    "cascade-subsystem.json",
+    "bouncing-ball.json",
+    "thermostat.json",
+    "fmcw-radar.json",
     "vanderpol.json"
   ]
 }

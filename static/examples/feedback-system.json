@@ -1,17 +1,17 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-19T09:08:04.556Z",
-    "modified": "2025-12-19T09:08:04.556Z",
+    "created": "2026-01-14T10:41:38.312Z",
+    "modified": "2026-01-14T10:41:38.312Z",
     "name": "Feedback Loop",
-    "description": "Negative feedback with integrator"
+    "description": "Linear Feedback System with Step Excitation"
   },
   "graph": {
     "nodes": [
       {
         "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
         "type": "Adder",
-        "name": "Sum (+-)",
+        "name": "Difference",
         "position": {
           "x": 825,
           "y": 390
@@ -45,7 +45,7 @@
           }
         ],
         "params": {
-          "operations": "'+-'"
+          "operations": "\"+-\""
         }
       },
       {
@@ -77,7 +77,7 @@
           }
         ],
         "params": {
-          "gain": "1",
+          "gain": "g",
           "_rotation": 2
         }
       },
@@ -110,16 +110,16 @@
           }
         ],
         "params": {
-          "initial_value": 0
+          "initial_value": "x0"
         }
       },
       {
         "id": "c196290c-d86e-473b-b4a9-e1fac84cce98",
         "type": "Scope",
-        "name": "Output",
+        "name": "Result",
         "position": {
-          "x": 1110,
-          "y": 390
+          "x": 1140,
+          "y": 345
         },
         "inputs": [
           {
@@ -129,11 +129,19 @@
             "direction": "input",
             "index": 0,
             "color": "#969696"
+          },
+          {
+            "id": "c196290c-d86e-473b-b4a9-e1fac84cce98-input-1",
+            "nodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
           }
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null
+          "_rotation": 0
         }
       },
       {
@@ -141,8 +149,8 @@
         "type": "StepSource",
         "name": "Unit Step",
         "position": {
-          "x": 660,
-          "y": 390
+          "x": 675,
+          "y": 270
         },
         "inputs": [],
         "outputs": [
@@ -157,8 +165,8 @@
         ],
         "params": {
           "amplitude": 1,
-          "tau": "3",
-          "_rotation": 0
+          "tau": "tau",
+          "_rotation": 1
         }
       }
     ],
@@ -185,32 +193,55 @@
         "targetPortIndex": 1
       },
       {
-        "id": "424c83ec-2f6e-40b5-8715-a2919677b1dd",
-        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
-        "sourcePortIndex": 0,
-        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
-        "targetPortIndex": 0
-      },
-      {
         "id": "e69b73e0-344a-459d-9b5b-4bd5944fc824",
         "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
         "sourcePortIndex": 0,
         "targetNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
         "targetPortIndex": 0
+      },
+      {
+        "id": "e9120582-ab70-49b1-8216-990467a56b37",
+        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "9c46810a-56b3-4cc6-8bb2-d8e711644de7",
+        "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "targetPortIndex": 0
+      }
+    ],
+    "annotations": [
+      {
+        "id": "a0d9ddea-c4f8-4363-9c0a-5e19e6c52491",
+        "position": {
+          "x": 810,
+          "y": 225
+        },
+        "content": "# Linear Feedback System\n\nA linear feedback system with a delayed step excitation and some decaying initial conditions. Check the code editor (E) for the global system parameters.",
+        "width": 380,
+        "height": 100
       }
     ]
   },
+  "events": [],
   "codeContext": {
-    "code": ""
+    "code": "# random feedback gain\ng = np.random.rand() + 1\n\n# random step delay\ntau = np.random.rand() + 2\n\n# random initial value\nx0 = np.random.rand()"
   },
   "simulationSettings": {
-    "duration": 10,
-    "dt": 0.01,
-    "solver": "SSPRK22",
-    "atol": 1e-8,
-    "rtol": 0.00001,
-    "ftol": 1e-9,
-    "reset": true,
+    "duration": "10",
+    "dt": "0.01",
+    "solver": "RKBS32",
+    "adaptive": true,
+    "atol": "1e-6",
+    "rtol": "1e-4",
+    "ftol": "1e-9",
+    "dt_min": "",
+    "dt_max": "0.1",
+    "ghostTraces": 6,
     "plotResults": true
   }
 }

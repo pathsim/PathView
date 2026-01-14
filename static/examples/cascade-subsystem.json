@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-23T14:57:43.382Z",
-    "modified": "2025-12-23T14:57:43.382Z",
-    "name": "Cascade Control",
-    "description": "Nested PID control loops"
+    "created": "2026-01-14T10:23:07.377Z",
+    "modified": "2026-01-14T10:23:07.377Z",
+    "name": "Cascade PI Controler",
+    "name": "Cascade Control of a Plant modeled as nested Subsystems"
   },
   "graph": {
     "nodes": [
@@ -392,7 +392,6 @@
                       }
                     ],
                     "params": {
-                      "operations": null,
                       "_rotation": 1
                     }
                   },
@@ -401,8 +400,8 @@
                     "type": "WhiteNoise",
                     "name": "Noise",
                     "position": {
-                      "x": 255,
-                      "y": 0
+                      "x": 105,
+                      "y": -15
                     },
                     "inputs": [],
                     "outputs": [
@@ -417,8 +416,8 @@
                     ],
                     "params": {
                       "spectral_density": "noise_psd",
-                      "sampling_rate": null,
-                      "_rotation": 1
+                      "sampling_rate": "0.5",
+                      "_rotation": 0
                     }
                   },
                   {
@@ -426,8 +425,8 @@
                     "type": "Scope",
                     "name": "Disturbed Signal",
                     "position": {
-                      "x": 345,
-                      "y": 210
+                      "x": 405,
+                      "y": 120
                     },
                     "inputs": [
                       {
@@ -474,6 +473,18 @@
                     "targetNodeId": "44861add-91bd-4091-bebe-f89b308c9c45",
                     "targetPortIndex": 0
                   }
+                ],
+                "annotations": [
+                  {
+                    "id": "c3103ad7-22d5-455d-8078-579809c95ad6",
+                    "position": {
+                      "x": 345,
+                      "y": -15
+                    },
+                    "content": "# Disturbance\n\nThe inline disturbance adds a white noise signal on top of the input signal.",
+                    "width": 155,
+                    "height": 100
+                  }
                 ]
               }
             }
@@ -514,6 +525,18 @@
               "targetNodeId": "4154466b-5a0b-42f7-bb32-27e649d59245",
               "targetPortIndex": 0
             }
+          ],
+          "annotations": [
+            {
+              "id": "4dc50a79-58b7-4cbd-b049-110bfbbd117e",
+              "position": {
+                "x": -600,
+                "y": -255
+              },
+              "content": "# Plant\n\nThe plant contains two transfer functions and an additive inline disturbance...\n\n... which is modeled by a subsystem too.",
+              "width": 140,
+              "height": 160
+            }
           ]
         }
       },
@@ -522,8 +545,8 @@
         "type": "Scope",
         "name": "Plant vs Setpoint",
         "position": {
-          "x": 1170,
-          "y": 495
+          "x": 1095,
+          "y": 510
         },
         "inputs": [
           {
@@ -545,9 +568,7 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "t_wait": "0.0",
-          "labels": null,
           "_rotation": 1
         }
       },
@@ -579,9 +600,7 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "t_wait": "0.0",
-          "labels": null,
           "_rotation": 3
         }
       },
@@ -613,9 +632,7 @@
         ],
         "outputs": [],
         "params": {
-          "sampling_rate": null,
           "t_wait": "0.0",
-          "labels": null,
           "_rotation": 3
         }
       }
@@ -712,23 +729,35 @@
         "targetNodeId": "e13e27ba-96ec-4b02-a6d6-6cea244e49dc",
         "targetPortIndex": 0
       }
+    ],
+    "annotations": [
+      {
+        "id": "416e7281-7496-4b94-8c9f-ab802029d5e9",
+        "position": {
+          "x": 720,
+          "y": 225
+        },
+        "content": "# Cascade PI Controler\n\nThis example is a cascade controler. The plant is modeled as a **Subsystem**. Double click to enter.",
+        "width": 230,
+        "height": 115
+      }
     ]
   },
   "events": [],
   "codeContext": {
-    "code": "# spectral density of noise source in plant\nnoise_psd = 1e-5"
+    "code": "# spectral density of noise source in plant\nnoise_psd = 1e-4"
   },
   "simulationSettings": {
     "duration": "100.0",
     "dt": "0.1",
-    "solver": "RK4",
+    "solver": "SSPRK22",
     "adaptive": true,
     "atol": "1e-6",
     "rtol": "1e-4",
     "ftol": "1e-9",
     "dt_min": "",
     "dt_max": "",
-    "ghostTraces": 6,
+    "ghostTraces": 3,
     "plotResults": true
   }
 }

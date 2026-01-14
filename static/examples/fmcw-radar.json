@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-25T09:44:15.576Z",
-    "modified": "2025-12-25T09:44:15.576Z",
+    "created": "2026-01-14T10:23:30.502Z",
+    "modified": "2026-01-14T10:23:30.502Z",
     "name": "FMCW Radar",
-    "description": "Frequency-modulated continuous-wave radar"
+    "description": "Ideal Frequency-Modulated-Continuous-Wave Radar System with Spectrum Analysis"
   },
   "graph": {
     "nodes": [
@@ -324,6 +324,18 @@
         "targetNodeId": "4a8118b9-67cb-4cd6-8146-d2b3a52aadfa",
         "targetPortIndex": 0
       }
+    ],
+    "annotations": [
+      {
+        "id": "97ef0229-ff61-436c-ba9b-ea0ab2ab0c58",
+        "position": {
+          "x": 465,
+          "y": 300
+        },
+        "content": "# FMCW\n\nThis is a minimalistic frequency-modulated continuous wave radar system.\n\nThe signal source is a chirp, a frequency modulated sinusoid. The signal is transmitted into free space. The time delayed reflected signal is recieved and multiplied (mixer) with the reference signal. The frequency difference is proportional to the time delay of the target distance. ",
+        "width": 290,
+        "height": 190
+      }
     ]
   },
   "events": [],
@@ -331,7 +343,7 @@
     "code": "# Natural constants (approximately)\nc0 = 3e8\n\n# Chirp parameters\nB, T, f_min = 4e9, 3e-7, 1e9\n\n# Delay for target emulation\ntau = 2e-9\n\n# For reference, the expected target distance\nR = c0 * tau / 2\n\n# And the corresponding frequency\nf_trg = 4 * R * B / (T * c0)"
   },
   "simulationSettings": {
-    "duration": "T",
+    "duration": "T/2",
     "dt": "1e-11",
     "solver": "SSPRK22",
     "adaptive": true,

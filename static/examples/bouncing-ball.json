@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2025-12-22T23:21:53.588Z",
-    "modified": "2025-12-22T23:21:53.588Z",
+    "created": "2026-01-14T10:21:54.899Z",
+    "modified": "2026-01-14T10:21:54.899Z",
     "name": "Bouncing Ball",
-    "description": "Gravity and collision events"
+    "name": "Gravity, Collisions and discrete Events"
   },
   "graph": {
     "nodes": [
@@ -255,6 +255,18 @@
         "targetNodeId": "78f720fe-8774-42c3-be6b-5a4ef30e00df",
         "targetPortIndex": 0
       }
+    ],
+    "annotations": [
+      {
+        "id": "deeecd86-71ac-4a13-a289-c64c946e667c",
+        "position": {
+          "x": -45,
+          "y": 90
+        },
+        "content": "# Bouncing Ball Physics\n\nThis is an example of a hybrid system with continuous dynamics (free falling ball) and discrete events (bounces).\n\nIntegrating the gravitational acceleration gives the ball velocity in free fall:\n\n$$ v(t) = - \\int_0^t g \\, d\\tau $$\n\nAnd the position is the integrated velocity:\n\n$$ x(t) = \\int_0^t v(\\tau) \\, d\\tau $$\n\nWe use an event node to define the discrete dynamics of the ball hitting the ground. Whenever the position crosses zero\n\n$$ |x(t)| = 0 $$\n\nthe sign of the velocity is flipped and a coefficient of restitution ($b$) is applied to model the energy loss from the deformation of the ball:\n\n$$ y(t) \\leftarrow -b \\, y(t)  $$\n\nWhen the total energy drops below a certain threshold we consider that a Zeno state and stop the simulation.",
+        "width": 425,
+        "height": 370
+      }
     ]
   },
   "events": [
@@ -263,20 +275,33 @@
       "type": "pathsim.events.ZeroCrossing",
       "name": "Bounce",
       "position": {
-        "x": 960,
+        "x": 945,
         "y": 225
       },
       "params": {
         "func_evt": "bounce_detect",
         "func_act": "bounce_resolve"
       }
+    },
+    {
+      "id": "eda13d11-f264-4861-ba54-e17c48884905",
+      "type": "pathsim.events.Condition",
+      "name": "Zeno",
+      "position": {
+        "x": 1200,
+        "y": 225
+      },
+      "params": {
+        "func_evt": "zeno_detect",
+        "func_act": "zeno_resolve"
+      }
     }
   ],
   "codeContext": {
-    "code": "# initial position \nx0 = 1\n\n# mass\nm = 1\n\n# gravity\ng = 9.81\n\n# bounce back coefficient (randomized)\nb = 0.85 + 0.1*np.random.rand()\n\n# event detection function\ndef bounce_detect(t):\n    return pos.engine.get()\n\n# event resolution function\ndef bounce_resolve(t):\n    pos.engine.set(-pos.engine.get())\n    vel.engine.set(-b*vel.engine.get())"
+    "code": "# initial position \nx0 = 1\n\n# mass\nm = 1\n\n# gravity\ng = 9.81\n\n# bounce back coefficient (randomized)\nb = 0.85 + 0.1*np.random.rand()\n\n# zeno energy threshold\ne_th = 0.5\n\n# event detection function\ndef bounce_detect(t):\n    return pos.engine.state\n\n# event resolution function\ndef bounce_resolve(t):\n    pos.engine.set(-pos.engine.state)\n    vel.engine.set(-b*vel.engine.state)\n\n# zeno state detection\ndef zeno_detect(t):\n    e = total_energy.outputs[0]\n    return e < e_th\n\n# stop simulation \ndef zeno_resolve(t):\n    sim.stop()\n"
   },
   "simulationSettings": {
-    "duration": "5",
+    "duration": "50",
     "dt": "",
     "solver": "RKBS32",
     "adaptive": true,
@@ -285,7 +310,7 @@
     "ftol": "",
     "dt_min": "",
     "dt_max": "0.05",
-    "ghostTraces": 6,
+    "ghostTraces": 8,
     "plotResults": true
   }
 }
