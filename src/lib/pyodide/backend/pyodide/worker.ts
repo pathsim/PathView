@@ -60,7 +60,7 @@ await micropip.install('pathsim')
 	send({ type: 'progress', value: PROGRESS_MESSAGES.INSTALLING_PATHSIM_CHEM });
 	await pyodide.runPythonAsync(`
 import micropip
-await micropip.install('pathsim-chem')
+await micropip.install('pathsim-chem>=0.2rc2', pre=True)
 	`);
 
 	// Verify and print version

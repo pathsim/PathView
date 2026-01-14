@@ -106,6 +106,7 @@ BLOCK_CONFIG = {
         "Process",
         "Bubbler4",
         "Splitter",
+        "GLC",
     ],
 }
 
@@ -180,6 +181,23 @@ UI_OVERRIDES = {
 
 # Parameter overrides - PathSim handles all validation at runtime
 PARAM_OVERRIDES: dict[str, dict] = {}
+
+# Input/output mapping overrides if can't be extracted automatically
+IO_OVERRIDES: dict[str, dict] = {
+    "GLC": {
+        "inputs": ["c_T_in", "flow_l", "y_T2_inlet", "flow_g"],
+        "outputs": [
+            "c_T_out",
+            "y_T2_out",
+            "eff",
+            "P_out",
+            "Q_l",
+            "Q_g_out",
+            "n_T_out_liquid",
+            "n_T_out_gas",
+        ],
+    }
+}
 
 
 def rst_to_html(rst_text: str) -> str:
@@ -435,6 +453,14 @@ def main():
         block_data = extract_block(block_name)
         if block_data:
             extracted_blocks[block_name] = block_data
+
+    # Override inputs/outputs from IO_OVERRIDES
+    for block_name, io_data in IO_OVERRIDES.items():
+        if block_name in extracted_blocks:
+            if "inputs" in io_data:
+                extracted_blocks[block_name]["inputs"] = io_data["inputs"]
+            if "outputs" in io_data:
+                extracted_blocks[block_name]["outputs"] = io_data["outputs"]
 
     print(f"Extracted {len(extracted_blocks)} blocks")
 

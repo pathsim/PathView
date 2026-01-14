@@ -1247,7 +1247,67 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
     "inputs": [
       "in"
     ],
-    "outputs": []
+    "outputs": [
+      "out 1.0"
+    ]
+  },
+  "GLC": {
+    "blockClass": "GLC",
+    "description": "Gas Liquid Contactor model block.",
+    "docstringHtml": "<p>Gas Liquid Contactor model block. Inherits from Function block.</p>\n<p>More details about the model can be found in: <a class=\"reference external\" href=\"https://doi.org/10.13182/FST95-A30485\">https://doi.org/10.13182/FST95-A30485</a></p>\n<dl class=\"docutils\">\n<dt>Args:</dt>\n<dd>P_in: Inlet operating pressure [Pa]\nL: Column height [m]\nD: Column diameter [m]\nT: Temperature [K]\ng: Gravitational acceleration [m/s^2], default is 9.81\ninitial_nb_of_elements: Initial number of elements for BVP solver\nBCs: Boundary conditions type, &quot;C-C&quot; (Closed-Closed) or &quot;O-C&quot; (Open-Closed), default is &quot;C-C&quot;</dd>\n</dl>\n",
+    "params": {
+      "P_in": {
+        "type": "any",
+        "default": null,
+        "description": "L: Column height [m]"
+      },
+      "L": {
+        "type": "any",
+        "default": null,
+        "description": "D: Column diameter [m]"
+      },
+      "D": {
+        "type": "any",
+        "default": null,
+        "description": "T: Temperature [K]"
+      },
+      "T": {
+        "type": "any",
+        "default": null,
+        "description": "g: Gravitational acceleration [m/s^2], default is 9.81"
+      },
+      "BCs": {
+        "type": "any",
+        "default": null,
+        "description": ""
+      },
+      "g": {
+        "type": "number",
+        "default": "9.80665",
+        "description": "initial_nb_of_elements: Initial number of elements for BVP solver"
+      },
+      "initial_nb_of_elements": {
+        "type": "integer",
+        "default": "20",
+        "description": "BCs: Boundary conditions type, \"C-C\" (Closed-Closed) or \"O-C\" (Open-Closed), default is \"C-C\""
+      }
+    },
+    "inputs": [
+      "c_T_in",
+      "flow_l",
+      "y_T2_inlet",
+      "flow_g"
+    ],
+    "outputs": [
+      "c_T_out",
+      "y_T2_out",
+      "eff",
+      "P_out",
+      "Q_l",
+      "Q_g_out",
+      "n_T_out_liquid",
+      "n_T_out_gas"
+    ]
   },
   "Subsystem": {
     "blockClass": "Subsystem",
@@ -1294,7 +1354,7 @@ export const blockConfig: Record<Exclude<NodeCategory, 'Subsystem'>, string[]> =
   Algebraic: ["Adder", "Multiplier", "Amplifier", "Function", "Sin", "Cos", "Tan", "Tanh", "Abs", "Sqrt", "Exp", "Log", "Log10", "Mod", "Clip", "Pow", "Switch", "LUT", "LUT1D"],
   Mixed: ["SampleHold", "FIR", "ADC", "DAC", "Counter", "CounterUp", "CounterDown", "Relay"],
   Recording: ["Scope", "Spectrum"],
-  Chemical: ["Process", "Bubbler4", "Splitter"],
+  Chemical: ["Process", "Bubbler4", "Splitter", "GLC"],
 };
 
 export const uiOverrides: Record<string, UIOverride> = 
