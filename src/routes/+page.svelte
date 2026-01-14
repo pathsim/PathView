@@ -709,6 +709,7 @@
 	async function handleRun() {
 		// Logging the current backend preference
 		console.log(`The current backend preference is ${currentBackendPreference}`)
+		console.log("The current node registry that the front-end recognizes is: ", nodeRegistry)
 
 		let usingPyodide = currentBackendPreference == "pyodide"
 
@@ -761,11 +762,13 @@
 				if(usingPyodide) {
 					validation = await validateGraphSimulation(nodes, codeContext);
 				} else {
+					console.log("[Sending to Flask web server] The node registry is: ", nodeRegistry.getAll())
 					let fetchedData = await fetch(getFlaskBackendUrl()+"/validateGraphSimulation", {
 						method: "POST",
 						body: JSON.stringify({
 							nodes,
-							codeContext
+							codeContext,
+							nodeRegistryNodes: nodeRegistry.getAll() // It is necessary to pass in the node registry to the backend since it doesn't have it
 						}),
 						headers: {
 							"Content-Type":"application/json"

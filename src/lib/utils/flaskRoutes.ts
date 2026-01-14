@@ -1,5 +1,6 @@
-import process from "process"
+// import process from "process"
 
 export function getFlaskBackendUrl() {
-    return process.env.FLASK_ENV == "production" ? process.env.FLASK_SERVER_URL : "http://localhost:8000"
+    // Right now it is this local address, but when we set up the server I'll make it that permanent address
+    return "http://localhost:8000" 
 }

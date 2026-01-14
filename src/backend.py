@@ -37,7 +37,7 @@ def runGraphStreamingSimulation():
     try:
         # Not fully implemented yet
         data = request.get_json()
-        nodes, connections, settingsStore, codeContext, events = data["nodes"], data["connections"], data["settingsStore"], data["codeContext"], data["events"]
+        nodes, connections, settings_store, code_context, events = data["nodes"], data["connections"], data["settingsStore"], data["codeContext"], data["events"]
 
         pass
     except KeyError as e:
@@ -51,13 +51,21 @@ def validateGraphSimulation():
 
     try:
         # Not fully implemented yet
-        # - Need access to node registry for node params
+        # - We are going to have to recreate nodeRegistry functionality when given the 
+        # - The original validation program has extractParams() and validateGraphBridge() run
+        # - extractParams() uses primarily nodeRegistry functionality
+        # - validateGraphBridge() uses a bunch of generated Python code to run in Pyodide s.t. we can just run it here
 
         data = request.get_json()
-        print("Received the data....")
-        nodes, codeContext = data["nodes"], data["codeContext"]
-        print("The nodes data produced was: ", nodes)
-        return jsonify({"success": True, data: {
+        nodes, code_context, node_registry_nodes = data.get("nodes"), data.get("codeContext"), data.get("nodeRegistryNodes")
+
+        # Extract Node Params
+
+
+        # Validate Graph Bridge
+
+        
+        return jsonify({"success": True, "data": {
             "valid": False,
             "errors": []
         }})

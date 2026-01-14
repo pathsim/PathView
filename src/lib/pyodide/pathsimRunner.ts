@@ -1035,6 +1035,7 @@ function extractNodeParams(nodes: NodeInstance[]): Record<string, Record<string,
 	const result: Record<string, Record<string, string>> = {};
 
 	for (const node of nodes) {
+		console.log("The node registry is: ", nodeRegistry)
 		const typeDef = nodeRegistry.get(node.type);
 		if (!typeDef) continue;
 
