@@ -32,25 +32,27 @@
 			const manifest = await manifestRes.json();
 			const files: string[] = manifest.files || [];
 
-			// Fetch each file to get its metadata
-			const loadedExamples: Example[] = [];
-			for (const filename of files) {
-				try {
-					const fileRes = await fetch(`${base}/examples/${filename}`);
-					if (fileRes.ok) {
-						const data = await fileRes.json();
-						loadedExamples.push({
-							name: data.metadata?.name || filename.replace('.json', ''),
-							file: `${base}/examples/${filename}`,
-							nodeCount: data.graph?.nodes?.length || 0,
-							description: data.metadata?.description
-						});
+			// Fetch all files in parallel to get metadata
+			const loadedExamples = await Promise.all(
+				files.map(async (filename): Promise<Example | null> => {
+					try {
+						const fileRes = await fetch(`${base}/examples/${filename}`);
+						if (fileRes.ok) {
+							const data = await fileRes.json();
+							return {
+								name: data.metadata?.name || filename.replace('.json', ''),
+								file: `${base}/examples/${filename}`,
+								nodeCount: data.graph?.nodes?.length || 0,
+								description: data.metadata?.description
+							};
+						}
+					} catch (e) {
+						console.warn(`Could not load example: ${filename}`);
 					}
-				} catch (e) {
-					console.warn(`Could not load example: ${filename}`);
-				}
-			}
-			examples = loadedExamples;
+					return null;
+				})
+			);
+			examples = loadedExamples.filter((e): e is Example => e !== null);
 		} catch (e) {
 			console.warn('Could not load examples');
 		}
