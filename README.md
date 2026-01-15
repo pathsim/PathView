@@ -428,6 +428,43 @@ PathView uses JSON-based file formats for saving and sharing:
 
 ---
 
+## Sharing Models via URL
+
+Models can be loaded directly from a URL using query parameters:
+
+```
+https://view.pathsim.org/?model=<url>
+https://view.pathsim.org/?modelgh=<github-shorthand>
+```
+
+### Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `model` | Direct URL to a `.pvm` or `.json` file | `?model=https://example.com/mymodel.pvm` |
+| `modelgh` | GitHub shorthand (expands to raw.githubusercontent.com) | `?modelgh=user/repo/path/to/model.pvm` |
+
+### GitHub Shorthand
+
+The `modelgh` parameter expands to a raw GitHub URL:
+
+```
+modelgh=user/repo/examples/demo.pvm
+→ https://raw.githubusercontent.com/user/repo/main/examples/demo.pvm
+```
+
+### Examples
+
+```
+# Load from any URL
+https://view.pathsim.org/?model=https://mysite.com/models/feedback.pvm
+
+# Load from GitHub repository
+https://view.pathsim.org/?modelgh=pathsim/pathview/static/examples/feedback-system.json
+```
+
+---
+
 ## Scripts
 
 | Script | Purpose |

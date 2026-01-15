@@ -31,7 +31,12 @@ except ImportError:
 from pathsim.blocks import *
 from pathsim.subsystem import Subsystem, Interface
 
-from pathsim_chem.tritium import *
+try:
+    from pathsim_chem.tritium import *
+    HAS_PATHSIM_CHEM = True
+except ImportError:
+    HAS_PATHSIM_CHEM = False
+    print("Warning: pathsim_chem not installed, Chemical blocks will be skipped")
 
 # Block configuration - defines which blocks to extract and their categories
 BLOCK_CONFIG = {
@@ -441,6 +446,10 @@ def main():
     # Extract all blocks
     extracted_blocks = {}
     for category, block_names in BLOCK_CONFIG.items():
+        # Skip Chemical category if pathsim_chem not available
+        if category == "Chemical" and not HAS_PATHSIM_CHEM:
+            print(f"  Skipping {category} category (pathsim_chem not installed)")
+            continue
         for block_name in block_names:
             print(f"  Extracting {block_name}...")
             block_data = extract_block(block_name)
@@ -464,8 +473,11 @@ def main():
 
     print(f"Extracted {len(extracted_blocks)} blocks")
 
+    # Filter config to only include categories that were extracted
+    filtered_config = {k: v for k, v in BLOCK_CONFIG.items() if k != "Chemical" or HAS_PATHSIM_CHEM}
+
     # Generate TypeScript
-    ts_content = generate_typescript(extracted_blocks, BLOCK_CONFIG, UI_OVERRIDES)
+    ts_content = generate_typescript(extracted_blocks, filtered_config, UI_OVERRIDES)
 
     # Write output file
     output_path = (

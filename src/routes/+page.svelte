@@ -63,7 +63,19 @@
 	let showPinnedPreviews = $state(false);
 	let hasAutoOpenedPlot = $state(false); // Only auto-open once
 	let hasAutoOpenedConsole = $state(false); // Only auto-open once
-	let showWelcomeModal = $state(true); // Show on startup
+
+	// Parse URL model params once at init
+	function getUrlModelConfig(): { url: string; isGitHub: boolean } | null {
+		if (typeof window === 'undefined') return null;
+		const params = new URLSearchParams(window.location.search);
+		const model = params.get('model');
+		const modelgh = params.get('modelgh');
+		if (model) return { url: model, isGitHub: false };
+		if (modelgh) return { url: modelgh, isGitHub: true };
+		return null;
+	}
+	const urlModelConfig = getUrlModelConfig();
+	let showWelcomeModal = $state(!urlModelConfig); // Hide if loading from URL
 
 	// Track widths directly - initialized on first dual-panel open
 	let consolePanelWidth = $state<number | undefined>(undefined);
@@ -433,6 +445,9 @@
 		window.addEventListener('run-simulation', handleRunSimulation);
 		window.addEventListener('continue-simulation', handleContinueSimulation);
 
+		// Check for URL parameters to load model
+		loadFromUrlParam();
+
 		return () => {
 			// Cleanup store subscriptions
 			unsubPinnedPreviews();
@@ -785,6 +800,58 @@
 		if (file) {
 			// Trigger fit view after a brief delay to let nodes render
 			setTimeout(() => triggerFitView(), 100);
+		}
+	}
+
+	/**
+	 * Expand GitHub shorthand to raw.githubusercontent.com URL
+	 * Format: owner/repo/path/to/file.pvm
+	 * Expands to: https://raw.githubusercontent.com/owner/repo/main/path/to/file.pvm
+	 */
+	function expandGitHubShorthand(shorthand: string): string {
+		const parts = shorthand.split('/');
+		if (parts.length < 3) {
+			throw new Error('Invalid GitHub shorthand. Use: owner/repo/path/to/file.pvm');
+		}
+		const owner = parts[0];
+		const repo = parts[1];
+		const pathParts = parts.slice(2);
+		// Default to 'main' branch
+		const branch = 'main';
+		const filePath = pathParts.join('/');
+		return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+	}
+
+	/**
+	 * Load model from URL parameter on page load
+	 */
+	async function loadFromUrlParam(): Promise<void> {
+		if (!urlModelConfig) return;
+
+		let url: string;
+		try {
+			url = urlModelConfig.isGitHub
+				? expandGitHubShorthand(urlModelConfig.url)
+				: urlModelConfig.url;
+		} catch (e) {
+			consoleStore.error(`Invalid GitHub shorthand: ${urlModelConfig.url}`);
+			consoleStore.error('Expected format: owner/repo/path/to/file.pvm');
+			showConsole = true;
+			return;
+		}
+
+		try {
+			const file = await loadGraphFromUrl(url);
+			if (file) {
+				setTimeout(() => triggerFitView(), 100);
+			} else {
+				throw new Error('Failed to load model');
+			}
+		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+			consoleStore.error(`Failed to load model from URL: ${url}`);
+			consoleStore.error(errorMsg);
+			showConsole = true;
 		}
 	}
 
