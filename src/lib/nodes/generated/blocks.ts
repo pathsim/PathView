@@ -1574,5 +1574,16 @@ export const uiOverrides: Record<string, UIOverride> =
   "Splitter": {
     "maxInputs": 1,
     "maxOutputs": null
+  },
+  "Process": {
+    "maxOutputs": 2
+  },
+  "GLC": {
+    "maxInputs": 4,
+    "maxOutputs": 8
+  },
+  "Bubbler4": {
+    "maxInputs": 2,
+    "maxOutputs": 5
   }
 };
