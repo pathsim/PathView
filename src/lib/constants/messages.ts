@@ -6,6 +6,7 @@ export const PROGRESS_MESSAGES = {
 	LOADING_PYODIDE: 'Loading Pyodide...',
 	INSTALLING_DEPS: 'Installing NumPy and SciPy...',
 	INSTALLING_PATHSIM: 'Installing PathSim...',
+	INSTALLING_PATHSIM_CHEM: 'Installing PathSim-Chem...',
 	STARTING_WORKER: 'Starting worker...',
 	STARTING_SIMULATION: 'Starting simulation...'
 } as const;

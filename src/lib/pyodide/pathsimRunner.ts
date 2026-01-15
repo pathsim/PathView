@@ -841,6 +841,9 @@ function generatePythonCodeForStreaming(
 		lines.push('from pathsim import Simulation, Connection');
 	}
 	lines.push('from pathsim.blocks import *');
+
+	// there should be a test to see if importing pathsim_chem is needed
+	lines.push('from pathsim_chem.tritium import *');
 	lines.push(`from pathsim.solvers import ${getSettingOrDefault(settings, 'solver')}`);
 	if (hasEvents) {
 		lines.push(`from pathsim.events import ${[...eventClasses].join(', ')}`);

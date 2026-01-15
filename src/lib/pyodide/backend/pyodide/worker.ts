@@ -57,10 +57,18 @@ import micropip
 await micropip.install('pathsim')
 	`);
 
+	send({ type: 'progress', value: PROGRESS_MESSAGES.INSTALLING_PATHSIM_CHEM });
+	await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('pathsim-chem>=0.2rc2', pre=True)
+	`);
+
 	// Verify and print version
 	await pyodide.runPythonAsync(`
 import pathsim
 print(f"PathSim {pathsim.__version__} loaded successfully")
+import pathsim_chem
+print(f"PathSim-Chem {pathsim_chem.__version__} loaded successfully")
 	`);
 
 	// Import numpy as np and gc globally
