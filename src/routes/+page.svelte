@@ -63,12 +63,19 @@
 	let showPinnedPreviews = $state(false);
 	let hasAutoOpenedPlot = $state(false); // Only auto-open once
 	let hasAutoOpenedConsole = $state(false); // Only auto-open once
-	let showWelcomeModal = $state(true); // Show on startup
-	let urlLoadingState = $state<{ loading: boolean; url: string | null; error: string | null }>({
-		loading: false,
-		url: null,
-		error: null
-	});
+
+	// Parse URL model params once at init
+	function getUrlModelConfig(): { url: string; isGitHub: boolean } | null {
+		if (typeof window === 'undefined') return null;
+		const params = new URLSearchParams(window.location.search);
+		const model = params.get('model');
+		const modelgh = params.get('modelgh');
+		if (model) return { url: model, isGitHub: false };
+		if (modelgh) return { url: modelgh, isGitHub: true };
+		return null;
+	}
+	const urlModelConfig = getUrlModelConfig();
+	let showWelcomeModal = $state(!urlModelConfig); // Hide if loading from URL
 
 	// Track widths directly - initialized on first dual-panel open
 	let consolePanelWidth = $state<number | undefined>(undefined);
@@ -819,42 +826,29 @@
 	 * Load model from URL parameter on page load
 	 */
 	async function loadFromUrlParam(): Promise<void> {
-		const params = new URLSearchParams(window.location.search);
-		const modelUrl = params.get('model');
-		const modelGh = params.get('modelgh');
+		if (!urlModelConfig) return;
 
-		let url: string | null = null;
-
-		if (modelUrl) {
-			url = modelUrl;
-		} else if (modelGh) {
-			try {
-				url = expandGitHubShorthand(modelGh);
-			} catch (e) {
-				consoleStore.error(`Invalid GitHub shorthand: ${modelGh}`);
-				consoleStore.error('Expected format: owner/repo/path/to/file.pvm');
-				return;
-			}
+		let url: string;
+		try {
+			url = urlModelConfig.isGitHub
+				? expandGitHubShorthand(urlModelConfig.url)
+				: urlModelConfig.url;
+		} catch (e) {
+			consoleStore.error(`Invalid GitHub shorthand: ${urlModelConfig.url}`);
+			consoleStore.error('Expected format: owner/repo/path/to/file.pvm');
+			showConsole = true;
+			return;
 		}
-
-		if (!url) return;
-
-		// Hide welcome modal and show loading state
-		showWelcomeModal = false;
-		urlLoadingState = { loading: true, url, error: null };
 
 		try {
 			const file = await loadGraphFromUrl(url);
 			if (file) {
-				// Trigger fit view after nodes render
 				setTimeout(() => triggerFitView(), 100);
-				urlLoadingState = { loading: false, url: null, error: null };
 			} else {
 				throw new Error('Failed to load model');
 			}
 		} catch (e) {
 			const errorMsg = e instanceof Error ? e.message : 'Unknown error';
-			urlLoadingState = { loading: false, url: null, error: errorMsg };
 			consoleStore.error(`Failed to load model from URL: ${url}`);
 			consoleStore.error(errorMsg);
 			showConsole = true;
@@ -1270,21 +1264,6 @@
 			onClose={() => showWelcomeModal = false}
 		/>
 	{/if}
-
-	<!-- URL Loading Overlay -->
-	{#if urlLoadingState.loading}
-		<div class="url-loading-overlay" transition:fade={{ duration: 150 }}>
-			<div class="url-loading-content">
-				<span class="url-loading-spinner"><Icon name="loader" size={24} /></span>
-				<span class="url-loading-text">Loading model...</span>
-				{#if urlLoadingState.url}
-					<span class="url-loading-url" title={urlLoadingState.url}>
-						{urlLoadingState.url.length > 60 ? urlLoadingState.url.slice(0, 60) + '...' : urlLoadingState.url}
-					</span>
-				{/if}
-			</div>
-		</div>
-	{/if}
 </div>
 
 <style>
@@ -1485,47 +1464,5 @@
 		max-width: 80px;
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	/* URL Loading Overlay */
-	.url-loading-overlay {
-		position: fixed;
-		inset: 0;
-		z-index: 1000;
-		background: var(--surface-overlay);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.url-loading-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--space-md);
-		padding: var(--space-xl);
-		background: var(--surface-raised);
-		border-radius: var(--radius-lg);
-		border: 1px solid var(--border);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.url-loading-spinner {
-		animation: spin 1s linear infinite;
-		color: var(--accent);
-	}
-
-	.url-loading-text {
-		font-size: var(--text-lg);
-		font-weight: 500;
-		color: var(--text);
-	}
-
-	.url-loading-url {
-		font-size: var(--text-sm);
-		color: var(--text-muted);
-		max-width: 400px;
-		word-break: break-all;
-		text-align: center;
 	}
 </style>
