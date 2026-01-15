@@ -182,6 +182,9 @@ UI_OVERRIDES = {
     "Scope": {"maxInputs": None, "maxOutputs": 0},
     "Spectrum": {"maxInputs": None, "maxOutputs": 0},
     "Splitter": {"maxInputs": 1, "maxOutputs": None},
+    "Process": {"maxOutputs": 2},
+    "GLC": {"maxInputs": 4, "maxOutputs": 8},
+    "Bubbler4": {"maxInputs": 2, "maxOutputs": 5},
 }
 
 # Parameter overrides - PathSim handles all validation at runtime
