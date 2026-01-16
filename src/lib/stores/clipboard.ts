@@ -1,18 +1,20 @@
 /**
  * Clipboard store for copy/paste operations
- * Stores deep clones of nodes, connections, and events
+ * Supports both in-memory and system clipboard for cross-instance paste
  */
 
 import { writable, get } from 'svelte/store';
 import type { NodeInstance, Connection } from '$lib/nodes/types';
 import type { EventInstance } from '$lib/events/types';
 import type { Position } from '$lib/types';
-import { graphStore, regenerateGraphIds } from '$lib/stores/graph';
+import { graphStore, cloneNodeForPaste } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
 import { historyStore } from '$lib/stores/history';
 import { NODE_TYPES } from '$lib/constants/nodeTypes';
 import { generateId } from '$lib/stores/utils';
 import { deleteSelectedItems } from '$lib/stores/selection';
+
+// ==================== TYPES ====================
 
 interface ClipboardContent {
 	nodes: NodeInstance[];
@@ -22,7 +24,23 @@ interface ClipboardContent {
 	center: Position;
 }
 
+/** Wrapper for system clipboard with type identification */
+interface SystemClipboardPayload {
+	type: 'pathview-clipboard';
+	version: string;
+	content: ClipboardContent;
+}
+
+// ==================== CONSTANTS ====================
+
+const CLIPBOARD_TYPE = 'pathview-clipboard';
+const CLIPBOARD_VERSION = '1.0';
+
+// ==================== IN-MEMORY STORE ====================
+
 const clipboard = writable<ClipboardContent | null>(null);
+
+// ==================== HELPERS ====================
 
 /**
  * Calculate the bounding box center of a set of items with positions
@@ -47,9 +65,74 @@ function calculateCenter(items: Array<{ position: Position }>): Position {
 }
 
 /**
- * Copy selected nodes and events to clipboard
+ * Type guard to validate system clipboard payload
  */
-function copy(): boolean {
+function isValidPayload(data: unknown): data is SystemClipboardPayload {
+	if (typeof data !== 'object' || data === null) return false;
+	const obj = data as Record<string, unknown>;
+	return (
+		obj.type === CLIPBOARD_TYPE &&
+		typeof obj.version === 'string' &&
+		typeof obj.content === 'object' &&
+		obj.content !== null
+	);
+}
+
+// ==================== SYSTEM CLIPBOARD ====================
+
+/**
+ * Write clipboard content to system clipboard
+ * Best effort - failures are logged but don't prevent in-memory copy
+ */
+async function writeToSystemClipboard(content: ClipboardContent): Promise<boolean> {
+	try {
+		const payload: SystemClipboardPayload = {
+			type: CLIPBOARD_TYPE,
+			version: CLIPBOARD_VERSION,
+			content
+		};
+		await navigator.clipboard.writeText(JSON.stringify(payload));
+		return true;
+	} catch (error) {
+		// Permission denied or API not available - silent fail
+		console.debug('System clipboard write failed:', error);
+		return false;
+	}
+}
+
+/**
+ * Read clipboard content from system clipboard
+ * Returns null if clipboard doesn't contain valid PathView data
+ */
+async function readFromSystemClipboard(): Promise<ClipboardContent | null> {
+	try {
+		const text = await navigator.clipboard.readText();
+		if (!text) return null;
+
+		const data = JSON.parse(text);
+		if (!isValidPayload(data)) {
+			return null; // Not PathView data
+		}
+
+		// Version check (for future compatibility)
+		if (data.version !== CLIPBOARD_VERSION) {
+			console.warn(`Clipboard version mismatch: ${data.version} vs ${CLIPBOARD_VERSION}`);
+			// Still try to use it - minor versions should be compatible
+		}
+
+		return data.content;
+	} catch {
+		// Parse error, permission denied, or clipboard API not available
+		return null;
+	}
+}
+
+// ==================== MAIN FUNCTIONS ====================
+
+/**
+ * Copy selected nodes and events to clipboard (in-memory + system)
+ */
+async function copy(): Promise<boolean> {
 	const selectedNodeIds = get(graphStore.selectedNodeIds);
 	const selectedEventIds = get(eventStore.selectedEventIds);
 
@@ -103,23 +186,37 @@ function copy(): boolean {
 	];
 	const center = calculateCenter(allItems);
 
-	clipboard.set({
+	const content: ClipboardContent = {
 		nodes: copiedNodes,
 		connections: copiedConnections,
 		events: copiedEvents,
 		center
-	});
+	};
+
+	// Store in memory (always works)
+	clipboard.set(content);
+
+	// Also write to system clipboard (best effort, for cross-instance paste)
+	await writeToSystemClipboard(content);
 
 	return true;
 }
 
 /**
  * Paste clipboard contents at target position
+ * Tries system clipboard first (enables cross-instance paste), falls back to in-memory
  * @param targetPosition - Position to center the pasted items at (flow coordinates)
  * @returns IDs of pasted nodes and events
  */
-function paste(targetPosition: Position): { nodeIds: string[]; eventIds: string[] } {
-	const content = get(clipboard);
+async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eventIds: string[] }> {
+	// Try system clipboard first (enables cross-instance paste)
+	let content = await readFromSystemClipboard();
+
+	// Fall back to in-memory clipboard
+	if (!content) {
+		content = get(clipboard);
+	}
+
 	if (!content || (content.nodes.length === 0 && content.events.length === 0)) {
 		return { nodeIds: [], eventIds: [] };
 	}
@@ -131,7 +228,7 @@ function paste(targetPosition: Position): { nodeIds: string[]; eventIds: string[
 			y: targetPosition.y - content.center.y
 		};
 
-		// Map from old node ID to new node ID
+		// Map from old node ID to new node ID (needed for connection remapping)
 		const nodeIdMap = new Map<string, string>();
 		const nodesToPaste: NodeInstance[] = [];
 
@@ -140,30 +237,13 @@ function paste(targetPosition: Position): { nodeIds: string[]; eventIds: string[
 			const newId = generateId();
 			nodeIdMap.set(node.id, newId);
 
-			const newNode: NodeInstance = {
-				...node,
-				id: newId,
-				position: {
-					x: node.position.x + offset.x,
-					y: node.position.y + offset.y
-				},
-				inputs: node.inputs.map((port, index) => ({
-					...port,
-					id: `${newId}-input-${index}`,
-					nodeId: newId
-				})),
-				outputs: node.outputs.map((port, index) => ({
-					...port,
-					id: `${newId}-output-${index}`,
-					nodeId: newId
-				}))
+			const newPosition = {
+				x: node.position.x + offset.x,
+				y: node.position.y + offset.y
 			};
 
-			// Recursively regenerate IDs in subsystem graph (handles nested subsystems)
-			if (newNode.graph) {
-				newNode.graph = regenerateGraphIds(newNode.graph);
-			}
-
+			// Use shared utility for node cloning (handles subsystem ID regeneration)
+			const newNode = cloneNodeForPaste(node, newPosition, newId);
 			nodesToPaste.push(newNode);
 		}
 
@@ -234,9 +314,9 @@ function paste(targetPosition: Position): { nodeIds: string[]; eventIds: string[
  * Cut selected nodes and events (copy + delete)
  * @returns true if something was cut
  */
-function cut(): boolean {
+async function cut(): Promise<boolean> {
 	// First copy the selection
-	if (!copy()) {
+	if (!(await copy())) {
 		return false;
 	}
 
@@ -246,7 +326,7 @@ function cut(): boolean {
 }
 
 /**
- * Check if clipboard has content
+ * Check if clipboard has content (in-memory only - system clipboard requires async)
  */
 function hasContent(): boolean {
 	const content = get(clipboard);

@@ -235,6 +235,47 @@ export function resizePorts(
 }
 
 /**
+ * Clone a node for paste/import operations
+ * Creates a new node with regenerated IDs at the given position
+ * Used by clipboard paste and file import to avoid ID conflicts
+ *
+ * @param node - The node to clone
+ * @param position - Absolute position for the new node
+ * @param newId - Optional ID to use (if not provided, generates one)
+ * @returns New node with fresh IDs
+ */
+export function cloneNodeForPaste(
+	node: NodeInstance,
+	position: { x: number; y: number },
+	newId?: string
+): NodeInstance {
+	const id = newId ?? generateId();
+
+	const newNode: NodeInstance = {
+		...node,
+		id,
+		position: { ...position },
+		inputs: node.inputs.map((port, index) => ({
+			...port,
+			id: `${id}-input-${index}`,
+			nodeId: id
+		})),
+		outputs: node.outputs.map((port, index) => ({
+			...port,
+			id: `${id}-output-${index}`,
+			nodeId: id
+		}))
+	};
+
+	// Recursively regenerate IDs in subsystem graphs
+	if (newNode.graph) {
+		newNode.graph = regenerateGraphIds(newNode.graph);
+	}
+
+	return newNode;
+}
+
+/**
  * Recursively regenerate all IDs in a subsystem graph
  * Handles nested subsystems at any depth
  */

@@ -122,6 +122,7 @@ export {
 	isInterfaceNode,
 	findParentSubsystem,
 	cloneNode,
+	cloneNodeForPaste,
 	resizePorts,
 	regenerateGraphIds
 } from './helpers';

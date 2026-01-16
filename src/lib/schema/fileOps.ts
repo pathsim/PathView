@@ -13,7 +13,7 @@ import type { ComponentFile, ComponentType, BlockContent, SubsystemContent } fro
 import type { Position } from '$lib/types';
 import { ALL_COMPONENT_EXTENSIONS, COMPONENT_VERSION } from '$lib/types/component';
 import { cleanNodeForExport } from './cleanParams';
-import { graphStore, regenerateGraphIds } from '$lib/stores/graph';
+import { graphStore, cloneNodeForPaste } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
 import { settingsStore } from '$lib/stores/settings';
 import { codeContextStore } from '$lib/stores/codeContext';
@@ -25,7 +25,6 @@ import { downloadJson } from '$lib/utils/download';
 import { confirmationStore } from '$lib/stores/confirmation';
 import { nodeRegistry } from '$lib/nodes';
 import { NODE_TYPES } from '$lib/constants/nodeTypes';
-import { generateId } from '$lib/stores/utils';
 
 const STORAGE_KEY = 'pathview_autosave';
 const FILE_EXTENSION = '.pvm';
@@ -489,36 +488,20 @@ function validateNodeTypes(nodes: NodeInstance[]): string[] {
 }
 
 /**
- * Import a block at the given position
+ * Import a block or subsystem component at the given position
+ * Uses shared cloneNodeForPaste utility for consistent ID regeneration
  */
-function importBlock(content: BlockContent, position: Position): string[] {
+function importComponent(content: BlockContent | SubsystemContent, position: Position): string[] {
 	const node = content.node;
 
-	// Validate node type is registered
+	// Validate all node types are registered (recursive for subsystems)
 	const invalidTypes = validateNodeTypes([node]);
 	if (invalidTypes.length > 0) {
 		throw new Error(`Unknown block type(s): ${invalidTypes.join(', ')}`);
 	}
 
-	// Generate new ID
-	const newId = generateId();
-
-	// Create new node with regenerated IDs
-	const newNode: NodeInstance = {
-		...node,
-		id: newId,
-		position: { ...position },
-		inputs: node.inputs.map((port, index) => ({
-			...port,
-			id: `${newId}-input-${index}`,
-			nodeId: newId
-		})),
-		outputs: node.outputs.map((port, index) => ({
-			...port,
-			id: `${newId}-output-${index}`,
-			nodeId: newId
-		}))
-	};
+	// Clone node with new IDs (handles subsystem graph regeneration automatically)
+	const newNode = cloneNodeForPaste(node, position);
 
 	// Clear selection and add node
 	historyStore.mutate(() => {
@@ -527,54 +510,7 @@ function importBlock(content: BlockContent, position: Position): string[] {
 		graphStore.pasteNodes([newNode], []);
 	});
 
-	return [newId];
-}
-
-/**
- * Import a subsystem at the given position
- */
-function importSubsystem(content: SubsystemContent, position: Position): string[] {
-	const node = content.node;
-
-	// Validate all node types in subsystem are registered
-	const invalidTypes = validateNodeTypes([node]);
-	if (invalidTypes.length > 0) {
-		throw new Error(`Unknown block type(s): ${invalidTypes.join(', ')}`);
-	}
-
-	// Generate new ID for the subsystem node
-	const newId = generateId();
-
-	// Create new node with regenerated IDs
-	const newNode: NodeInstance = {
-		...node,
-		id: newId,
-		position: { ...position },
-		inputs: node.inputs.map((port, index) => ({
-			...port,
-			id: `${newId}-input-${index}`,
-			nodeId: newId
-		})),
-		outputs: node.outputs.map((port, index) => ({
-			...port,
-			id: `${newId}-output-${index}`,
-			nodeId: newId
-		}))
-	};
-
-	// Recursively regenerate IDs in the subsystem's internal graph
-	if (newNode.graph) {
-		newNode.graph = regenerateGraphIds(newNode.graph);
-	}
-
-	// Clear selection and add node
-	historyStore.mutate(() => {
-		graphStore.clearSelection();
-		eventStore.clearSelection();
-		graphStore.pasteNodes([newNode], []);
-	});
-
-	return [newId];
+	return [newNode.id];
 }
 
 /**
@@ -638,16 +574,11 @@ async function processImportContent(
 	options: ImportOptions
 ): Promise<ImportResult> {
 	switch (componentFile.type) {
-		case 'block': {
-			const position = options.position || { x: 100, y: 100 };
-			const nodeIds = importBlock(componentFile.content as BlockContent, position);
-			return { success: true, type: 'block', nodeIds };
-		}
-
+		case 'block':
 		case 'subsystem': {
 			const position = options.position || { x: 100, y: 100 };
-			const nodeIds = importSubsystem(componentFile.content as SubsystemContent, position);
-			return { success: true, type: 'subsystem', nodeIds };
+			const nodeIds = importComponent(componentFile.content as BlockContent | SubsystemContent, position);
+			return { success: true, type: componentFile.type, nodeIds };
 		}
 
 		case 'model': {
