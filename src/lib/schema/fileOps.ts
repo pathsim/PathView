@@ -594,8 +594,7 @@ async function importModel(
 			title: 'Unsaved Changes',
 			message: 'Opening this file will discard your current work. Continue?',
 			confirmText: 'Discard & Open',
-			cancelText: 'Cancel',
-			destructive: true
+			cancelText: 'Cancel'
 		});
 
 		if (!confirmed) {

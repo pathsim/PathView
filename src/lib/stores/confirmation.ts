@@ -10,7 +10,6 @@ export interface ConfirmationOptions {
 	message: string;
 	confirmText?: string;
 	cancelText?: string;
-	destructive?: boolean; // If true, confirm button is styled as destructive
 }
 
 interface ConfirmationState {
@@ -38,7 +37,6 @@ function show(options: ConfirmationOptions): Promise<boolean> {
 			options: {
 				confirmText: 'Confirm',
 				cancelText: 'Cancel',
-				destructive: false,
 				...options
 			},
 			resolve

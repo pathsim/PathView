@@ -11,7 +11,6 @@
 			message: string;
 			confirmText?: string;
 			cancelText?: string;
-			destructive?: boolean;
 		} | null;
 	}>({ open: false, options: null });
 
