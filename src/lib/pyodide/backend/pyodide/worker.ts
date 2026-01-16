@@ -28,6 +28,8 @@ function send(response: REPLResponse): void {
  * Initialize Pyodide and install packages
  */
 async function initialize(): Promise<void> {
+	console.log(`We are intializing the Pyodide backend but the backend preference is: ${backendPreferenceStore.get()}`)
+	
 	if (isInitialized) {
 		send({ type: 'ready' });
 		return;
