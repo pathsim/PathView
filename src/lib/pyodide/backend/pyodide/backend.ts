@@ -8,6 +8,7 @@ import type { Backend, BackendState, REPLRequest, REPLResponse, REPLErrorRespons
 import { backendState } from '../state';
 import { TIMEOUTS } from '$lib/constants/python';
 import { PROGRESS_MESSAGES, STATUS_MESSAGES } from '$lib/constants/messages';
+import type { BackendPreference } from '$lib/types';
 
 interface PendingRequest {
 	resolve: (value: string | undefined) => void;
@@ -33,6 +34,7 @@ export class PyodideBackend implements Backend {
 	private messageId = 0;
 	private pendingRequests = new Map<string, PendingRequest>();
 	private isInitializing = false;
+	private backendPreference : BackendPreference = "pyodide";
 
 	private streamState: StreamState = {
 		id: null,
@@ -167,6 +169,10 @@ export class PyodideBackend implements Backend {
 
 	getError(): string | null {
 		return this.getState().error;
+	}
+	
+	setBackendPreference(preference : BackendPreference): void {
+		this.backendPreference = preference
 	}
 
 	// -------------------------------------------------------------------------
@@ -318,6 +324,7 @@ export class PyodideBackend implements Backend {
 
 	private sendRequest(request: REPLRequest): void {
 		if (!this.worker) {
+			console.log(`Within sendRequest() I have an uninitialized worker!`) // Debugging console
 			throw new Error('Worker not initialized');
 		}
 		this.worker.postMessage(request);

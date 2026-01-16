@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 import requests as req
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -7,27 +8,23 @@ from flask_cors import CORS
 import io
 from contextlib import redirect_stdout, redirect_stderr
 
+# Initialization Code
+
+import numpy as np
+import gc
+import pathsim, pathsim_chem
+
+print(f"PathSim {pathsim.__version__} loaded successfully")
+    
+_clean_globals = set(globals().keys())
+namespace = {}
+
 '''
 The Flask web server would not be initialized simultaneously with the SvelteKit website since the latter is statically generated,
 rather there would be some type of deployment of this application such that it could receive requests from 
 "https://view.pathsim.org" (which I think is already encapsualted by the "*" in the CORS.resources.options parameter)
 '''
 
-isInitialized = False
-
-def initialize():
-    global isInitialized
-
-    # No need for the micropip installation since only the Pyodide backend needs that installation package
-    import numpy as np
-    import gc
-    import pathsim, pathsim_chem
-    print(f"PathSim {pathsim.__version__} loaded successfully")
-
-    _clean_globals = set(globals().keys())
-    isInitialized = True
-
-# initialize()
 
 app = Flask(__name__, static_folder="../static", static_url_path="")
 
@@ -52,9 +49,9 @@ else:
     )
 
 # Execute Python route copied from the previous repository
-@app.route("/execute-python", methods=["POST"])
-def execute_python():
-    """Execute Python code and returns variables/functions."""
+@app.route("/execute-code", methods=["POST"])
+def execute_code():
+    """Execute Python code and returns nothing."""
 
     try:
         data = request.json
@@ -64,7 +61,7 @@ def execute_python():
             return jsonify({"success": False, "error": "No code provided"}), 400
 
         # Create a temporary namespace that includes current eval_namespace
-        temp_namespace = {}
+        # temp_namespace = {}
         # temp_namespace.update(globals())
 
         # Capture stdout and stderr
@@ -73,7 +70,7 @@ def execute_python():
 
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                exec(code, temp_namespace)
+                exec(code, namespace)
 
             # Capture any output
             output = stdout_capture.getvalue()
@@ -81,39 +78,10 @@ def execute_python():
 
             if error_output:
                 return jsonify({"success": False, "error": error_output}), 400
-
-            # Find new variables and functions
-            vars = set(temp_namespace.keys())
-            # new_vars = vars_after - vars_before
-
-            # Filter out built-ins and modules, keep user-defined items
-            user_variables = {}
-            user_functions = []
-
-            for var_name in vars:
-                if not var_name.startswith("__"):
-                    value = temp_namespace[var_name]
-                    if callable(value) and hasattr(value, "__name__"):
-                        user_functions.append(var_name)
-                    else:
-                        # Try to serialize the value for display
-                        try:
-                            if isinstance(value, (int, float, str, bool, list, dict)):
-                                user_variables[var_name] = value
-                            else:
-                                user_variables[var_name] = str(value)
-                        except Exception:
-                            user_variables[var_name] = (
-                                f"<{type(value).__name__} object>"
-                            )
-
+            
             return jsonify(
                 {
-                    "success": True,
-                    "output": output if output else None,
-                    "variables": user_variables,
-                    "functions": user_functions,
-                    "message": f"Executed successfully. Added {len(user_variables)} variables and {len(user_functions)} functions to namespace.",
+                    "success": True
                 }
             )
 
@@ -124,7 +92,57 @@ def execute_python():
 
     except Exception as e:
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
-    
+
+@app.route("/evaluate-expression", methods=["POST"])
+def evaluate_expression():
+    "Evaluates Python expression and returns result"
+    try:
+        data = request.json
+        expr = data.get("expr")
+        
+        if not expr.strip():
+            return jsonify({"success": False, "error": "No Python expression provided"}), 400
+        
+        # temp_namespace = {}
+
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        try:
+            result = ""
+            with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+                result = eval(expr, namespace)
+
+            # Capture any output
+            output = stdout_capture.getvalue()
+            error_output = stderr_capture.getvalue()
+
+            if error_output:
+                return jsonify({"success": False, "error": error_output}), 400
+            
+            return jsonify(
+                {
+                    "success": True,
+                    "result": result
+                }
+            )
+
+        except SyntaxError as e:
+            return jsonify({"success": False, "error": f"Syntax Error: {str(e)}"}), 400
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Runtime Error: {str(e)}"}), 400 
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+
+
+@app.route("/traceback", methods=["GET"])
+def check_traceback():
+    try:
+        traceback_text = traceback.format_exc()
+        return jsonify({"success": True, "traceback": traceback_text})
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server-side error: {e}"})
+
 # @app.route("/runGraphStreamingSimulation", methods=["POST"])
 # def runGraphStreamingSimulation():
 #     try:
@@ -182,31 +200,6 @@ def execute_python():
 #     except Exception as e:
 #         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
 
-@app.route("/initializationStatus", methods=["GET"])
-def initializationStatus():
-    print("Checking the intialization status of the Flask web server...")
-
-    try:
-        # Not fully implemented yet
-        if isInitialized:
-            return jsonify({"success": True, "initialized": True})
-        else:
-            count = 0
-
-            # Try three times to run the initialization program and check the status of initialization
-            while count < 3 and not isInitialized:
-                print(f"Attempting to initialize...")
-                initialize()
-                print(f"This is attempt {count}")
-                count += 1
-
-            if isInitialized:
-                return jsonify({"success": True, "initialized": True})
-            else:
-                return jsonify({"success": True, "initialized": False, "error": "Not yet initialized..."})
-    except Exception as e:
-        return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
-    
 # Global error handler to ensure all errors return JSON
 @app.errorhandler(Exception)
 def handle_exception(e):

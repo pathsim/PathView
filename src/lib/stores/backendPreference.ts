@@ -11,7 +11,7 @@ export type BackendPreference = 'pyodide' | 'flask';
 
 // Get initial backend preference from localStorage or system preference
 function getIntialBackendPreference(): BackendPreference {
-	if (!browser) return 'pyodide';
+	if (!browser || typeof window == "undefined") return 'flask';
 
 	const stored = localStorage.getItem('pathview-backend-preference');
 	if (stored === 'pyodide' || stored === 'flask') {
@@ -26,7 +26,7 @@ const backendPreference = writable<BackendPreference>(getIntialBackendPreference
 
 // Apply backend preference to document and persist
 backendPreference.subscribe((value) => {
-	if (!browser) return;
+	if (!browser || typeof window == "undefined") return;
 
 	// Persist to localStorage
 	localStorage.setItem('pathview-backend-preference', value);
@@ -41,6 +41,10 @@ export const backendPreferenceStore = {
 	 */
 	toggle(): void {
 		backendPreference.update((current) => (current === 'pyodide' ? 'flask' : 'pyodide'));
+		if(typeof window !== "undefined") {
+			// To avoid complications with the initialization state of the Pyodide Backend class I will just reload the page
+			window.location.reload()
+		}
 	},
 
 	/**

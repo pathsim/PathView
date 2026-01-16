@@ -391,6 +391,7 @@
 		});
 
 		const unsubTheme = themeStore.subscribe((theme) => {
+			console.log("Unsubscribing from the theme store")
 			currentTheme = theme;
 		});
 
@@ -709,8 +710,7 @@
 	// Run simulation (auto-initializes if needed) - Interacts with "backend"
 	async function handleRun() {
 		// Logging the current backend preference
-		console.log(`The current backend preference is ${currentBackendPreference}`)
-		console.log("The current node registry that the front-end recognizes is: ", nodeRegistry)
+		console.log(`(+page.svelte) The current backend preference is ${currentBackendPreference}`)
 
 		let usingPyodide = currentBackendPreference == "pyodide"
 
