@@ -75,7 +75,7 @@
 				<button class="ghost" onclick={handleCancel}>
 					{state.options.cancelText}
 				</button>
-				<button class="primary" onclick={handleConfirm}>
+				<button onclick={handleConfirm}>
 					{state.options.confirmText}
 				</button>
 			</div>
