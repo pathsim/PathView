@@ -9,7 +9,7 @@
 	import { get } from 'svelte/store';
 	import { dropTargetBridge } from '$lib/stores/dropTargetBridge';
 	import { assemblyAnimationTrigger, runAssemblyAnimation } from '$lib/animation/assemblyAnimation';
-	import { importComponent } from '$lib/schema/componentOps';
+	import { importFile } from '$lib/schema/fileOps';
 	import { ALL_COMPONENT_EXTENSIONS } from '$lib/types/component';
 
 	interface Props {
@@ -101,21 +101,23 @@
 				y: event.clientY
 			});
 
-			// Check for file drop (component import)
+			// Check for file drop (import any supported file type)
 			const files = event.dataTransfer?.files;
 			if (files && files.length > 0) {
 				const file = files[0];
 				const extension = '.' + file.name.split('.').pop()?.toLowerCase();
 
 				if (ALL_COMPONENT_EXTENSIONS.includes(extension)) {
-					try {
-						await importComponent(file, {
+					const result = await importFile(file, {
+						position: {
 							x: position.x - 80,
 							y: position.y - 30
-						});
-					} catch (error) {
-						console.error('Failed to import component:', error);
-						alert(`Failed to import component: ${error instanceof Error ? error.message : 'Unknown error'}`);
+						},
+						fileName: file.name
+					});
+
+					if (!result.success && !result.cancelled && result.error) {
+						alert(`Failed to import: ${result.error}`);
 					}
 					return;
 				}

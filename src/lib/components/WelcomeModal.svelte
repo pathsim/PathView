@@ -98,7 +98,7 @@
 			</button>
 
 			<button class="action-card" onclick={handleOpen}>
-				<Icon name="folder" size={20} />
+				<Icon name="download" size={20} />
 				<span class="action-label">Open</span>
 			</button>
 

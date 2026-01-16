@@ -17,7 +17,8 @@ import { NODE_TYPES } from '$lib/constants/nodeTypes';
 import { triggerFitView, screenToFlow } from '$lib/stores/viewActions';
 import { generateBlockCode, generateSingleEventCode } from '$lib/pyodide/pathsimRunner';
 import { generateBlockCodeHeader, generateEventCodeHeader } from '$lib/utils/codePreviewHeader';
-import { exportComponent, openComponentImportDialog } from '$lib/schema/componentOps';
+import { exportComponent } from '$lib/schema/componentOps';
+import { openImportDialog } from '$lib/schema/fileOps';
 import { hasExportableData, exportRecordingData } from '$lib/utils/csvExport';
 import { exportGraphAsSvg } from '$lib/utils/svgExport';
 
@@ -333,11 +334,11 @@ function buildCanvasMenu(
 		},
 		DIVIDER,
 		{
-			label: 'Import',
+			label: 'Open/Import',
 			icon: 'download',
 			action: () => {
 				const flowPos = screenToFlow(screenPosition);
-				openComponentImportDialog(flowPos);
+				openImportDialog(flowPos);
 			}
 		},
 		{

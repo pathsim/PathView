@@ -165,16 +165,6 @@ button:disabled {
 	cursor: not-allowed;
 }
 
-button.primary {
-	background: var(--accent);
-	color: white;
-}
-
-button.primary:hover {
-	background: var(--accent-hover);
-	box-shadow: var(--shadow-glow);
-}
-
 button.ghost {
 	background: transparent;
 	color: var(--text-muted);

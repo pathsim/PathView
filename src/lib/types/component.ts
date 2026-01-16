@@ -50,3 +50,6 @@ export const COMPONENT_MIME_TYPES = {
 
 /** All accepted component file extensions */
 export const ALL_COMPONENT_EXTENSIONS = ['.blk', '.sub', '.pvm', '.json'];
+
+/** Component file format version */
+export const COMPONENT_VERSION = '1.0';

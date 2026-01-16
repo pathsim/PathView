@@ -40,7 +40,9 @@
 	import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';
 	import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';
 	import { consoleStore } from '$lib/stores/console';
-	import { newGraph, openFile, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, loadGraphFromUrl, currentFileName } from '$lib/schema/fileOps';
+	import { newGraph, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, openImportDialog, importFromUrl, currentFileName } from '$lib/schema/fileOps';
+	import { confirmationStore } from '$lib/stores/confirmation';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding } from '$lib/stores/viewActions';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
 	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
@@ -780,15 +782,23 @@
 	}
 
 	// File operations
-	function handleNew() {
-		if (nodeCount > 0 && !confirm('Create new? Unsaved changes will be lost.')) return;
+	async function handleNew() {
+		if (nodeCount > 0) {
+			const confirmed = await confirmationStore.show({
+				title: 'Unsaved Changes',
+				message: 'Creating a new file will discard your current work. Continue?',
+				confirmText: 'Discard & Create New',
+				cancelText: 'Cancel'
+			});
+			if (!confirmed) return;
+		}
 		newGraph();
 	}
 
 	async function handleOpen() {
-		if (nodeCount > 0 && !confirm('Open file? Unsaved changes will be lost.')) return;
-		const file = await openFile();
-		if (file) {
+		// Uses unified import system with built-in confirmation
+		const result = await openImportDialog();
+		if (result.success && result.type === 'model') {
 			// Trigger fit view after a brief delay to let nodes render
 			setTimeout(() => triggerFitView(), 100);
 		}
@@ -796,8 +806,8 @@
 
 	// Load example file
 	async function handleLoadExample(url: string) {
-		const file = await loadGraphFromUrl(url);
-		if (file) {
+		const result = await importFromUrl(url);
+		if (result.success) {
 			// Trigger fit view after a brief delay to let nodes render
 			setTimeout(() => triggerFitView(), 100);
 		}
@@ -840,17 +850,12 @@
 			return;
 		}
 
-		try {
-			const file = await loadGraphFromUrl(url);
-			if (file) {
-				setTimeout(() => triggerFitView(), 100);
-			} else {
-				throw new Error('Failed to load model');
-			}
-		} catch (e) {
-			const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+		const result = await importFromUrl(url);
+		if (result.success) {
+			setTimeout(() => triggerFitView(), 100);
+		} else if (result.error) {
 			consoleStore.error(`Failed to load model from URL: ${url}`);
-			consoleStore.error(errorMsg);
+			consoleStore.error(result.error);
 			showConsole = true;
 		}
 	}
@@ -953,8 +958,8 @@
 			<button class="toolbar-btn" onclick={handleNew} use:tooltip={"New"} aria-label="New">
 				<Icon name="new-canvas" size={16} />
 			</button>
-			<button class="toolbar-btn" onclick={handleOpen} use:tooltip={{ text: "Open", shortcut: "Ctrl+O" }} aria-label="Open">
-				<Icon name="folder" size={16} />
+			<button class="toolbar-btn" onclick={handleOpen} use:tooltip={{ text: "Open/Import", shortcut: "Ctrl+O" }} aria-label="Open/Import">
+				<Icon name="download" size={16} />
 			</button>
 			<button class="toolbar-btn" onclick={() => saveFile()} use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }} aria-label="Save">
 				<Icon name="upload" size={16} />
@@ -1255,10 +1260,13 @@
 	<!-- Global Tooltip -->
 	<Tooltip />
 
+	<!-- Global Confirmation Modal -->
+	<ConfirmationModal />
+
 	<!-- Welcome Modal -->
 	{#if showWelcomeModal}
 		<WelcomeModal
-			onNew={() => newGraph()}
+			onNew={handleNew}
 			onOpen={handleOpen}
 			onLoadExample={handleLoadExample}
 			onClose={() => showWelcomeModal = false}
