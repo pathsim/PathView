@@ -96,25 +96,13 @@
 		overflow: hidden;
 	}
 
-	.confirmation-dialog .dialog-header {
-		padding: var(--space-sm) var(--space-md);
-		min-height: auto;
-	}
-
-	.confirmation-dialog .dialog-header span {
-		font-size: 13px;
-		font-weight: 600;
-		color: var(--text);
-	}
-
 	.dialog-body {
 		padding: var(--space-md);
-		padding-top: var(--space-sm);
 	}
 
 	.dialog-body p {
 		margin: 0;
-		font-size: 13px;
+		font-size: var(--font-sm);
 		color: var(--text-muted);
 		line-height: 1.5;
 	}
@@ -123,22 +111,15 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: var(--space-sm);
-		padding: var(--space-md);
-		padding-top: 0;
-	}
-
-	.dialog-footer button {
-		padding: var(--space-xs) var(--space-md);
-		font-size: 13px;
-		font-weight: 500;
+		padding: var(--space-sm) var(--space-md) var(--space-md);
 	}
 
 	.dialog-footer button.destructive {
-		background: var(--error);
-		color: white;
+		background: transparent;
+		color: var(--error);
 	}
 
 	.dialog-footer button.destructive:hover {
-		background: color-mix(in srgb, var(--error) 85%, black);
+		background: var(--error-bg);
 	}
 </style>
