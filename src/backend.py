@@ -13,14 +13,19 @@ rather there would be some type of deployment of this application such that it c
 "https://view.pathsim.org" (which I think is already encapsualted by the "*" in the CORS.resources.options parameter)
 '''
 
+isInitialized = False
+
 def initialize():
-    # No need for th emicropip installation as the Pyodide backend does it
+    global isInitialized
+
+    # No need for the micropip installation since only the Pyodide backend needs that installation package
     import numpy as np
     import gc
     import pathsim, pathsim_chem
     print(f"PathSim {pathsim.__version__} loaded successfully")
-    
+
     _clean_globals = set(globals().keys())
+    isInitialized = True
 
 initialize()
 
@@ -177,13 +182,27 @@ def execute_python():
 #     except Exception as e:
 #         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
 
-# @app.route("/initialize", methods=["GET"])
-# def initialize():
-#     try:
-#         # Not fully implemented yet
-#         pass
-#     except Exception as e:
-#         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
+@app.route("/initializationStatus", methods=["GET"])
+def initialize():
+    print("Beginning (or checking) the intialization status of the Flask web server...")
+    try:
+        # Not fully implemented yet
+        if isInitialized:
+            return jsonify({"success": True, "initialized": True})
+        else:
+            count = 0
+
+            # Try three times to run the initialization program and check the status of initialization
+            while count < 3 and not isInitialized:
+                initialize()
+                count += 1
+
+            if isInitialized:
+                return jsonify({"success": True, "initialized": True})
+            else:
+                return jsonify({"success": True, "initialized": False, "error": "Not yet initialized..."})
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
     
 # Global error handler to ensure all errors return JSON
 @app.errorhandler(Exception)
