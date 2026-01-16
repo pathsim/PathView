@@ -1266,7 +1266,7 @@
 	<!-- Welcome Modal -->
 	{#if showWelcomeModal}
 		<WelcomeModal
-			onNew={() => newGraph()}
+			onNew={handleNew}
 			onOpen={handleOpen}
 			onLoadExample={handleLoadExample}
 			onClose={() => showWelcomeModal = false}
