@@ -114,3 +114,15 @@ export function createRenderQueue(options: RenderQueueOptions): RenderQueue {
 		}
 	};
 }
+
+// ============================================================
+// SINGLETON INSTANCE
+// ============================================================
+
+import { RENDER_QUEUE_FPS } from '../core/constants';
+
+/** Global render queue for all plot updates */
+export const plotRenderQueue = createRenderQueue({
+	fps: RENDER_QUEUE_FPS,
+	name: 'PlotRenderQueue'
+});
