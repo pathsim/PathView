@@ -3,6 +3,7 @@
  */
 
 export { createRenderQueue, type RenderQueue } from './renderQueue';
+export { processPlot, type ProcessPlotOptions } from './dataProcessor';
 
 // Singleton instance for the application
 import { createRenderQueue } from './renderQueue';
