@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
-	import { toSVGPathsLinear, type SVGPathData } from '$lib/plotting/renderers/svg';
+	import { toSVGPaths, type SVGPathData } from '$lib/plotting/renderers/svg';
 	import { PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_PADDING } from '$lib/plotting/core/constants';
 	import type { ProcessedPlot } from '$lib/plotting/core/types';
 
@@ -22,8 +22,8 @@
 	const unsubscribe = plotDataStore.subscribe((state) => {
 		const plot = state.plots.get(nodeId);
 		if (plot) {
-			// Use linear paths for simpler preview rendering
-			paths = toSVGPathsLinear(plot, width, height, padding);
+			// Use toSVGPaths which respects axis scale settings (linear/log)
+			paths = toSVGPaths(plot, width, height, padding);
 		} else {
 			paths = [];
 		}

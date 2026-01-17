@@ -2,7 +2,7 @@
  * SVG renderer - converts ProcessedPlot to SVG path data for previews
  */
 
-import type { ProcessedPlot } from '../core/types';
+import type { ProcessedPlot, AxisScale } from '../core/types';
 import { LINE_DASH_SVG, PREVIEW_WIDTH, PREVIEW_HEIGHT, PREVIEW_PADDING } from '../core/constants';
 
 // ============================================================
@@ -23,13 +23,53 @@ export interface SVGPathData {
 }
 
 // ============================================================
+// AXIS SCALING HELPERS
+// ============================================================
+
+/** Minimum value for log scale (prevents -Infinity) */
+const LOG_MIN_VALUE = 1e-10;
+
+/**
+ * Transform a value based on axis scale
+ */
+function transformValue(value: number, scale: AxisScale): number {
+	if (scale === 'log') {
+		// Clamp to minimum positive value for log scale
+		return Math.log10(Math.max(value, LOG_MIN_VALUE));
+	}
+	return value;
+}
+
+/**
+ * Compute bounds for an axis with scaling applied
+ */
+function computeScaledBounds(
+	min: number,
+	max: number,
+	scale: AxisScale
+): { scaledMin: number; scaledMax: number; range: number } {
+	if (scale === 'log') {
+		// For log scale, ensure positive values
+		const safeMin = Math.max(min, LOG_MIN_VALUE);
+		const safeMax = Math.max(max, LOG_MIN_VALUE);
+		const scaledMin = Math.log10(safeMin);
+		const scaledMax = Math.log10(safeMax);
+		const range = scaledMax - scaledMin || 1;
+		return { scaledMin, scaledMax, range };
+	}
+	// Linear scale
+	const range = max - min || 1;
+	return { scaledMin: min, scaledMax: max, range };
+}
+
+// ============================================================
 // SVG PATH GENERATION
 // ============================================================
 
 /**
  * Convert ProcessedPlot to SVG path data for preview rendering
  *
- * Uses decimated data and pre-computed bounds from the ProcessedPlot
+ * Respects the axis scale settings (linear/log) from the plot's layout.
  *
  * @param plot - Processed plot data
  * @param width - SVG width (default: PREVIEW_WIDTH)
@@ -42,18 +82,20 @@ export function toSVGPaths(
 	height: number = PREVIEW_HEIGHT,
 	padding: number = PREVIEW_PADDING
 ): SVGPathData[] {
-	const { traces, bounds, type } = plot;
+	const { traces, bounds, layout } = plot;
 
 	if (traces.length === 0) return [];
 
 	const { xMin, xMax, yMin, yMax } = bounds;
-	const xRange = xMax - xMin || 1;
-	const yRange = yMax - yMin || 1;
+	const xScale = layout.xAxisScale;
+	const yScale = layout.yAxisScale;
+
+	// Compute scaled bounds for each axis
+	const xBounds = computeScaledBounds(xMin, xMax, xScale);
+	const yBounds = computeScaledBounds(yMin, yMax, yScale);
+
 	const plotWidth = width - padding * 2;
 	const plotHeight = height - padding * 2;
-
-	// For spectrum previews, apply log transform to y values
-	const isSpectrum = type === 'spectrum';
 
 	return traces.map((trace) => {
 		const { xDecimated, yDecimated, style, ghost } = trace;
@@ -62,26 +104,28 @@ export function toSVGPaths(
 		const pathPoints: string[] = [];
 
 		for (let i = 0; i < xDecimated.length; i++) {
-			const xVal = xDecimated[i];
-			// For spectrum, apply log transform to y values for preview
-			let yVal = yDecimated[i];
-			if (isSpectrum && yVal > 0) {
-				// Apply log scale for visualization
-				const logYMin = yMin > 0 ? Math.log10(yMin) : -10;
-				const logYMax = yMax > 0 ? Math.log10(yMax) : 0;
-				const logYVal = Math.log10(yVal);
-				const logRange = logYMax - logYMin || 1;
-				yVal = logYMin + ((logYVal - logYMin) / logRange) * (yMax - yMin) + yMin;
-			}
+			const rawX = xDecimated[i];
+			const rawY = yDecimated[i];
 
-			const x = padding + ((xVal - xMin) / xRange) * plotWidth;
-			const y = height - padding - ((yVal - yMin) / yRange) * plotHeight;
+			// Skip invalid values for log scale
+			if (xScale === 'log' && rawX <= 0) continue;
+			if (yScale === 'log' && rawY <= 0) continue;
+
+			// Transform values based on axis scale
+			const scaledX = transformValue(rawX, xScale);
+			const scaledY = transformValue(rawY, yScale);
+
+			// Map to pixel coordinates
+			const x = padding + ((scaledX - xBounds.scaledMin) / xBounds.range) * plotWidth;
+			const y = height - padding - ((scaledY - yBounds.scaledMin) / yBounds.range) * plotHeight;
 
 			// Clamp to visible area
 			const clampedX = Math.max(padding, Math.min(width - padding, x));
 			const clampedY = Math.max(padding, Math.min(height - padding, y));
 
-			pathPoints.push(`${i === 0 ? 'M' : 'L'}${clampedX.toFixed(1)},${clampedY.toFixed(1)}`);
+			// Use 'M' for first point or after skipped points
+			const command = pathPoints.length === 0 ? 'M' : 'L';
+			pathPoints.push(`${command}${clampedX.toFixed(1)},${clampedY.toFixed(1)}`);
 		}
 
 		return {
@@ -95,8 +139,8 @@ export function toSVGPaths(
 }
 
 /**
- * Convert ProcessedPlot to SVG paths using linear y-scale
- * (Simpler version without log transform for scope data)
+ * Convert ProcessedPlot to SVG paths using linear scaling for both axes
+ * (Convenience function for simple previews that ignore layout settings)
  */
 export function toSVGPathsLinear(
 	plot: ProcessedPlot,
