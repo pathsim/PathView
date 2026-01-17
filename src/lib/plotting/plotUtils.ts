@@ -18,8 +18,8 @@ export interface LayoutStyleOptions {
 	yAxisScale?: AxisScale;
 }
 
-/** Map our line style names to Plotly dash values */
-const LINE_DASH_MAP: Record<LineStyle, Plotly.Dash> = {
+/** Map our line style names to Plotly dash values (none excluded - handled separately) */
+const LINE_DASH_MAP: Record<Exclude<LineStyle, 'none'>, Plotly.Dash> = {
 	solid: 'solid',
 	dash: 'dash',
 	dot: 'dot',
@@ -279,12 +279,19 @@ export function createScopeTrace(
 	const traceName = name || `port ${index}`;
 	const color = getSignalColor(index);
 
-	// Determine mode based on marker settings
+	const lineStyle = styleOptions?.lineStyle ?? 'solid';
 	const showMarkers = styleOptions?.showMarkers ?? false;
-	const mode = showMarkers ? 'lines+markers' : 'lines';
+	const showLines = lineStyle !== 'none';
 
-	// Line dash style
-	const dash = LINE_DASH_MAP[styleOptions?.lineStyle ?? 'solid'];
+	// Determine mode based on line and marker settings
+	let mode: 'lines' | 'markers' | 'lines+markers';
+	if (showLines && showMarkers) {
+		mode = 'lines+markers';
+	} else if (showMarkers) {
+		mode = 'markers';
+	} else {
+		mode = 'lines';
+	}
 
 	const trace: Partial<Plotly.ScatterData> = {
 		x: time,
@@ -293,13 +300,17 @@ export function createScopeTrace(
 		mode,
 		name: traceName,
 		legendgroup: `signal-${index}`,
-		line: {
-			color,
-			width: 1.5,
-			dash
-		},
 		hovertemplate: `<b style="color:${color}">${traceName}</b><br>t = %{x:.4g} s<br>y = %{y:.4g}<extra></extra>`
 	};
+
+	// Only add line config when lines are shown
+	if (showLines) {
+		trace.line = {
+			color,
+			width: 1.5,
+			dash: LINE_DASH_MAP[lineStyle]
+		};
+	}
 
 	// Only add marker config when markers are shown
 	if (showMarkers) {
@@ -355,12 +366,19 @@ export function createSpectrumTrace(
 	// Use indices for x-axis (equal spacing)
 	const indices = Array.from({ length: magnitude.length }, (_, i) => i);
 
-	// Determine mode based on marker settings
+	const lineStyle = styleOptions?.lineStyle ?? 'solid';
 	const showMarkers = styleOptions?.showMarkers ?? false;
-	const mode = showMarkers ? 'lines+markers' : 'lines';
+	const showLines = lineStyle !== 'none';
 
-	// Line dash style
-	const dash = LINE_DASH_MAP[styleOptions?.lineStyle ?? 'solid'];
+	// Determine mode based on line and marker settings
+	let mode: 'lines' | 'markers' | 'lines+markers';
+	if (showLines && showMarkers) {
+		mode = 'lines+markers';
+	} else if (showMarkers) {
+		mode = 'markers';
+	} else {
+		mode = 'lines';
+	}
 
 	const trace: Partial<Plotly.ScatterData> = {
 		x: indices,
@@ -369,15 +387,19 @@ export function createSpectrumTrace(
 		mode,
 		name: traceName,
 		legendgroup: `signal-${index}`,
-		line: {
-			color,
-			width: 1.5,
-			dash
-		},
 		// Store frequency in customdata for hover
 		customdata: frequency,
 		hovertemplate: `<b style="color:${color}">${traceName}</b><br>f = %{customdata:.2f} Hz<br>mag = %{y:.4g}<extra></extra>`
 	};
+
+	// Only add line config when lines are shown
+	if (showLines) {
+		trace.line = {
+			color,
+			width: 1.5,
+			dash: LINE_DASH_MAP[lineStyle]
+		};
+	}
 
 	// Only add marker config when markers are shown
 	if (showMarkers) {

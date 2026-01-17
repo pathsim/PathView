@@ -66,6 +66,7 @@
 	}
 
 	const lineStyles: { value: LineStyle; label: string; preview: string }[] = [
+		{ value: 'none', label: 'None', preview: '—' },
 		{ value: 'solid', label: 'Solid', preview: '━━━' },
 		{ value: 'dash', label: 'Dashed', preview: '─ ─' },
 		{ value: 'dot', label: 'Dotted', preview: '···' },

@@ -5,7 +5,7 @@
 
 import { writable, get } from 'svelte/store';
 
-export type LineStyle = 'solid' | 'dash' | 'dot' | 'dashdot';
+export type LineStyle = 'none' | 'solid' | 'dash' | 'dot' | 'dashdot';
 export type MarkerStyle = 'circle' | 'square' | 'diamond' | 'cross' | 'x' | 'triangle-up';
 export type AxisScale = 'linear' | 'log';
 
