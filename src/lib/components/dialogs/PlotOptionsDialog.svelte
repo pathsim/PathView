@@ -11,7 +11,7 @@
 		type MarkerStyle,
 		type PlotSettings
 	} from '$lib/stores/plotSettings';
-	import { getSignalColor, LINE_DASH_SVG } from '$lib/plotting/plotUtils';
+	import { getTraceColor, getAccentColor, LINE_DASH_SVG } from '$lib/plotting/core/constants';
 
 	interface TraceInfo {
 		nodeId: string;
@@ -202,7 +202,7 @@
 								{#each nodeTraces as trace}
 									{@const traceId = createTraceId(trace.nodeId, trace.signalIndex)}
 									{@const settings = getTraceSettings(traceId)}
-									{@const color = getSignalColor(trace.signalIndex)}
+									{@const color = getTraceColor(trace.signalIndex, getAccentColor())}
 									<div class="trace-row">
 										<div class="col-preview">
 											<!-- SVG preview of line + marker -->
