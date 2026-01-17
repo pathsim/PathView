@@ -250,4 +250,15 @@
 		margin: 0.25em 0;
 	}
 
+	/* Hyperlinks */
+	.docs-content :global(a) {
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	.docs-content :global(a:hover) {
+		color: var(--accent-hover);
+		text-decoration: underline;
+	}
+
 </style>
