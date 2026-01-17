@@ -1,129 +1,63 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
 	import {
-		getScopeLayout,
-		getSpectrumLayout,
-		createScopeTrace,
-		createSpectrumTrace,
-		createGhostScopeTrace,
-		createGhostSpectrumTrace,
-		plotConfig,
-		type TraceStyleOptions,
-		type LayoutStyleOptions
-	} from '$lib/plotting/plotUtils';
-	import { themeStore, type Theme } from '$lib/stores/theme';
-	import { plotSettingsStore, createTraceId, type PlotSettings } from '$lib/stores/plotSettings';
-	import { enqueuePlotUpdate, cancelPlotUpdate, isVisible } from './plotQueue';
-
-	interface ScopeData {
-		time: number[];
-		signals: number[][];
-		labels?: string[];
-	}
-
-	interface SpectrumData {
-		frequency: number[];
-		magnitude: number[][];
-		labels?: string[];
-	}
+		toPlotlyTrace,
+		toPlotlySpectrumTrace,
+		toPlotlyLayout,
+		createEmptyLayout,
+		PLOTLY_CONFIG
+	} from '$lib/plotting/renderers/plotly';
+	import type { ProcessedPlot, ProcessedTrace } from '$lib/plotting/core/types';
 
 	interface Props {
-		type: 'scope' | 'spectrum';
 		nodeId: string;
-		data: ScopeData | SpectrumData | null;
-		ghostData?: (ScopeData | SpectrumData)[];
-		title?: string;
-		isStreaming?: boolean;
 	}
 
-	let { type, nodeId, data, ghostData = [], title, isStreaming = false }: Props = $props();
-
-	// Check if data has actual content (not just empty arrays)
-	const hasData = $derived(() => {
-		if (!data) return false;
-		if (type === 'scope') {
-			const d = data as ScopeData;
-			return d.time.length > 0 && d.signals.some(s => s.length > 0);
-		} else {
-			const d = data as SpectrumData;
-			return d.frequency.length > 0 && d.magnitude.some(m => m.length > 0);
-		}
-	});
-
-	// Default title based on type
-	const defaultTitle = $derived(type === 'scope' ? 'Scope' : 'Spectrum');
-	const plotTitle = $derived(title ?? defaultTitle);
-
-	// Get label for signal index
-	function getSignalLabel(index: number): string {
-		if (data?.labels && index < data.labels.length) {
-			return data.labels[index];
-		}
-		return `port ${index}`;
-	}
+	let { nodeId }: Props = $props();
 
 	let plotDiv: HTMLDivElement;
 	let Plotly: typeof import('plotly.js-dist-min') | null = null;
 	let resizeObserver: ResizeObserver | null = null;
-	let currentTheme = $state<Theme>('dark');
-	let plotSettings = $state<PlotSettings>({
-		traces: {},
-		blocks: {}
-	});
 
-	// Get per-trace style options
-	function getTraceStyle(signalIndex: number): TraceStyleOptions {
-		const traceId = createTraceId(nodeId, signalIndex);
-		const settings = plotSettingsStore.getTraceSettings(traceId);
-		return {
-			lineStyle: settings.lineStyle,
-			markerStyle: settings.markerStyle
-		};
-	}
-
-	// Get per-block layout options
-	function getBlockLayoutStyle(): LayoutStyleOptions {
-		const blockSettings = plotSettingsStore.getBlockSettings(nodeId);
-		return {
-			xAxisScale: blockSettings.xAxisScale,
-			yAxisScale: blockSettings.yAxisScale
-		};
-	}
-
-	// Get per-block show legend setting
-	function getBlockShowLegend(): boolean {
-		return plotSettingsStore.getBlockSettings(nodeId).showLegend;
-	}
-
-	// Unique ID for this component in the shared render queue
-	const componentId = Symbol();
+	// Local state from store
+	let processedPlot = $state<ProcessedPlot | null>(null);
+	let isStreaming = $state(false);
 
 	// Streaming mode state for extendTraces optimization
 	let streamingInitialized = false;
 	let renderedTimeLength = 0;
 	let ghostTraceCount = 0;
-	let wasStreaming = false; // Track streaming transitions
+	let wasStreaming = false;
 
-	const unsubscribeTheme = themeStore.subscribe((theme) => {
-		currentTheme = theme;
-	});
+	const unsubscribe = plotDataStore.subscribe((state) => {
+		processedPlot = state.plots.get(nodeId) ?? null;
+		const newIsStreaming = state.isStreaming;
 
-	const unsubscribePlotSettings = plotSettingsStore.subscribe((s) => {
-		plotSettings = s;
+		// Handle streaming state transitions
+		if (newIsStreaming && !wasStreaming) {
+			// Streaming just started (rerun) - reset for fresh extendTraces
+			streamingInitialized = false;
+			renderedTimeLength = 0;
+			ghostTraceCount = 0;
+		} else if (!newIsStreaming && wasStreaming) {
+			// Streaming just stopped
+			streamingInitialized = false;
+			renderedTimeLength = 0;
+			ghostTraceCount = 0;
+		}
+		wasStreaming = newIsStreaming;
+		isStreaming = newIsStreaming;
+
+		// Render if Plotly is ready
+		if (Plotly && plotDiv) {
+			renderPlot();
+		}
 	});
 
 	onMount(async () => {
 		Plotly = await import('plotly.js-dist-min');
-
-		// Initialize spectrum blocks with log Y-axis by default
-		if (type === 'spectrum') {
-			const currentSettings = plotSettingsStore.get().blocks[nodeId];
-			if (!currentSettings) {
-				plotSettingsStore.setBlockYAxisScale(nodeId, 'log');
-			}
-		}
-
-		scheduleUpdate();
+		if (processedPlot) renderPlot();
 
 		resizeObserver = new ResizeObserver(() => {
 			if (Plotly && plotDiv) {
@@ -133,213 +67,131 @@
 		resizeObserver.observe(plotDiv);
 	});
 
-	function scheduleUpdate() {
-		// Use shared queue for batched, throttled updates
-		enqueuePlotUpdate(componentId, updatePlotWithState);
-	}
-
-	// Reset streaming state on transitions
-	$effect(() => {
-		if (isStreaming && !wasStreaming) {
-			// Streaming just started (rerun) - reset for fresh extendTraces
-			streamingInitialized = false;
-			renderedTimeLength = 0;
-			ghostTraceCount = 0;
-		} else if (!isStreaming && wasStreaming) {
-			// Streaming just stopped
-			streamingInitialized = false;
-			renderedTimeLength = 0;
-			ghostTraceCount = 0;
-		}
-		wasStreaming = isStreaming;
-	});
-
-	$effect(() => {
-		const _theme = currentTheme;
-		const _data = data;
-		const _ghostData = ghostData;
-		const _type = type;
-		const _isStreaming = isStreaming;
-		const _plotSettings = plotSettings;
-		if (Plotly && plotDiv) {
-			// Always update - handles empty data with ghosts, etc.
-			scheduleUpdate();
-		}
-	});
-
-	function updatePlotWithState() {
-		if (!Plotly || !plotDiv) return;
-
-		// Spectrum plots always use full react (data is replaced, not appended)
-		if (type === 'spectrum') {
-			updateSpectrumPlot();
-			return;
-		}
-
-		// Scope plots can use extendTraces during streaming
-		updateScopePlot();
-	}
-
-	function updateSpectrumPlot() {
-		if (!Plotly || !plotDiv) return;
-
-		const traces: Partial<Plotly.ScatterData>[] = [];
-		const spectrumGhosts = ghostData as SpectrumData[];
-		const totalGhosts = spectrumGhosts.length;
-
-		const layoutStyle = getBlockLayoutStyle();
-		const blockShowLegend = getBlockShowLegend();
-
-		// Add ghost traces with matching style
-		for (let ghostIdx = totalGhosts - 1; ghostIdx >= 0; ghostIdx--) {
-			const ghost = spectrumGhosts[ghostIdx];
-			if (!ghost?.magnitude || !ghost.frequency?.length) continue;
-			for (let sigIdx = 0; sigIdx < ghost.magnitude.length; sigIdx++) {
-				const traceStyle = getTraceStyle(sigIdx);
-				// Skip ghost traces if current trace is hidden
-				if (traceStyle.lineStyle === null && traceStyle.markerStyle === null) continue;
-				traces.push(createGhostSpectrumTrace(ghost.frequency, ghost.magnitude[sigIdx], sigIdx, ghostIdx, totalGhosts, traceStyle));
-			}
-		}
-
-		// Add current data traces with per-trace settings
-		let layout = getSpectrumLayout(plotTitle, undefined, blockShowLegend, layoutStyle);
-		if (hasData()) {
-			const spectrumData = data as SpectrumData;
-			for (let i = 0; i < spectrumData.magnitude.length; i++) {
-				const traceStyle = getTraceStyle(i);
-				// Skip traces with no line and no marker
-				if (traceStyle.lineStyle === null && traceStyle.markerStyle === null) continue;
-				traces.push(createSpectrumTrace(spectrumData.frequency, spectrumData.magnitude[i], i, getSignalLabel(i), traceStyle));
-			}
-			layout = getSpectrumLayout(plotTitle, spectrumData.frequency, blockShowLegend, layoutStyle);
-		}
-
-		if (traces.length === 0) {
-			showEmptyPlot(layout);
-		} else {
-			Plotly.react(plotDiv, traces, layout, plotConfig);
-		}
-	}
-
-	function updateScopePlot() {
-		if (!Plotly || !plotDiv) return;
-
-		const scopeData = data as ScopeData | null;
-		const scopeGhosts = ghostData as ScopeData[];
-		const currentTimeLength = scopeData?.time?.length ?? 0;
-
-		// Use extendTraces if: streaming, already initialized, and have new data to append
-		if (isStreaming && streamingInitialized && currentTimeLength > renderedTimeLength) {
-			extendScopeTraces(scopeData!, currentTimeLength);
-			return;
-		}
-
-		// Full render: initial render, not streaming, or continuing from existing data
-		fullScopeRender(scopeData, scopeGhosts);
-	}
-
-	function fullScopeRender(scopeData: ScopeData | null, scopeGhosts: ScopeData[]) {
-		if (!Plotly || !plotDiv) return;
-
-		const layoutStyle = getBlockLayoutStyle();
-		const blockShowLegend = getBlockShowLegend();
-
-		const traces: Partial<Plotly.ScatterData>[] = [];
-		const layout = getScopeLayout(plotTitle, blockShowLegend, layoutStyle);
-		const totalGhosts = scopeGhosts.length;
-
-		// Add ghost traces with matching style (rendered once, won't change during streaming)
-		for (let ghostIdx = totalGhosts - 1; ghostIdx >= 0; ghostIdx--) {
-			const ghost = scopeGhosts[ghostIdx];
-			if (!ghost?.signals || !ghost.time?.length) continue;
-			for (let sigIdx = 0; sigIdx < ghost.signals.length; sigIdx++) {
-				const traceStyle = getTraceStyle(sigIdx);
-				// Skip ghost traces if current trace is hidden
-				if (traceStyle.lineStyle === null && traceStyle.markerStyle === null) continue;
-				traces.push(createGhostScopeTrace(ghost.time, ghost.signals[sigIdx], sigIdx, ghostIdx, totalGhosts, traceStyle));
-			}
-		}
-
-		// Track ghost trace count for extendTraces indexing
-		ghostTraceCount = traces.length;
-
-		// Add current data traces with per-trace settings
-		if (scopeData && scopeData.time?.length > 0) {
-			for (let i = 0; i < scopeData.signals.length; i++) {
-				const traceStyle = getTraceStyle(i);
-				// Skip traces with no line and no marker
-				if (traceStyle.lineStyle === null && traceStyle.markerStyle === null) continue;
-				traces.push(createScopeTrace(scopeData.time, scopeData.signals[i], i, getSignalLabel(i), traceStyle));
-			}
-		}
-
-		if (traces.length === 0) {
-			showEmptyPlot(layout);
-			streamingInitialized = false;
-			renderedTimeLength = 0;
-		} else {
-			Plotly.react(plotDiv, traces, layout, plotConfig);
-			// Mark as initialized for streaming only if we have current data traces to extend
-			// (not just ghost traces - extendTraces needs actual current traces to exist)
-			if (isStreaming && scopeData && scopeData.time?.length > 0) {
-				streamingInitialized = true;
-				renderedTimeLength = scopeData.time.length;
-			}
-		}
-	}
-
-	function extendScopeTraces(scopeData: ScopeData, currentTimeLength: number) {
-		if (!Plotly || !plotDiv) return;
-
-		const newStartIndex = renderedTimeLength;
-		const newTime = scopeData.time.slice(newStartIndex);
-		const signalCount = scopeData.signals.length;
-
-		// Build arrays for extendTraces: x and y data for each current trace
-		const xData: number[][] = [];
-		const yData: number[][] = [];
-		const traceIndices: number[] = [];
-
-		for (let i = 0; i < signalCount; i++) {
-			xData.push(newTime);
-			yData.push(scopeData.signals[i].slice(newStartIndex));
-			traceIndices.push(ghostTraceCount + i);
-		}
-
-		Plotly.extendTraces(plotDiv, { x: xData, y: yData }, traceIndices);
-		renderedTimeLength = currentTimeLength;
-	}
-
-	function showEmptyPlot(layout: Partial<Plotly.Layout>) {
-		if (!Plotly || !plotDiv) return;
-
-		const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--text-disabled').trim();
-		layout.annotations = [
-			{
-				text: 'No data',
-				xref: 'paper',
-				yref: 'paper',
-				x: 0.5,
-				y: 0.5,
-				showarrow: false,
-				font: { size: 14, color: annotationColor }
-			}
-		];
-		Plotly.newPlot(plotDiv, [], layout, plotConfig);
-	}
-
 	onDestroy(() => {
-		unsubscribeTheme();
-		unsubscribePlotSettings();
-		cancelPlotUpdate(componentId);
-		if (resizeObserver) {
-			resizeObserver.disconnect();
-		}
+		unsubscribe();
+		resizeObserver?.disconnect();
 		if (Plotly && plotDiv) {
 			Plotly.purge(plotDiv);
 		}
 	});
+
+	function renderPlot() {
+		if (!Plotly || !plotDiv) return;
+
+		// Spectrum plots always use full react (data is replaced, not appended)
+		if (processedPlot?.type === 'spectrum') {
+			renderSpectrumPlot();
+			return;
+		}
+
+		// Scope plots can use extendTraces during streaming
+		renderScopePlot();
+	}
+
+	function renderSpectrumPlot() {
+		if (!Plotly || !plotDiv || !processedPlot) {
+			showEmptyPlot();
+			return;
+		}
+
+		const traces: Partial<Plotly.ScatterData>[] = processedPlot.traces.map((trace) =>
+			toPlotlySpectrumTrace(trace, processedPlot!.frequencies)
+		);
+
+		if (traces.length === 0) {
+			showEmptyPlot();
+		} else {
+			const layout = toPlotlyLayout(processedPlot);
+			Plotly.react(plotDiv, traces, layout, PLOTLY_CONFIG);
+		}
+	}
+
+	function renderScopePlot() {
+		if (!Plotly || !plotDiv) return;
+
+		if (!processedPlot || processedPlot.traces.length === 0) {
+			showEmptyPlot();
+			streamingInitialized = false;
+			renderedTimeLength = 0;
+			return;
+		}
+
+		// Get current time length from first main (non-ghost) trace
+		const mainTrace = processedPlot.traces.find((t) => !t.ghost);
+		const currentTimeLength = mainTrace?.x.length ?? 0;
+
+		// Use extendTraces if: streaming, already initialized, and have new data to append
+		if (isStreaming && streamingInitialized && currentTimeLength > renderedTimeLength) {
+			extendScopeTraces(currentTimeLength);
+			return;
+		}
+
+		// Full render
+		fullScopeRender();
+	}
+
+	function fullScopeRender() {
+		if (!Plotly || !plotDiv || !processedPlot) return;
+
+		// Count ghost traces (they come first in the array)
+		ghostTraceCount = processedPlot.traces.filter((t) => t.ghost).length;
+
+		const traces: Partial<Plotly.ScatterData>[] = processedPlot.traces.map((trace) =>
+			toPlotlyTrace(trace)
+		);
+		const layout = toPlotlyLayout(processedPlot);
+
+		Plotly.react(plotDiv, traces, layout, PLOTLY_CONFIG);
+
+		// Mark as initialized for streaming if we have main traces
+		const mainTrace = processedPlot.traces.find((t) => !t.ghost);
+		if (isStreaming && mainTrace && mainTrace.x.length > 0) {
+			streamingInitialized = true;
+			renderedTimeLength = mainTrace.x.length;
+		}
+	}
+
+	function extendScopeTraces(currentTimeLength: number) {
+		if (!Plotly || !plotDiv || !processedPlot) return;
+
+		const newStartIndex = renderedTimeLength;
+
+		// Get main (non-ghost) traces
+		const mainTraces = processedPlot.traces.filter((t) => !t.ghost);
+
+		// Build arrays for extendTraces
+		const xData: number[][] = [];
+		const yData: number[][] = [];
+		const traceIndices: number[] = [];
+
+		mainTraces.forEach((trace, i) => {
+			xData.push(trace.x.slice(newStartIndex));
+			yData.push(trace.y.slice(newStartIndex));
+			traceIndices.push(ghostTraceCount + i);
+		});
+
+		if (xData.length > 0 && xData[0].length > 0) {
+			Plotly.extendTraces(plotDiv, { x: xData, y: yData }, traceIndices);
+		}
+
+		renderedTimeLength = currentTimeLength;
+	}
+
+	function showEmptyPlot() {
+		if (!Plotly || !plotDiv) return;
+
+		// Build a minimal layout for empty state
+		const baseLayout = processedPlot
+			? toPlotlyLayout(processedPlot)
+			: {
+					paper_bgcolor: 'transparent',
+					plot_bgcolor: 'transparent',
+					margin: { l: 60, r: 15, t: 10, b: 45 }
+				};
+
+		const emptyLayout = createEmptyLayout(baseLayout);
+		Plotly.newPlot(plotDiv, [], emptyLayout, PLOTLY_CONFIG);
+	}
 </script>
 
 <div class="plot-container">

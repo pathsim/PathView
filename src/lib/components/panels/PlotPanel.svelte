@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { simulationState, type SimulationResult } from '$lib/pyodide/bridge';
-	import { graphStore } from '$lib/stores/graph';
-	import { settingsStore } from '$lib/stores/settings';
+	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
 	import SignalPlot from './SignalPlot.svelte';
+	import type { ProcessedPlot } from '$lib/plotting/core/types';
 
 	interface Props {
 		collapsed?: boolean;
@@ -57,113 +56,24 @@
 		};
 	});
 
-	// Get simulation result, history, and streaming state from store
-	let result = $state<SimulationResult | null>(null);
-	let resultHistory = $state<SimulationResult[]>([]);
-	let isStreaming = $state(false);
+	// Get processed plots from the centralized store
+	let plots = $state<ProcessedPlot[]>([]);
 
-	const unsubscribeSim = simulationState.subscribe((s) => {
-		result = s.result;
-		resultHistory = s.resultHistory;
-		isStreaming = s.phase === 'running';
-	});
-
-	// Get ghost traces setting
-	let ghostTraces = $state(0);
-	const unsubscribeSettings = settingsStore.subscribe((s) => {
-		ghostTraces = s.ghostTraces ?? 0;
+	const unsubscribe = plotDataStore.subscribe((state) => {
+		plots = Array.from(state.plots.values());
 	});
 
 	onDestroy(() => {
-		unsubscribeSim();
-		unsubscribeSettings();
+		unsubscribe();
 	});
 
-	// Helper to get node name by ID (uses names from simulation result)
-	function getNodeName(id: string, fallback: string): string {
-		return result?.nodeNames?.[id] || fallback;
-	}
-
-	// Compute ghost data reactively - maps nodeId to ghost data array
-	// Single pass O(n*m) instead of double pass
-	const ghostScopeDataMap = $derived(() => {
-		if (ghostTraces === 0 || resultHistory.length === 0) return new Map<string, { time: number[]; signals: number[][] }[]>();
-
-		const map = new Map<string, { time: number[]; signals: number[][] }[]>();
-		const history = resultHistory.slice(0, ghostTraces);
-
-		for (const r of history) {
-			if (!r.scopeData) continue;
-			for (const [nodeId, data] of Object.entries(r.scopeData)) {
-				if (!map.has(nodeId)) {
-					map.set(nodeId, []);
-				}
-				map.get(nodeId)!.push(data);
-			}
-		}
-
-		return map;
-	});
-
-	const ghostSpectrumDataMap = $derived(() => {
-		if (ghostTraces === 0 || resultHistory.length === 0) return new Map<string, { frequency: number[]; magnitude: number[][] }[]>();
-
-		const map = new Map<string, { frequency: number[]; magnitude: number[][] }[]>();
-		const history = resultHistory.slice(0, ghostTraces);
-
-		for (const r of history) {
-			if (!r.spectrumData) continue;
-			for (const [nodeId, data] of Object.entries(r.spectrumData)) {
-				if (!map.has(nodeId)) {
-					map.set(nodeId, []);
-				}
-				map.get(nodeId)!.push(data);
-			}
-		}
-
-		return map;
-	});
-
-	// Parse scope and spectrum data into arrays
-	const scopePlots = $derived(() => {
-		if (!result?.scopeData) return [];
-		return Object.entries(result.scopeData).map(([id, data], index) => ({
-			id,
-			title: getNodeName(id, `Scope ${index + 1}`),
-			data: data as { time: number[]; signals: number[][] }
-		}));
-	});
-
-	const spectrumPlots = $derived(() => {
-		if (!result?.spectrumData) return [];
-		return Object.entries(result.spectrumData).map(([id, data], index) => ({
-			id,
-			title: getNodeName(id, `Spectrum ${index + 1}`),
-			data: data as { frequency: number[]; magnitude: number[][] }
-		}));
-	});
-
-	// Types for plot data
-	type ScopeData = { time: number[]; signals: number[][]; labels?: string[] };
-	type SpectrumData = { frequency: number[]; magnitude: number[][]; labels?: string[] };
-	type PlotEntry = { id: string; type: 'scope' | 'spectrum'; title: string; data: ScopeData | SpectrumData };
-
-	// All plots combined
-	const allPlots = $derived(() => {
-		const plots: PlotEntry[] = [];
-		for (const plot of scopePlots()) {
-			plots.push({ id: plot.id, type: 'scope', title: plot.title, data: plot.data });
-		}
-		for (const plot of spectrumPlots()) {
-			plots.push({ id: plot.id, type: 'spectrum', title: plot.title, data: plot.data });
-		}
-		return plots;
-	});
+	// All plots for UI (tabs/tiles)
+	const allPlots = $derived(() => plots);
 
 	// Reset tab when plots change
 	$effect(() => {
-		const plots = allPlots();
-		if (activeTab >= plots.length && plots.length > 0) {
+		const plotList = allPlots();
+		if (activeTab >= plotList.length && plotList.length > 0) {
 			activeTab = 0;
 		}
 	});
@@ -190,32 +100,18 @@
 						class:scrollable={gridLayout.needsScroll}
 						style="grid-template-columns: repeat({gridLayout.cols}, 1fr); --min-tile-height: {MIN_TILE_HEIGHT}px;"
 					>
-						{#each allPlots() as plot (plot.id)}
+						{#each allPlots() as plot (plot.nodeId)}
 							<div class="plot-tile">
-								<SignalPlot
-									type={plot.type}
-									nodeId={plot.id}
-									data={plot.data}
-									ghostData={plot.type === 'scope' ? ghostScopeDataMap().get(plot.id) ?? [] : ghostSpectrumDataMap().get(plot.id) ?? []}
-									title={plot.title}
-									{isStreaming}
-								/>
+								<SignalPlot nodeId={plot.nodeId} />
 							</div>
 						{/each}
 					</div>
 				{:else}
 					<!-- Tabbed view: show one plot at a time -->
 					<div class="plot-area">
-						{#each allPlots() as plot, i (plot.id)}
+						{#each allPlots() as plot, i (plot.nodeId)}
 							{#if activeTab === i}
-								<SignalPlot
-									type={plot.type}
-									nodeId={plot.id}
-									data={plot.data}
-									ghostData={plot.type === 'scope' ? ghostScopeDataMap().get(plot.id) ?? [] : ghostSpectrumDataMap().get(plot.id) ?? []}
-									title={plot.title}
-									{isStreaming}
-								/>
+								<SignalPlot nodeId={plot.nodeId} />
 							{/if}
 						{/each}
 					</div>
