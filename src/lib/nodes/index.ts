@@ -13,7 +13,7 @@ export { nodeRegistry } from './registry';
 export { defineNode } from './defineNode';
 
 // Re-export generated block config for external use
-export { blockConfig, extractedBlocks, uiOverrides } from './generated/blocks';
+export { blockConfig, extractedBlocks } from './generated/blocks';
 
 // Register subsystem nodes after main registry is initialized
 import { registerSubsystemNodes } from './subsystem';

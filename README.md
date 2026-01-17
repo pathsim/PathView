@@ -162,48 +162,26 @@ from pathsim.blocks import YourNewBlock
 
 ### 2. Add to block configuration
 
-Edit `scripts/config/pathsim/blocks.json` and add the block to the appropriate category:
+Edit `scripts/config/pathsim/blocks.json` and add the block class name to the appropriate category:
 
 ```json
 {
   "categories": {
     "Algebraic": [
-      { "class": "Adder", "maxOutputs": 1 },
-      { "class": "YourNewBlock" }
+      "Adder",
+      "Multiplier",
+      "YourNewBlock"
     ]
   }
 }
 ```
 
-### 3. (Optional) Add UI overrides
-
-UI overrides control port behavior when PathSim's `Block.info()` returns variable/unlimited ports:
-
-| Override | Purpose | Example |
-|----------|---------|---------|
-| `maxInputs: 0` | No inputs allowed | Sources |
-| `maxOutputs: 0` | No outputs allowed | Recording blocks (Scope) |
-| `maxInputs: 1` | Single input only | SISO blocks (PID, TransferFunction) |
-| `maxOutputs: 1` | Single output only | Reduction blocks (Adder, Multiplier) |
-
-```json
-{ "class": "MySource", "maxInputs": 0, "maxOutputs": 1 }
-{ "class": "MySISO", "maxInputs": 1, "maxOutputs": 1 }
-{ "class": "MyReducer", "maxOutputs": 1 }
-```
-
-**When are overrides needed?**
-
-PathSim's `Block.info()` returns port labels as:
+Port configurations are automatically extracted from `Block.info()`:
 - `None` → Variable/unlimited ports (UI allows add/remove)
 - `{}` → No ports of this type
-- `{"name": index}` → Fixed labeled ports
+- `{"name": index}` → Fixed labeled ports (locked count)
 
-Overrides are only needed when:
-1. PathSim returns `None` (variable) but UI should limit ports
-2. You want to constrain port counts for UX reasons
-
-### 4. Run extraction
+### 3. Run extraction
 
 ```bash
 npm run extract
@@ -214,7 +192,7 @@ This generates TypeScript files in `src/lib/*/generated/` with:
 - Port configurations from `Block.info()`
 - Pyodide runtime config
 
-### 5. Verify
+### 4. Verify
 
 Start the dev server and check that your block appears in the Block Library panel.
 
@@ -249,12 +227,10 @@ Create `scripts/config/pathsim-controls/blocks.json`:
 
   "categories": {
     "Controls": [
-      { "class": "PIDController" },
-      { "class": "StateEstimator", "maxInputs": 2 }
+      "PIDController",
+      "StateEstimator"
     ]
-  },
-
-  "ioOverrides": {}
+  }
 }
 ```
 

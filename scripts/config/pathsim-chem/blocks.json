@@ -5,17 +5,10 @@
 
   "categories": {
     "Chemical": [
-      { "class": "Process", "maxOutputs": 2 },
-      { "class": "Bubbler4", "maxInputs": 2, "maxOutputs": 5 },
-      { "class": "Splitter", "maxInputs": 1 },
-      { "class": "GLC", "maxInputs": 4, "maxOutputs": 8 }
+      "Process",
+      "Bubbler4",
+      "Splitter",
+      "GLC"
     ]
-  },
-
-  "ioOverrides": {
-    "GLC": {
-      "inputs": ["c_T_in", "flow_l", "y_T2_inlet", "flow_g"],
-      "outputs": ["c_T_out", "y_T2_out", "eff", "P_out", "Q_l", "Q_g_out", "n_T_out_liquid", "n_T_out_gas"]
-    }
   }
 }

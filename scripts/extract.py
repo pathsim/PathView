@@ -278,15 +278,14 @@ class BlockExtractor:
         self.config = config_loader
         self._module_cache: dict[str, Any] = {}
 
-    def extract_all(self) -> tuple[dict, dict, dict]:
+    def extract_all(self) -> tuple[dict, dict]:
         """Extract blocks from all toolboxes.
 
         Returns:
-            (extractedBlocks, blockConfig, uiOverrides)
+            (extractedBlocks, blockConfig)
         """
         all_blocks = {}
         block_config = {}
-        ui_overrides = {}
 
         for toolbox_dir in self.config.discover_toolboxes():
             blocks_json = toolbox_dir / "blocks.json"
@@ -307,19 +306,13 @@ class BlockExtractor:
                     block_config[category] = []
 
                 for block_def in block_list:
-                    class_name = block_def["class"]
+                    class_name = block_def if isinstance(block_def, str) else block_def["class"]
 
                     try:
                         cls = getattr(module, class_name)
-                        block_data = self._extract_block(cls, block_def, config)
+                        block_data = self._extract_block(cls, config)
                         all_blocks[class_name] = block_data
                         block_config[category].append(class_name)
-
-                        # Build UI overrides
-                        override = self._build_ui_override(block_def)
-                        if override:
-                            ui_overrides[class_name] = override
-
                         print(f"    Extracted {class_name}")
 
                     except Exception as e:
@@ -342,33 +335,25 @@ class BlockExtractor:
                 except Exception as e:
                     print(f"    Warning: Failed to extract docstring for {class_name}: {e}")
 
-        return all_blocks, block_config, ui_overrides
+        return all_blocks, block_config
 
-    def _extract_block(self, cls, block_def: dict, config: dict) -> dict:
+    def _extract_block(self, cls, config: dict) -> dict:
         """Extract metadata from a single block class using .info()."""
         # Try to use .info() classmethod first
         if hasattr(cls, 'info'):
             try:
                 info = cls.info()
-                return self._extract_from_info(cls, info, block_def, config)
+                return self._extract_from_info(cls, info)
             except Exception as e:
                 print(f"      Warning: .info() failed for {cls.__name__}, falling back to introspection: {e}")
 
         # Fallback to direct introspection
-        return self._extract_from_introspection(cls, block_def, config)
+        return self._extract_from_introspection(cls)
 
-    def _extract_from_info(self, cls, info: dict, block_def: dict, config: dict) -> dict:
+    def _extract_from_info(self, cls, info: dict) -> dict:
         """Extract metadata using Block.info() return value."""
-        # Check for IO overrides in config
-        io_overrides = config.get("ioOverrides", {}).get(cls.__name__, {})
-
-        # Process port labels
-        if io_overrides:
-            inputs = io_overrides.get("inputs", [])
-            outputs = io_overrides.get("outputs", [])
-        else:
-            inputs = self._process_port_labels(info.get("input_port_labels"))
-            outputs = self._process_port_labels(info.get("output_port_labels"))
+        inputs = self._process_port_labels(info.get("input_port_labels"))
+        outputs = self._process_port_labels(info.get("output_port_labels"))
 
         # Process parameters
         params = {}
@@ -389,7 +374,7 @@ class BlockExtractor:
             "outputs": outputs
         }
 
-    def _extract_from_introspection(self, cls, block_def: dict, config: dict) -> dict:
+    def _extract_from_introspection(self, cls) -> dict:
         """Extract metadata using Python introspection (fallback)."""
         sig = inspect.signature(cls.__init__)
         docstring = cls.__doc__ or ""
@@ -406,20 +391,14 @@ class BlockExtractor:
                 "description": extract_param_description(docstring, name)
             }
 
-        # Check for IO overrides in config
-        io_overrides = config.get("ioOverrides", {}).get(cls.__name__, {})
-        if io_overrides:
-            inputs = io_overrides.get("inputs", [])
-            outputs = io_overrides.get("outputs", [])
-        else:
-            # Try to instantiate to get ports
-            try:
-                instance = cls()
-                inputs = list(getattr(instance.inputs, "_mapping", {}).keys()) if hasattr(instance, "inputs") else []
-                outputs = list(getattr(instance.outputs, "_mapping", {}).keys()) if hasattr(instance, "outputs") else []
-            except Exception:
-                inputs = []
-                outputs = []
+        # Try to instantiate to get ports
+        try:
+            instance = cls()
+            inputs = list(getattr(instance.inputs, "_mapping", {}).keys()) if hasattr(instance, "inputs") else []
+            outputs = list(getattr(instance.outputs, "_mapping", {}).keys()) if hasattr(instance, "outputs") else []
+        except Exception:
+            inputs = []
+            outputs = []
 
         return {
             "blockClass": cls.__name__,
@@ -449,21 +428,6 @@ class BlockExtractor:
         # Sort by index value and return names (fixed ports)
         sorted_items = sorted(labels.items(), key=lambda x: x[1])
         return [name for name, _ in sorted_items]
-
-    def _build_ui_override(self, block_def: dict) -> dict | None:
-        """Build UI override from block definition."""
-        override = {}
-
-        if "maxInputs" in block_def:
-            override["maxInputs"] = block_def["maxInputs"]
-        if "maxOutputs" in block_def:
-            override["maxOutputs"] = block_def["maxOutputs"]
-        if "defaultInputs" in block_def:
-            override["defaultInputs"] = block_def["defaultInputs"]
-        if "defaultOutputs" in block_def:
-            override["defaultOutputs"] = block_def["defaultOutputs"]
-
-        return override if override else None
 
     def _import_module(self, import_path: str) -> Any:
         """Import and cache a module."""
@@ -748,13 +712,11 @@ class TypeScriptGenerator:
     def __init__(self, output_dir: Path):
         self.output_dir = output_dir
 
-    def write_blocks(self, blocks: dict, config: dict, overrides: dict) -> None:
+    def write_blocks(self, blocks: dict, config: dict) -> None:
         """Write blocks.ts file."""
         lines = [
             "// Auto-generated by scripts/extract.py - DO NOT EDIT",
             "// Re-run 'npm run extract' to update",
-            "",
-            "import type { NodeCategory } from '../types';",
             "",
             "export interface ExtractedParam {",
             "  type: string;",
@@ -774,14 +736,6 @@ class TypeScriptGenerator:
             "  outputs: string[] | null; // null = variable/unlimited, [] = none, [...] = fixed",
             "}",
             "",
-            "export interface UIOverride {",
-            "  maxInputs?: number | null;",
-            "  maxOutputs?: number | null;",
-            "  defaultInputs?: string[];",
-            "  defaultOutputs?: string[];",
-            "  shape?: string;",
-            "}",
-            "",
             "export const extractedBlocks: Record<string, ExtractedBlock> = ",
         ]
 
@@ -793,10 +747,6 @@ class TypeScriptGenerator:
             names_str = ", ".join(f'"{name}"' for name in block_names)
             lines.append(f"  {category}: [{names_str}],")
         lines.append("};")
-        lines.append("")
-
-        lines.append("export const uiOverrides: Record<string, UIOverride> = ")
-        lines.append(json.dumps(overrides, indent=2) + ";")
         lines.append("")
 
         output_path = self.output_dir / "nodes" / "generated" / "blocks.ts"
@@ -965,8 +915,8 @@ Examples:
 
     if extract_all or args.blocks:
         print("\nExtracting blocks...")
-        blocks, block_config, overrides = BlockExtractor(config).extract_all()
-        generator.write_blocks(blocks, block_config, overrides)
+        blocks, block_config = BlockExtractor(config).extract_all()
+        generator.write_blocks(blocks, block_config)
         print(f"  Total: {len(blocks)} blocks")
 
     if extract_all or args.events:

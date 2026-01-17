@@ -20,35 +20,12 @@
     },
     "categories": {
       "type": "object",
-      "description": "Block categories mapping to block definitions",
+      "description": "Block categories mapping to lists of class names",
       "additionalProperties": {
         "type": "array",
         "items": {
-          "type": "object",
-          "required": ["class"],
-          "properties": {
-            "class": {
-              "type": "string",
-              "description": "Python class name of the block"
-            },
-            "maxInputs": {
-              "type": ["integer", "null"],
-              "description": "Maximum number of input ports (null for unlimited)"
-            },
-            "maxOutputs": {
-              "type": ["integer", "null"],
-              "description": "Maximum number of output ports (null for unlimited)"
-            },
-            "defaultInputs": {
-              "type": "integer",
-              "description": "Default number of input ports when creating new instance"
-            },
-            "defaultOutputs": {
-              "type": "integer",
-              "description": "Default number of output ports when creating new instance"
-            }
-          },
-          "additionalProperties": false
+          "type": "string",
+          "description": "Python class name of the block"
         }
       }
     },
@@ -58,26 +35,6 @@
         "type": "string"
       },
       "description": "Additional classes to extract docstrings from (e.g., 'Subsystem', 'Interface')"
-    },
-    "ioOverrides": {
-      "type": "object",
-      "description": "Manual port name overrides for blocks with complex port configurations",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "inputs": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "List of input port names"
-          },
-          "outputs": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "List of output port names"
-          }
-        },
-        "additionalProperties": false
-      }
     }
   },
   "additionalProperties": false

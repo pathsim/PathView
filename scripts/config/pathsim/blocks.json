@@ -5,78 +5,76 @@
 
   "categories": {
     "Sources": [
-      { "class": "Constant" },
-      { "class": "Source" },
-      { "class": "SinusoidalSource" },
-      { "class": "StepSource" },
-      { "class": "PulseSource" },
-      { "class": "TriangleWaveSource" },
-      { "class": "SquareWaveSource" },
-      { "class": "GaussianPulseSource" },
-      { "class": "ChirpPhaseNoiseSource" },
-      { "class": "ClockSource" },
-      { "class": "WhiteNoise" },
-      { "class": "PinkNoise" },
-      { "class": "RandomNumberGenerator" }
+      "Constant",
+      "Source",
+      "SinusoidalSource",
+      "StepSource",
+      "PulseSource",
+      "TriangleWaveSource",
+      "SquareWaveSource",
+      "GaussianPulseSource",
+      "ChirpPhaseNoiseSource",
+      "ClockSource",
+      "WhiteNoise",
+      "PinkNoise",
+      "RandomNumberGenerator"
     ],
 
     "Dynamic": [
-      { "class": "Integrator" },
-      { "class": "Differentiator" },
-      { "class": "Delay" },
-      { "class": "ODE" },
-      { "class": "DynamicalSystem" },
-      { "class": "StateSpace" },
-      { "class": "PID" },
-      { "class": "AntiWindupPID" },
-      { "class": "TransferFunctionNumDen" },
-      { "class": "TransferFunctionZPG" },
-      { "class": "ButterworthLowpassFilter" },
-      { "class": "ButterworthHighpassFilter" },
-      { "class": "ButterworthBandpassFilter" },
-      { "class": "ButterworthBandstopFilter" }
+      "Integrator",
+      "Differentiator",
+      "Delay",
+      "ODE",
+      "DynamicalSystem",
+      "StateSpace",
+      "PID",
+      "AntiWindupPID",
+      "TransferFunctionNumDen",
+      "TransferFunctionZPG",
+      "ButterworthLowpassFilter",
+      "ButterworthHighpassFilter",
+      "ButterworthBandpassFilter",
+      "ButterworthBandstopFilter"
     ],
 
     "Algebraic": [
-      { "class": "Adder" },
-      { "class": "Multiplier" },
-      { "class": "Amplifier" },
-      { "class": "Function" },
-      { "class": "Sin" },
-      { "class": "Cos" },
-      { "class": "Tan" },
-      { "class": "Tanh" },
-      { "class": "Abs" },
-      { "class": "Sqrt" },
-      { "class": "Exp" },
-      { "class": "Log" },
-      { "class": "Log10" },
-      { "class": "Mod" },
-      { "class": "Clip" },
-      { "class": "Pow" },
-      { "class": "Switch" },
-      { "class": "LUT" },
-      { "class": "LUT1D" }
+      "Adder",
+      "Multiplier",
+      "Amplifier",
+      "Function",
+      "Sin",
+      "Cos",
+      "Tan",
+      "Tanh",
+      "Abs",
+      "Sqrt",
+      "Exp",
+      "Log",
+      "Log10",
+      "Mod",
+      "Clip",
+      "Pow",
+      "Switch",
+      "LUT",
+      "LUT1D"
     ],
 
     "Mixed": [
-      { "class": "SampleHold" },
-      { "class": "FIR" },
-      { "class": "ADC" },
-      { "class": "DAC" },
-      { "class": "Counter" },
-      { "class": "CounterUp" },
-      { "class": "CounterDown" },
-      { "class": "Relay" }
+      "SampleHold",
+      "FIR",
+      "ADC",
+      "DAC",
+      "Counter",
+      "CounterUp",
+      "CounterDown",
+      "Relay"
     ],
 
     "Recording": [
-      { "class": "Scope", "maxOutputs": 0 },
-      { "class": "Spectrum", "maxOutputs": 0 }
+      "Scope",
+      "Spectrum"
     ]
   },
 
-  "extraDocstrings": ["Subsystem", "Interface"],
-
-  "ioOverrides": {}
+  "extraDocstrings": ["Subsystem", "Interface"]
 }
