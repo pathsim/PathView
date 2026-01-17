@@ -13,4 +13,4 @@ export {
 } from './plotly';
 
 // SVG renderer
-export { toSVGPaths, toSVGPathsLinear, type SVGPathData } from './svg';
+export { toSVGPaths, type SVGPathData } from './svg';

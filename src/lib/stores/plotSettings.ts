@@ -5,9 +5,9 @@
 
 import { writable, get } from 'svelte/store';
 
-export type LineStyle = 'solid' | 'dash' | 'dot';
-export type MarkerStyle = 'circle' | 'square' | 'triangle-up';
-export type AxisScale = 'linear' | 'log';
+// Import and re-export types from plotting core (single source of truth)
+export type { LineStyle, MarkerStyle, AxisScale } from '$lib/plotting/core/types';
+import type { LineStyle, MarkerStyle, AxisScale } from '$lib/plotting/core/types';
 
 /** Settings for an individual trace */
 export interface TraceSettings {

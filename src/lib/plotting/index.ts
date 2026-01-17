@@ -55,8 +55,7 @@ export {
 	toPlotlySpectrumTrace,
 	toPlotlyLayout,
 	getBaseLayout,
-	createEmptyLayout,
-	PLOTLY_CONFIG as PLOTLY_RENDER_CONFIG
+	createEmptyLayout
 } from './renderers/plotly';
 
-export { toSVGPaths, toSVGPathsLinear, type SVGPathData } from './renderers/svg';
+export { toSVGPaths, type SVGPathData } from './renderers/svg';
