@@ -15,8 +15,8 @@ const config = {
 			strict: true
 		}),
 		paths: {
-			// custom domain
-			base: ''
+			// Use BASE_PATH env var for deployment (e.g., '/dev' or '')
+			base: process.env.BASE_PATH || ''
 		}
 	}
 };
