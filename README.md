@@ -618,6 +618,33 @@ Colors are CSS-driven - see `src/app.css` for variables and `src/lib/utils/color
 
 ---
 
+## Deployment
+
+PathView uses a dual deployment strategy with automatic versioning:
+
+| Trigger | What happens | Deployed to |
+|---------|--------------|-------------|
+| Push to `main` | Build with base path `/dev` | [view.pathsim.org/dev/](https://view.pathsim.org/dev/) |
+| Release published | Bump `package.json`, build, deploy | [view.pathsim.org/](https://view.pathsim.org/) |
+| Manual dispatch | Choose `dev` or `release` | Respective path |
+
+### How it works
+
+1. Both versions deploy to the `deployment` branch using GitHub Actions
+2. Dev builds update only the `/dev` folder, preserving the release at root
+3. Release builds update root, preserving `/dev`
+4. Version in `package.json` is automatically bumped from the release tag (e.g., `v0.4.0` → `0.4.0`)
+
+### Creating a release
+
+1. Create a GitHub release with a version tag (e.g., `v0.4.0`)
+2. The workflow automatically:
+   - Updates `package.json` to match the tag
+   - Commits the version bump to `main`
+   - Builds and deploys to production
+
+---
+
 ## License
 
 MIT
