@@ -88,9 +88,10 @@ function renderHandle(
 	const paths = getHandlePath(rotation);
 
 	// Render two-layer hollow handle (outer border + inner cutout)
+	// Inner path is offset by 1px on all sides (matches CSS inset: 1px)
 	return `<g transform="translate(${handleX.toFixed(2)}, ${handleY.toFixed(2)})">
 		<path d="${paths.outer}" fill="${ctx.theme.edge}"/>
-		<path d="${paths.inner}" fill="${ctx.theme.surfaceRaised}" transform="translate(1.5, 1)"/>
+		<path d="${paths.inner}" fill="${ctx.theme.surfaceRaised}" transform="translate(1, 1)"/>
 	</g>`;
 }
 

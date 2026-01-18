@@ -80,32 +80,40 @@ function adjustTarget(x: number, y: number, position: Position): { x: number; y:
 /**
  * Calculate arrow position and angle from target position
  * Pure implementation without DOM
+ *
+ * The arrow points INTO the target handle (direction of flow entering the node)
+ * targetPosition indicates which side of the node the handle is on
  */
 function calculateArrowTransform(
 	targetX: number,
 	targetY: number,
 	targetPosition: Position
 ): { x: number; y: number; angle: number } {
-	// Arrow points in direction of flow (towards target handle)
+	// Arrow points INTO the handle (opposite direction of targetPosition)
+	// Arrow path shape points right by default, so angle=0 means pointing right
 	let angle: number;
 	let offsetX = 0;
 	let offsetY = 0;
 
 	switch (targetPosition) {
 		case 'left':
-			angle = 180;
+			// Handle on left side, edge enters from left → arrow points RIGHT (into node)
+			angle = 0;
 			offsetX = -ARROW_FORWARD_OFFSET;
 			break;
 		case 'right':
-			angle = 0;
+			// Handle on right side, edge enters from right → arrow points LEFT (into node)
+			angle = 180;
 			offsetX = ARROW_FORWARD_OFFSET;
 			break;
 		case 'top':
-			angle = -90;
+			// Handle on top, edge enters from above → arrow points DOWN (into node)
+			angle = 90;
 			offsetY = -ARROW_FORWARD_OFFSET;
 			break;
 		case 'bottom':
-			angle = 90;
+			// Handle on bottom, edge enters from below → arrow points UP (into node)
+			angle = -90;
 			offsetY = ARROW_FORWARD_OFFSET;
 			break;
 		default:
