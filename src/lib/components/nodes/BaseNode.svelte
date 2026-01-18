@@ -11,6 +11,7 @@
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
 	import { paramInput } from '$lib/actions/paramInput';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
+	import { NODE } from '$lib/constants/dimensions';
 	import PlotPreview from './PlotPreview.svelte';
 
 	interface Props {
@@ -124,16 +125,11 @@
 		}
 	});
 
-	// Node size constants
-	const NODE_PORT_SPACING = 18; // pixels per port
-	const NODE_BASE_HEIGHT = 36;
-	const NODE_BASE_WIDTH = 90;
-
 	const maxPortsOnSide = $derived(Math.max(data.inputs.length, data.outputs.length));
 
 	// For horizontal layout: height grows with ports; for vertical: width grows
-	const nodeHeight = $derived(isVertical ? NODE_BASE_HEIGHT : Math.max(NODE_BASE_HEIGHT, maxPortsOnSide * NODE_PORT_SPACING + 10));
-	const nodeWidth = $derived(isVertical ? Math.max(NODE_BASE_WIDTH, maxPortsOnSide * NODE_PORT_SPACING + 20) : NODE_BASE_WIDTH);
+	const nodeHeight = $derived(isVertical ? NODE.baseHeight : Math.max(NODE.baseHeight, maxPortsOnSide * NODE.portSpacing + 10));
+	const nodeWidth = $derived(isVertical ? Math.max(NODE.baseWidth, maxPortsOnSide * NODE.portSpacing + 20) : NODE.baseWidth);
 
 	// Calculate port positions using percentages for proper centering
 	function getPortPosition(index: number, total: number): string {
