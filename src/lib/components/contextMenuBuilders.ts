@@ -20,7 +20,8 @@ import { generateBlockCodeHeader, generateEventCodeHeader } from '$lib/utils/cod
 import { exportComponent } from '$lib/schema/componentOps';
 import { openImportDialog } from '$lib/schema/fileOps';
 import { hasExportableData, exportRecordingData } from '$lib/utils/csvExport';
-import { exportGraphAsSvg } from '$lib/utils/svgExport';
+import { exportToSVG } from '$lib/export/svg';
+import { downloadSvg } from '$lib/utils/download';
 
 /** Divider menu item */
 const DIVIDER: MenuItemType = { label: '', action: () => {}, divider: true };
@@ -344,7 +345,7 @@ function buildCanvasMenu(
 		{
 			label: 'Export SVG',
 			icon: 'image',
-			action: () => exportGraphAsSvg()
+			action: () => downloadSvg(exportToSVG(), 'pathview-graph.svg')
 		}
 	];
 

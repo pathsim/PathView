@@ -11,6 +11,8 @@ export interface ShapeDefinition {
 	name: string;
 	cssClass: string;
 	borderRadius: string;
+	/** Numeric border radius for SVG export (single value or [TL, TR, BR, BL]) */
+	svgRadius: number | [number, number, number, number];
 }
 
 /** Shape registry - maps shape IDs to definitions */
@@ -36,42 +38,48 @@ registerShape({
 	id: 'pill',
 	name: 'Pill',
 	cssClass: 'shape-pill',
-	borderRadius: '20px'
+	borderRadius: '20px',
+	svgRadius: 20
 });
 
 registerShape({
 	id: 'rect',
 	name: 'Rectangle',
 	cssClass: 'shape-rect',
-	borderRadius: '4px'
+	borderRadius: '4px',
+	svgRadius: 4
 });
 
 registerShape({
 	id: 'circle',
 	name: 'Circle',
 	cssClass: 'shape-circle',
-	borderRadius: '16px'
+	borderRadius: '16px',
+	svgRadius: 16
 });
 
 registerShape({
 	id: 'diamond',
 	name: 'Diamond',
 	cssClass: 'shape-diamond',
-	borderRadius: '4px'
+	borderRadius: '4px',
+	svgRadius: 4
 });
 
 registerShape({
 	id: 'mixed',
 	name: 'Mixed',
 	cssClass: 'shape-mixed',
-	borderRadius: '12px 4px 12px 4px'
+	borderRadius: '12px 4px 12px 4px',
+	svgRadius: [12, 4, 12, 4]
 });
 
 registerShape({
 	id: 'default',
 	name: 'Default',
 	cssClass: 'shape-default',
-	borderRadius: '8px'
+	borderRadius: '8px',
+	svgRadius: 8
 });
 
 /** Category to shape mapping */
