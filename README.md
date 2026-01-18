@@ -39,21 +39,26 @@ src/
 │   ├── actions/           # Svelte actions (paramInput)
 │   ├── animation/         # Graph loading animations
 │   ├── components/        # UI components
-│   │   ├── canvas/        # Flow editor utilities
-│   │   ├── dialogs/       # Modal dialogs (BlockProperties, EventProperties, Export, Search, KeyboardShortcuts)
-│   │   │   └── shared/    # Shared dialog components
-│   │   ├── edges/         # SvelteFlow edge components
-│   │   ├── icons/         # Centralized icon library
-│   │   ├── nodes/         # Node components (BaseNode, EventNode, PlotPreview)
-│   │   └── panels/        # Side panels (Simulation, NodeLibrary, Code, Plot, Console, Events)
-│   ├── constants/         # Centralized constants (nodeTypes)
+│   │   ├── canvas/        # Flow editor utilities (connection, transforms)
+│   │   ├── dialogs/       # Modal dialogs
+│   │   │   └── shared/    # Shared dialog components (ColorPicker, etc.)
+│   │   ├── edges/         # SvelteFlow edge components (ArrowEdge)
+│   │   ├── icons/         # Icon component (Icon.svelte)
+│   │   ├── nodes/         # Node components (BaseNode, EventNode, AnnotationNode, PlotPreview)
+│   │   └── panels/        # Side panels (Simulation, NodeLibrary, CodeEditor, Plot, Console, Events)
+│   ├── constants/         # Centralized constants (nodeTypes, layout, handles)
 │   ├── events/            # Event system
 │   │   └── generated/     # Auto-generated from PathSim
+│   ├── export/            # Export utilities
+│   │   └── svg/           # SVG graph export (renderer, types)
 │   ├── nodes/             # Node type system
 │   │   ├── features/      # Node feature flags
 │   │   ├── generated/     # Auto-generated from PathSim
 │   │   └── shapes/        # Node shape definitions
-│   ├── plotting/          # Plot utilities
+│   ├── plotting/          # Plot system
+│   │   ├── core/          # Constants, types, utilities
+│   │   ├── processing/    # Data processing, render queue
+│   │   └── renderers/     # Plotly and SVG renderers
 │   ├── pyodide/           # Python runtime (backend, bridge)
 │   │   └── backend/       # Modular backend system (registry, state, types)
 │   │       └── pyodide/   # Pyodide Web Worker implementation
@@ -63,7 +68,7 @@ src/
 │   ├── stores/            # Svelte stores (state management)
 │   │   └── graph/         # Graph state with subsystem navigation
 │   ├── types/             # TypeScript type definitions
-│   └── utils/             # Utilities (colors, download, svgExport, csvExport, codemirror)
+│   └── utils/             # Utilities (colors, download, csvExport, codemirror)
 ├── routes/                # SvelteKit pages
 └── app.css                # Global styles with CSS variables
 
@@ -122,9 +127,11 @@ Worker (10 Hz)              Main Thread                 UI (10 Hz)
 | **Main App** | Orchestrates panels, shortcuts, file ops | `routes/+page.svelte` |
 | **Flow Canvas** | SvelteFlow wrapper, node/edge sync | `components/FlowCanvas.svelte` |
 | **Flow Updater** | View control, animation triggers | `components/FlowUpdater.svelte` |
-| **Context Menus** | Right-click menus for nodes/canvas | `components/ContextMenu.svelte`, `contextMenuBuilders.ts` |
+| **Context Menus** | Right-click menus for nodes/canvas/plots | `components/ContextMenu.svelte`, `contextMenuBuilders.ts` |
 | **Graph Store** | Node/edge state, subsystem navigation | `stores/graph/` |
-| **View Actions** | Fit view, zoom, pan controls | `stores/viewActions.ts` |
+| **View Actions** | Fit view, zoom, pan controls | `stores/viewActions.ts`, `stores/viewTriggers.ts` |
+| **Clipboard** | Copy/paste/duplicate operations | `stores/clipboard.ts` |
+| **Plot Settings** | Per-trace and per-block plot options | `stores/plotSettings.ts` |
 | **Node Registry** | Block type definitions, parameters | `nodes/registry.ts` |
 | **Code Generation** | Graph → Python code | `pyodide/pathsimRunner.ts` |
 | **Backend** | Modular Python execution interface | `pyodide/backend/` |
@@ -132,7 +139,7 @@ Worker (10 Hz)              Main Thread                 UI (10 Hz)
 | **PyodideBackend** | Web Worker Pyodide implementation | `pyodide/backend/pyodide/` |
 | **Simulation Bridge** | High-level simulation API | `pyodide/bridge.ts` |
 | **Schema** | File/component save/load operations | `schema/fileOps.ts`, `schema/componentOps.ts` |
-| **Export Utils** | SVG/CSV/Python file downloads | `utils/download.ts`, `utils/svgExport.ts`, `utils/csvExport.ts` |
+| **Export Utils** | SVG/CSV/Python file downloads | `utils/download.ts`, `export/svg/`, `utils/csvExport.ts` |
 
 ### Centralized Constants
 
@@ -415,9 +422,10 @@ $effect(() => {
 Subsystems are nested graphs with path-based navigation:
 
 ```typescript
-graphStore.navigateInto(subsystemId);  // Drill into subsystem
-graphStore.navigateOut();               // Go up one level
-graphStore.currentPath                  // Current navigation path
+graphStore.drillDown(subsystemId);  // Drill into subsystem
+graphStore.drillUp();               // Go up one level
+graphStore.navigateTo(level);       // Navigate to breadcrumb level
+graphStore.currentPath              // Current navigation path
 ```
 
 The Interface node inside a subsystem mirrors its parent Subsystem's ports (with inverted direction).
@@ -469,7 +477,9 @@ PathView uses JSON-based file formats for saving and sharing:
 - **File > Export Python** - Generate standalone Python script
 - **Right-click node > Export** - Save individual block/subsystem
 - **Right-click canvas > Export SVG** - Export graph as vector image
-- **Scope/Spectrum nodes** - Export simulation data as CSV
+- **Right-click plot > Download PNG/SVG** - Export plot as image
+- **Right-click plot > Export CSV** - Export simulation data as CSV
+- **Scope/Spectrum node context menu** - Export simulation data as CSV
 
 ---
 
@@ -516,7 +526,10 @@ https://view.pathsim.org/?modelgh=pathsim/pathview/static/examples/feedback-syst
 |--------|---------|
 | `npm run dev` | Start development server |
 | `npm run build` | Production build |
+| `npm run preview` | Preview production build |
 | `npm run check` | TypeScript/Svelte type checking |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
 | `npm run extract` | Regenerate all definitions from PathSim |
 | `npm run extract:blocks` | Blocks only |
 | `npm run extract:events` | Events only |
