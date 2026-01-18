@@ -22,6 +22,7 @@ import { openImportDialog } from '$lib/schema/fileOps';
 import { hasExportableData, exportRecordingData } from '$lib/utils/csvExport';
 import { exportToSVG } from '$lib/export/svg';
 import { downloadSvg } from '$lib/utils/download';
+import { plotSettingsStore, DEFAULT_BLOCK_SETTINGS } from '$lib/stores/plotSettings';
 
 /** Divider menu item */
 const DIVIDER: MenuItemType = { label: '', action: () => {}, divider: true };
@@ -443,6 +444,69 @@ function buildAnnotationMenu(annotationId: string): MenuItemType[] {
 }
 
 /**
+ * Build context menu items for a plot
+ */
+async function downloadPlotImage(plotEl: HTMLDivElement, format: 'png' | 'svg', filename: string): Promise<void> {
+	const Plotly = await import('plotly.js-dist-min');
+	await Plotly.downloadImage(plotEl, {
+		format,
+		filename,
+		width: 1200,
+		height: 800
+	});
+}
+
+function buildPlotMenu(nodeId: string, plotEl: HTMLDivElement): MenuItemType[] {
+	const node = graphStore.getNode(nodeId);
+	const nodeName = node?.name || 'Plot';
+	const nodeType = node?.type || 'Scope';
+	const dataSource = nodeType === 'Spectrum' ? 'spectrum' : 'scope';
+	const canExportCsv = hasExportableData(nodeId, dataSource as 'scope' | 'spectrum');
+
+	// Get legend visibility from plotSettingsStore (same source as PlotOptionsDialog)
+	const settings = get(plotSettingsStore);
+	const blockSettings = settings.blocks[nodeId] ?? DEFAULT_BLOCK_SETTINGS;
+	const showLegend = blockSettings.showLegend;
+
+	return [
+		{
+			label: 'Download PNG',
+			icon: 'image',
+			action: () => downloadPlotImage(plotEl, 'png', nodeName)
+		},
+		{
+			label: 'Download SVG',
+			icon: 'image',
+			action: () => downloadPlotImage(plotEl, 'svg', nodeName)
+		},
+		DIVIDER,
+		{
+			label: 'Export CSV',
+			icon: 'table',
+			action: () => exportRecordingData(nodeId, nodeName, nodeType),
+			disabled: !canExportCsv
+		},
+		DIVIDER,
+		{
+			label: showLegend ? 'Hide Legend' : 'Show Legend',
+			icon: 'list',
+			action: () => plotSettingsStore.setBlockShowLegend(nodeId, !showLegend)
+		},
+		{
+			label: 'Reset View',
+			icon: 'maximize',
+			action: async () => {
+				const Plotly = await import('plotly.js-dist-min');
+				Plotly.relayout(plotEl, {
+					'xaxis.autorange': true,
+					'yaxis.autorange': true
+				});
+			}
+		}
+	];
+}
+
+/**
  * Build context menu items based on target
  */
 export function buildContextMenuItems(
@@ -465,6 +529,8 @@ export function buildContextMenuItems(
 			return buildCanvasMenu(screenPosition, callbacks);
 		case 'annotation':
 			return buildAnnotationMenu(target.annotationId);
+		case 'plot':
+			return buildPlotMenu(target.nodeId, target.plotEl);
 		default:
 			return [];
 	}

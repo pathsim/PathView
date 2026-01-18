@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
 	import { themeStore } from '$lib/stores/theme';
+	import { contextMenuStore } from '$lib/stores/contextMenu';
 	import {
 		toPlotlyTrace,
 		toPlotlySpectrumTrace,
@@ -221,10 +222,16 @@
 		const emptyLayout = createEmptyLayout(baseLayout);
 		Plotly.newPlot(plotDiv, [], emptyLayout, PLOTLY_CONFIG);
 	}
+
+	function handleContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		contextMenuStore.openForPlot(nodeId, plotDiv, { x: e.clientX, y: e.clientY });
+	}
 </script>
 
 <div class="plot-container">
-	<div class="plot" bind:this={plotDiv}></div>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="plot" bind:this={plotDiv} oncontextmenu={handleContextMenu}></div>
 </div>
 
 <style>

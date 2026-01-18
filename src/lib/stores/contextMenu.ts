@@ -12,7 +12,8 @@ export type ContextMenuTarget =
 	| { type: 'edge'; edgeId: string }
 	| { type: 'canvas' }
 	| { type: 'selection'; nodeIds: string[] }
-	| { type: 'annotation'; annotationId: string };
+	| { type: 'annotation'; annotationId: string }
+	| { type: 'plot'; nodeId: string; plotEl: HTMLDivElement };
 
 interface ContextMenuState {
 	open: boolean;
@@ -92,6 +93,17 @@ export const contextMenuStore = {
 			open: true,
 			position,
 			target: { type: 'annotation', annotationId }
+		});
+	},
+
+	/**
+	 * Open context menu for a plot
+	 */
+	openForPlot(nodeId: string, plotEl: HTMLDivElement, position: Position): void {
+		state.set({
+			open: true,
+			position,
+			target: { type: 'plot', nodeId, plotEl }
 		});
 	},
 
