@@ -88,9 +88,10 @@ jobs:
 
       - name: Deploy to /dev
         if: steps.deploy-type.outputs.type == 'dev'
-        uses: peaceiris/actions-deployment@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deployment
           publish_dir: ./build
           destination_dir: dev
           keep_files: true
@@ -98,9 +99,10 @@ jobs:
 
       - name: Deploy release to root
         if: steps.deploy-type.outputs.type == 'release'
-        uses: peaceiris/actions-deployment@v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deployment
           publish_dir: ./build
           keep_files: true
           cname: view.pathsim.org
