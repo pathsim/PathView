@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://docs.pathsim.org
+    about: Check the documentation for help
+  - name: Discussions
+    url: https://github.com/pathsim/pathview/discussions
+    about: Ask questions and discuss ideas

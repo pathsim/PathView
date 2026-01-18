@@ -119,9 +119,14 @@
 				<span class="action-label">Docs</span>
 			</a>
 
-			<a href="https://github.com/pathsim" target="_blank" class="action-card">
+			<a href="https://github.com/pathsim/pathview" target="_blank" class="action-card">
 				<Icon name="github" size={20} />
 				<span class="action-label">GitHub</span>
+			</a>
+
+			<a href="https://github.com/pathsim/pathview/issues/new/choose" target="_blank" class="action-card">
+				<Icon name="alert-triangle" size={20} />
+				<span class="action-label">Issue</span>
 			</a>
 
 			<a href="https://github.com/sponsors/milanofthe" target="_blank" class="action-card">
@@ -150,7 +155,6 @@
 				</div>
 			</div>
 		{/if}
-
 	</div>
 </div>
 
@@ -178,7 +182,7 @@
 
 	.actions {
 		display: grid;
-		grid-template-columns: repeat(5, 1fr);
+		grid-template-columns: repeat(6, 1fr);
 		gap: 8px;
 	}
 
@@ -285,13 +289,15 @@
 		}
 	}
 
+	@media (max-width: 600px) {
+		.actions {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
 	@media (max-width: 500px) {
 		.examples-grid {
 			grid-template-columns: 1fr;
-		}
-
-		.actions {
-			grid-template-columns: repeat(3, 1fr);
 		}
 	}
 
