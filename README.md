@@ -7,7 +7,7 @@
 
 # PathView - System Modeling in the Browser
 
-A web-based visual node editor for building and simulating dynamic systems with [PathSim](https://github.com/pathsim/pathsim) as the backend. Runs entirely in the browser via Pyodide - no server required. The UI is hosted at [view.pathsim.org](view.pathsim.org), free to use for everyone.
+A web-based visual node editor for building and simulating dynamic systems with [PathSim](https://github.com/pathsim/pathsim) as the backend. Runs entirely in the browser via Pyodide - no server required. The UI is hosted at [view.pathsim.org](https://view.pathsim.org), free to use for everyone.
 
 ## Tech Stack
 
