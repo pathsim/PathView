@@ -7,12 +7,13 @@
 		defaultColor?: string;
 		onSelect: (color: string | undefined) => void;
 		popupPosition?: 'bottom' | 'top';
+		tooltipPosition?: 'bottom' | 'top' | 'left' | 'right';
 		iconColor?: string;
 		iconSize?: number;
 		variant?: 'default' | 'ghost';
 	}
 
-	let { currentColor, defaultColor = DEFAULT_NODE_COLOR, onSelect, popupPosition = 'bottom', iconColor, iconSize = 16, variant = 'default' }: Props = $props();
+	let { currentColor, defaultColor = DEFAULT_NODE_COLOR, onSelect, popupPosition = 'bottom', tooltipPosition = 'bottom', iconColor, iconSize = 16, variant = 'default' }: Props = $props();
 
 	let isOpen = $state(false);
 
@@ -47,7 +48,7 @@
 <svelte:window onclick={handleClickOutside} />
 
 <div class="color-picker-wrapper">
-	<button class="picker-btn" class:ghost={variant === 'ghost'} onclick={toggle} aria-label="Change color" use:tooltip={"Color"}>
+	<button class="picker-btn" class:ghost={variant === 'ghost'} onclick={toggle} aria-label="Change color" use:tooltip={{ text: 'Color', position: tooltipPosition }}>
 		<svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={iconColor || 'currentColor'} stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<circle cx="12" cy="12" r="10"/>
 			<circle cx="8" cy="10" r="1.5" fill={iconColor || 'currentColor'}/>

@@ -4,7 +4,7 @@
  */
 
 import { writable, get } from 'svelte/store';
-import type { NodeInstance, Connection } from '$lib/nodes/types';
+import type { NodeInstance, Connection, Annotation } from '$lib/nodes/types';
 import type { EventInstance } from '$lib/events/types';
 import type { Position } from '$lib/types';
 import { graphStore, cloneNodeForPaste } from '$lib/stores/graph';
@@ -22,6 +22,7 @@ interface ClipboardContent {
 	nodes: NodeInstance[];
 	connections: Connection[];
 	events: EventInstance[];
+	annotations: Annotation[];
 	// Center of the copied selection (for positioning on paste)
 	center: Position;
 }
@@ -78,7 +79,7 @@ function isValidPayload(data: unknown): data is SystemClipboardPayload {
 	const content = obj.content as Record<string, unknown> | null;
 	if (!content || typeof content !== 'object') return false;
 
-	// Validate content structure
+	// Validate content structure (annotations optional for backward compatibility)
 	return (
 		Array.isArray(content.nodes) &&
 		Array.isArray(content.connections) &&
@@ -140,13 +141,30 @@ async function readFromSystemClipboard(): Promise<ClipboardContent | null> {
 // ==================== MAIN FUNCTIONS ====================
 
 /**
- * Copy selected nodes and events to clipboard (in-memory + system)
+ * Copy selected nodes, events, and annotations to clipboard (in-memory + system)
  */
 async function copy(): Promise<boolean> {
 	const selectedNodeIds = get(graphStore.selectedNodeIds);
 	const selectedEventIds = get(eventStore.selectedEventIds);
 
-	if (selectedNodeIds.size === 0 && selectedEventIds.size === 0) {
+	// Check for selected annotations
+	const copiedAnnotations: Annotation[] = [];
+	for (const id of selectedNodeIds) {
+		const annotation = graphStore.getAnnotation(id);
+		if (annotation) {
+			copiedAnnotations.push(JSON.parse(JSON.stringify(annotation)));
+		}
+	}
+
+	// Filter out annotation IDs from node selection check
+	const actualNodeIds = new Set<string>();
+	for (const id of selectedNodeIds) {
+		if (!graphStore.getAnnotation(id)) {
+			actualNodeIds.add(id);
+		}
+	}
+
+	if (actualNodeIds.size === 0 && selectedEventIds.size === 0 && copiedAnnotations.length === 0) {
 		return false;
 	}
 
@@ -155,7 +173,7 @@ async function copy(): Promise<boolean> {
 
 	// Deep clone selected nodes (excluding Interface blocks)
 	const copiedNodes: NodeInstance[] = [];
-	for (const id of selectedNodeIds) {
+	for (const id of actualNodeIds) {
 		const node = nodesMap.get(id);
 		if (node && node.type !== NODE_TYPES.INTERFACE) {
 			copiedNodes.push(JSON.parse(JSON.stringify(node)));
@@ -165,7 +183,7 @@ async function copy(): Promise<boolean> {
 	// Find connections where BOTH source and target are in the selection
 	const copiedConnections: Connection[] = [];
 	for (const conn of connections) {
-		if (selectedNodeIds.has(conn.sourceNodeId) && selectedNodeIds.has(conn.targetNodeId)) {
+		if (actualNodeIds.has(conn.sourceNodeId) && actualNodeIds.has(conn.targetNodeId)) {
 			copiedConnections.push(JSON.parse(JSON.stringify(conn)));
 		}
 	}
@@ -192,7 +210,8 @@ async function copy(): Promise<boolean> {
 	// Calculate center of all copied items
 	const allItems = [
 		...copiedNodes.map(n => ({ position: n.position })),
-		...copiedEvents.map(e => ({ position: e.position }))
+		...copiedEvents.map(e => ({ position: e.position })),
+		...copiedAnnotations.map(a => ({ position: a.position }))
 	];
 	const center = calculateCenter(allItems);
 
@@ -200,6 +219,7 @@ async function copy(): Promise<boolean> {
 		nodes: copiedNodes,
 		connections: copiedConnections,
 		events: copiedEvents,
+		annotations: copiedAnnotations,
 		center
 	};
 
@@ -216,9 +236,9 @@ async function copy(): Promise<boolean> {
  * Paste clipboard contents at target position
  * Tries system clipboard first (enables cross-instance paste), falls back to in-memory
  * @param targetPosition - Position to center the pasted items at (flow coordinates)
- * @returns IDs of pasted nodes and events
+ * @returns IDs of pasted nodes, events, and annotations
  */
-async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eventIds: string[] }> {
+async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eventIds: string[]; annotationIds: string[] }> {
 	// Try system clipboard first (enables cross-instance paste)
 	let content = await readFromSystemClipboard();
 
@@ -227,8 +247,13 @@ async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eve
 		content = get(clipboard);
 	}
 
-	if (!content || (content.nodes.length === 0 && content.events.length === 0)) {
-		return { nodeIds: [], eventIds: [] };
+	// Ensure annotations array exists (backward compatibility)
+	if (!content?.annotations) {
+		content = content ? { ...content, annotations: [] } : null;
+	}
+
+	if (!content || (content.nodes.length === 0 && content.events.length === 0 && content.annotations.length === 0)) {
+		return { nodeIds: [], eventIds: [], annotationIds: [] };
 	}
 
 	// Validate node types and filter out unknown types (for cross-instance paste safety)
@@ -257,9 +282,9 @@ async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eve
 			connections: validConnections
 		};
 
-		// If all nodes were filtered out, nothing to paste
-		if (content.nodes.length === 0 && content.events.length === 0) {
-			return { nodeIds: [], eventIds: [] };
+		// If all nodes were filtered out, check if there's still something to paste
+		if (content.nodes.length === 0 && content.events.length === 0 && content.annotations.length === 0) {
+			return { nodeIds: [], eventIds: [], annotationIds: [] };
 		}
 	}
 
@@ -348,7 +373,26 @@ async function paste(targetPosition: Position): Promise<{ nodeIds: string[]; eve
 			}
 		}
 
-		return { nodeIds, eventIds };
+		// Paste annotations
+		const annotationIds: string[] = [];
+		for (const annotation of content.annotations) {
+			const newPosition = {
+				x: annotation.position.x + offset.x,
+				y: annotation.position.y + offset.y
+			};
+
+			const newId = graphStore.addAnnotation(newPosition);
+			graphStore.updateAnnotation(newId, {
+				content: annotation.content,
+				width: annotation.width,
+				height: annotation.height,
+				color: annotation.color,
+				fontSize: annotation.fontSize
+			});
+			annotationIds.push(newId);
+		}
+
+		return { nodeIds, eventIds, annotationIds };
 	});
 }
 
@@ -372,7 +416,7 @@ async function cut(): Promise<boolean> {
  */
 function hasContent(): boolean {
 	const content = get(clipboard);
-	return content !== null && (content.nodes.length > 0 || content.events.length > 0);
+	return content !== null && (content.nodes.length > 0 || content.events.length > 0 || content.annotations.length > 0);
 }
 
 /**
@@ -385,13 +429,14 @@ function clear(): void {
 /**
  * Get clipboard content summary (for UI feedback)
  */
-function getSummary(): { nodes: number; connections: number; events: number } | null {
+function getSummary(): { nodes: number; connections: number; events: number; annotations: number } | null {
 	const content = get(clipboard);
 	if (!content) return null;
 	return {
 		nodes: content.nodes.length,
 		connections: content.connections.length,
-		events: content.events.length
+		events: content.events.length,
+		annotations: content.annotations.length
 	};
 }
 

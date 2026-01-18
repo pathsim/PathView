@@ -82,3 +82,13 @@ export const selectNodeTrigger = writable<{ nodeIds: string[]; addToSelection: b
 export function triggerSelectNodes(nodeIds: string[], addToSelection = false): void {
 	selectNodeTrigger.update((current) => ({ nodeIds, addToSelection, id: current.id + 1 }));
 }
+
+// Edit annotation trigger - triggers edit mode on a specific annotation
+export const editAnnotationTrigger = writable<{ annotationId: string; id: number }>({
+	annotationId: '',
+	id: 0
+});
+
+export function triggerEditAnnotation(annotationId: string): void {
+	editAnnotationTrigger.update((current) => ({ annotationId, id: current.id + 1 }));
+}

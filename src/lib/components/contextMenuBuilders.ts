@@ -6,7 +6,7 @@
 import { get } from 'svelte/store';
 import type { MenuItemType } from './ContextMenu.svelte';
 import type { ContextMenuTarget } from '$lib/stores/contextMenu';
-import { graphStore } from '$lib/stores/graph';
+import { graphStore, ANNOTATION_FONT_SIZE } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
 import { clipboardStore } from '$lib/stores/clipboard';
 import { codePreviewStore } from '$lib/stores/codePreview';
@@ -14,7 +14,7 @@ import { codeContextStore } from '$lib/stores/codeContext';
 import { openNodeDialog } from '$lib/stores/nodeDialog';
 import { openEventDialog } from '$lib/stores/eventDialog';
 import { NODE_TYPES } from '$lib/constants/nodeTypes';
-import { triggerFitView, screenToFlow } from '$lib/stores/viewActions';
+import { triggerFitView, screenToFlow, triggerEditAnnotation } from '$lib/stores/viewActions';
 import { generateBlockCode, generateSingleEventCode } from '$lib/pyodide/pathsimRunner';
 import { generateBlockCodeHeader, generateEventCodeHeader } from '$lib/utils/codePreviewHeader';
 import { exportComponent } from '$lib/schema/componentOps';
@@ -382,10 +382,61 @@ function buildCanvasMenu(
  * Build context menu items for an annotation
  */
 function buildAnnotationMenu(annotationId: string): MenuItemType[] {
+	const annotation = graphStore.getAnnotation(annotationId);
+	const currentFontSize = annotation?.fontSize || ANNOTATION_FONT_SIZE.DEFAULT;
+
 	return [
+		{
+			label: 'Edit',
+			icon: 'type',
+			shortcut: 'Dbl-click',
+			action: () => triggerEditAnnotation(annotationId)
+		},
+		DIVIDER,
+		{
+			label: 'Increase Font Size',
+			icon: 'font-size-increase',
+			action: () => {
+				if (currentFontSize < ANNOTATION_FONT_SIZE.MAX) {
+					graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize + ANNOTATION_FONT_SIZE.STEP });
+				}
+			},
+			disabled: currentFontSize >= ANNOTATION_FONT_SIZE.MAX
+		},
+		{
+			label: 'Decrease Font Size',
+			icon: 'font-size-decrease',
+			action: () => {
+				if (currentFontSize > ANNOTATION_FONT_SIZE.MIN) {
+					graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize - ANNOTATION_FONT_SIZE.STEP });
+				}
+			},
+			disabled: currentFontSize <= ANNOTATION_FONT_SIZE.MIN
+		},
+		DIVIDER,
+		{
+			label: 'Duplicate',
+			icon: 'copy',
+			shortcut: 'Ctrl+D',
+			action: () => {
+				graphStore.selectNode(annotationId, false);
+				graphStore.duplicateSelected();
+			}
+		},
+		{
+			label: 'Copy',
+			icon: 'clipboard',
+			shortcut: 'Ctrl+C',
+			action: () => {
+				graphStore.selectNode(annotationId, false);
+				clipboardStore.copy();
+			}
+		},
+		DIVIDER,
 		{
 			label: 'Delete',
 			icon: 'trash',
+			shortcut: 'Del',
 			action: () => graphStore.removeAnnotation(annotationId)
 		}
 	];

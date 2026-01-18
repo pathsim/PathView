@@ -380,6 +380,16 @@
 		<circle cx="8.5" cy="8.5" r="1.5"/>
 		<polyline points="21 15 16 10 5 21"/>
 	</svg>
+{:else if name === 'font-size-increase'}
+	<svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+		<text x="2" y="18" font-size="16" font-weight="700" font-family="system-ui, sans-serif">A</text>
+		<text x="14" y="18" font-size="16" font-weight="700" font-family="system-ui, sans-serif">a</text>
+	</svg>
+{:else if name === 'font-size-decrease'}
+	<svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+		<text x="2" y="18" font-size="11" font-weight="700" font-family="system-ui, sans-serif">A</text>
+		<text x="10" y="18" font-size="11" font-weight="700" font-family="system-ui, sans-serif">a</text>
+	</svg>
 {:else}
 	<span class="text-icon">{name}</span>
 {/if}

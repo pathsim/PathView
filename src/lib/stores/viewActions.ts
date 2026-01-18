@@ -25,7 +25,9 @@ export {
 	nudgeTrigger,
 	triggerNudge,
 	selectNodeTrigger,
-	triggerSelectNodes
+	triggerSelectNodes,
+	editAnnotationTrigger,
+	triggerEditAnnotation
 } from './viewTriggers';
 
 // Re-export all utilities

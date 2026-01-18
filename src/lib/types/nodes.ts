@@ -134,6 +134,7 @@ export interface Annotation {
 	width: number;
 	height: number;
 	color?: string; // Optional custom color (defaults to --pathsim-blue)
+	fontSize?: number; // Font size in pixels (default: 11)
 
 	// Index signature for SvelteFlow compatibility
 	[key: string]: unknown;

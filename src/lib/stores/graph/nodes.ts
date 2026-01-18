@@ -3,7 +3,7 @@
  */
 
 import { get } from 'svelte/store';
-import type { NodeInstance, PortInstance, Connection } from '$lib/nodes/types';
+import type { NodeInstance, PortInstance, Connection, Annotation } from '$lib/nodes/types';
 import type { Position } from '$lib/types';
 import { nodeRegistry } from '$lib/nodes/registry';
 import { NODE_TYPES } from '$lib/constants/nodeTypes';
@@ -19,7 +19,8 @@ import {
 	updateNodeById,
 	updateCurrentNodes,
 	updateCurrentConnections,
-	updateCurrentNodesAndConnections
+	updateCurrentNodesAndConnections,
+	updateCurrentAnnotations
 } from './state';
 import { regenerateGraphIds, createPorts } from './helpers';
 import { triggerSelectNodes } from '$lib/stores/viewActions';
@@ -236,7 +237,7 @@ export function getAllNodes(): NodeInstance[] {
 }
 
 /**
- * Duplicate selected nodes (and connections between them)
+ * Duplicate selected nodes, annotations, and connections between them
  */
 export function duplicateSelected(): string[] {
 	const selected = get(selectedNodeIds);
@@ -244,6 +245,7 @@ export function duplicateSelected(): string[] {
 
 	const currentGraph = getCurrentGraph();
 	const newNodeIds: string[] = [];
+	const newAnnotationIds: string[] = [];
 	const offset = { x: 50, y: 50 };
 
 	// Map from old node ID to new node ID (for connection remapping)
@@ -252,7 +254,27 @@ export function duplicateSelected(): string[] {
 	// Build list of new nodes to add
 	const nodesToAdd: NodeInstance[] = [];
 
+	// Build list of new annotations to add
+	const annotationsToAdd: Annotation[] = [];
+
 	selected.forEach(id => {
+		// Check if this is an annotation
+		const annotation = currentGraph.annotations.get(id);
+		if (annotation) {
+			const newId = generateId();
+			const newAnnotation: Annotation = {
+				...annotation,
+				id: newId,
+				position: {
+					x: annotation.position.x + offset.x,
+					y: annotation.position.y + offset.y
+				}
+			};
+			annotationsToAdd.push(newAnnotation);
+			newAnnotationIds.push(newId);
+			return;
+		}
+
 		const original = currentGraph.nodes.get(id);
 		if (!original) return;
 		if (original.type === NODE_TYPES.INTERFACE) return; // Don't duplicate Interface
@@ -316,26 +338,46 @@ export function duplicateSelected(): string[] {
 	}
 
 	// Add all nodes and connections in one update
-	updateCurrentNodesAndConnections(
-		// Map updater for nodes (root)
-		nodes => {
-			const newMap = new Map(nodes);
-			for (const node of nodesToAdd) {
-				newMap.set(node.id, node);
-			}
-			return newMap;
-		},
-		// Array updater for nodes (subsystem)
-		nodes => [...nodes, ...nodesToAdd],
-		// Connection updater
-		conns => [...conns, ...newConnections]
-	);
-
-	if (newNodeIds.length > 0) {
-		triggerSelectNodes(newNodeIds, false);
+	if (nodesToAdd.length > 0 || newConnections.length > 0) {
+		updateCurrentNodesAndConnections(
+			// Map updater for nodes (root)
+			nodes => {
+				const newMap = new Map(nodes);
+				for (const node of nodesToAdd) {
+					newMap.set(node.id, node);
+				}
+				return newMap;
+			},
+			// Array updater for nodes (subsystem)
+			nodes => [...nodes, ...nodesToAdd],
+			// Connection updater
+			conns => [...conns, ...newConnections]
+		);
 	}
 
-	return newNodeIds;
+	// Add annotations
+	if (annotationsToAdd.length > 0) {
+		updateCurrentAnnotations(
+			// Map updater (root)
+			a => {
+				const newMap = new Map(a);
+				for (const annotation of annotationsToAdd) {
+					newMap.set(annotation.id, annotation);
+				}
+				return newMap;
+			},
+			// Array updater (subsystem)
+			a => [...a, ...annotationsToAdd]
+		);
+	}
+
+	// Select all new items
+	const allNewIds = [...newNodeIds, ...newAnnotationIds];
+	if (allNewIds.length > 0) {
+		triggerSelectNodes(allNewIds, false);
+	}
+
+	return allNewIds;
 }
 
 /**

@@ -12,6 +12,14 @@ import {
 	updateCurrentAnnotations
 } from './state';
 
+// Font size constants for annotations
+export const ANNOTATION_FONT_SIZE = {
+	DEFAULT: 11,
+	MIN: 8,
+	MAX: 24,
+	STEP: 1
+} as const;
+
 /**
  * Add an annotation to the current graph context
  */
@@ -22,7 +30,8 @@ export function addAnnotation(position: Position): string {
 		position,
 		content: '',
 		width: 200,
-		height: 100
+		height: 100,
+		fontSize: ANNOTATION_FONT_SIZE.DEFAULT
 	};
 
 	updateCurrentAnnotations(
