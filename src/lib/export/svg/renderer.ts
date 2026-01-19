@@ -251,10 +251,11 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 			const inputW = inputRect.width / zoom;
 			const inputH = inputRect.height / zoom;
 			const inputValue = inputEl.value || inputEl.placeholder || '';
+			const inputBorderRadius = parseFloat(getComputedStyle(inputEl).borderRadius) || inputH / 2;
 
-			// Input background
+			// Input background (pill shape)
 			parts.push(
-				`<rect x="${inputX}" y="${inputY}" width="${inputW}" height="${inputH}" rx="4" fill="${ctx.theme.surfaceRaised}" stroke="${ctx.theme.border}" stroke-width="1"/>`
+				`<rect x="${inputX}" y="${inputY}" width="${inputW}" height="${inputH}" rx="${inputBorderRadius}" fill="${ctx.theme.surfaceRaised}" stroke="${ctx.theme.border}" stroke-width="1"/>`
 			);
 
 			// Input value
