@@ -150,7 +150,7 @@
 	// - Pinned params: need ~120px minimum for label + input
 	// - Vertical orientation: also consider port count
 	const nameWidth = $derived(data.name.length * 6 + 24);
-	const pinnedParamsWidth = $derived(pinnedCount > 0 ? 120 : 0);
+	const pinnedParamsWidth = $derived(pinnedCount > 0 ? 160 : 0);
 	const nodeWidth = $derived(
 		snapTo2G(Math.max(
 			NODE.baseWidth,
