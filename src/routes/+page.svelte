@@ -27,6 +27,7 @@
 	import { nodeRegistry } from '$lib/nodes';
 	import { NODE_TYPES } from '$lib/constants/nodeTypes';
 	import { PANEL_GAP, PANEL_TOGGLES_WIDTH, MIN_BOTTOM_PANEL_WIDTH, PANEL_DEFAULTS, NAV_HEIGHT } from '$lib/constants/layout';
+	import { GRID_SIZE } from '$lib/constants/grid';
 	import { DEFAULT_SIMULATION_SETTINGS } from '$lib/nodes/types';
 	import { graphStore } from '$lib/stores/graph';
 	import { eventStore } from '$lib/stores/events';
@@ -681,8 +682,8 @@
 	// Handle arrow keys - nudge selected nodes or pan canvas
 	function handleArrowKey(direction: string, largeStep: boolean) {
 		const hasSelection = hasAnySelection();
-		const panStep = largeStep ? 50 : 20;
-		const nudgeStep = largeStep ? 20 : 5;
+		const panStep = largeStep ? GRID_SIZE * 5 : GRID_SIZE * 2;
+		const nudgeStep = largeStep ? GRID_SIZE * 2 : GRID_SIZE;
 
 		const delta = { x: 0, y: 0 };
 
