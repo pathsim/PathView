@@ -29,6 +29,7 @@
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
 		import { nodeRegistry } from '$lib/nodes';
 	import { NODE_TYPES } from '$lib/constants/nodeTypes';
+	import { SNAP_GRID, BACKGROUND_GAP } from '$lib/constants/grid';
 	import type { NodeInstance, Connection, Annotation } from '$lib/nodes/types';
 	import type { EventInstance } from '$lib/events/types';
 
@@ -772,7 +773,7 @@
 		onnodecontextmenu={handleNodeContextMenu}
 		onedgecontextmenu={handleEdgeContextMenu}
 		onpanecontextmenu={handlePaneContextMenu}
-		{...{ snapToGrid: true, snapGrid: [15, 15] } as any}
+		{...{ snapToGrid: true, snapGrid: SNAP_GRID } as any}
 		deleteKeyCode={['Delete', 'Backspace']}
 		selectionKeyCode={['Shift']}
 		multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
@@ -785,7 +786,7 @@
 		proOptions={{ hideAttribution: true }}
 	>
 		<FlowUpdater pendingUpdates={pendingNodeUpdates} onUpdatesProcessed={clearPendingUpdates} />
-		<Background variant={BackgroundVariant.Dots} gap={20} size={1} />
+		<Background variant={BackgroundVariant.Dots} gap={BACKGROUND_GAP} size={1} />
 	</SvelteFlow>
 </div>
 

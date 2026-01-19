@@ -45,6 +45,8 @@
 <style>
 	.event-node {
 		position: relative;
+		/* Center event on its position point (center = local origin) */
+		transform: translate(-50%, -50%);
 		cursor: pointer;
 	}
 

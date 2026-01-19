@@ -12,7 +12,7 @@ import { get } from 'svelte/store';
 import { graphStore } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
 import { getThemeColors } from '$lib/constants/theme';
-import { EVENT } from '$lib/constants/dimensions';
+import { NODE, EVENT } from '$lib/constants/dimensions';
 import { getHandlePath } from '$lib/constants/handlePaths';
 import type { ExportOptions, RenderContext, Bounds } from './types';
 import { DEFAULT_OPTIONS } from './types';
@@ -132,13 +132,16 @@ function renderHandles(nodeId: string, nodeX: number, nodeY: number, ctx: Render
 // ============================================================================
 
 function renderNode(node: NodeInstance, ctx: RenderContext): string {
-	const { x, y } = node.position;
 	const wrapper = document.querySelector(`[data-id="${node.id}"]`) as HTMLElement;
 	if (!wrapper) return '';
 
 	const dims = getNodeDimensions(node.id);
 	if (!dims) return '';
 	const { width, height } = dims;
+
+	// Position is center-origin, convert to top-left for SVG
+	const x = node.position.x - width / 2;
+	const y = node.position.y - height / 2;
 
 	const nodeEl = wrapper.querySelector('.node') as HTMLElement;
 	if (!nodeEl) return '';
@@ -217,8 +220,9 @@ function renderEvent(event: EventInstance, ctx: RenderContext): string {
 		eventType = typeEl?.textContent || '';
 	}
 
-	const cx = event.position.x + EVENT.center;
-	const cy = event.position.y + EVENT.center;
+	// Position is center-origin, so position IS the center
+	const cx = event.position.x;
+	const cy = event.position.y;
 	const color = event.color || ctx.theme.accent;
 
 	const parts: string[] = [];
@@ -261,19 +265,25 @@ function calculateBounds(nodes: NodeInstance[], events: EventInstance[]): Bounds
 
 	for (const node of nodes) {
 		const dims = getNodeDimensions(node.id);
-		const width = dims?.width ?? 90;
-		const height = dims?.height ?? 36;
-		bounds.minX = Math.min(bounds.minX, node.position.x);
-		bounds.minY = Math.min(bounds.minY, node.position.y);
-		bounds.maxX = Math.max(bounds.maxX, node.position.x + width);
-		bounds.maxY = Math.max(bounds.maxY, node.position.y + height);
+		const width = dims?.width ?? NODE.baseWidth;
+		const height = dims?.height ?? NODE.baseHeight;
+		// Position is center-origin, calculate corners
+		const left = node.position.x - width / 2;
+		const top = node.position.y - height / 2;
+		bounds.minX = Math.min(bounds.minX, left);
+		bounds.minY = Math.min(bounds.minY, top);
+		bounds.maxX = Math.max(bounds.maxX, left + width);
+		bounds.maxY = Math.max(bounds.maxY, top + height);
 	}
 
 	for (const event of events) {
-		bounds.minX = Math.min(bounds.minX, event.position.x);
-		bounds.minY = Math.min(bounds.minY, event.position.y);
-		bounds.maxX = Math.max(bounds.maxX, event.position.x + EVENT.size);
-		bounds.maxY = Math.max(bounds.maxY, event.position.y + EVENT.size);
+		// Events also use center-origin
+		const left = event.position.x - EVENT.size / 2;
+		const top = event.position.y - EVENT.size / 2;
+		bounds.minX = Math.min(bounds.minX, left);
+		bounds.minY = Math.min(bounds.minY, top);
+		bounds.maxX = Math.max(bounds.maxX, left + EVENT.size);
+		bounds.maxY = Math.max(bounds.maxY, top + EVENT.size);
 	}
 
 	return isFinite(bounds.minX) ? bounds : { minX: 0, minY: 0, maxX: 200, maxY: 200 };

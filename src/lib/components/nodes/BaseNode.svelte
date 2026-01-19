@@ -11,7 +11,7 @@
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
 	import { paramInput } from '$lib/actions/paramInput';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
-	import { NODE } from '$lib/constants/dimensions';
+	import { NODE, snapTo2G, getPortPositionCalc } from '$lib/constants/dimensions';
 	import PlotPreview from './PlotPreview.svelte';
 
 	interface Props {
@@ -25,6 +25,14 @@
 	// Get type definition
 	const typeDef = $derived(nodeRegistry.get(data.type));
 	const category = $derived(typeDef?.category || 'Algebraic');
+
+	// Get valid pinned params (filter out any that no longer exist in the type definition)
+	// Defined early since it's needed for dimension calculations
+	const validPinnedParams = $derived(() => {
+		if (!data.pinnedParams?.length || !typeDef) return [];
+		const paramNames = new Set(typeDef.params.map(p => p.name));
+		return data.pinnedParams.filter(name => paramNames.has(name));
+	});
 
 	// Recording node hover preview
 	const isRecordingNode = $derived(category === 'Recording');
@@ -127,17 +135,19 @@
 
 	const maxPortsOnSide = $derived(Math.max(data.inputs.length, data.outputs.length));
 
-	// For horizontal layout: height grows with ports; for vertical: width grows
-	const nodeHeight = $derived(isVertical ? NODE.baseHeight : Math.max(NODE.baseHeight, maxPortsOnSide * NODE.portSpacing + 10));
-	const nodeWidth = $derived(isVertical ? Math.max(NODE.baseWidth, maxPortsOnSide * NODE.portSpacing + 20) : NODE.baseWidth);
-
-	// Calculate port positions using percentages for proper centering
-	function getPortPosition(index: number, total: number): string {
-		if (total === 1) return '50%';
-		// Distribute evenly with padding from edges
-		const percent = ((index + 1) / (total + 1)) * 100;
-		return `${percent}%`;
-	}
+	// Minimum node dimensions based on port count (grid-aligned to 2G)
+	// Content can expand beyond these minimums
+	const minPortDimension = $derived(Math.max(1, maxPortsOnSide) * NODE.portSpacing);
+	const minNodeHeight = $derived(
+		isVertical
+			? snapTo2G(NODE.baseHeight)
+			: snapTo2G(Math.max(NODE.baseHeight, minPortDimension))
+	);
+	const minNodeWidth = $derived(
+		isVertical
+			? snapTo2G(Math.max(NODE.baseWidth, minPortDimension))
+			: snapTo2G(NODE.baseWidth)
+	);
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
 	const isSubsystemNode = $derived(isSubsystem(data));
@@ -192,13 +202,6 @@
 
 	// Custom node color (defaults to pathsim-blue)
 	const nodeColor = $derived(data.color || 'var(--accent)');
-
-	// Get valid pinned params (filter out any that no longer exist in the type definition)
-	const validPinnedParams = $derived(() => {
-		if (!data.pinnedParams?.length || !typeDef) return [];
-		const paramNames = new Set(typeDef.params.map(p => p.name));
-		return data.pinnedParams.filter(name => paramNames.has(name));
-	});
 
 	// Handle pinned param change
 	function handlePinnedParamChange(paramName: string, value: string) {
@@ -282,7 +285,7 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	data-rotation={rotation}
-	style="min-width: {nodeWidth}px; min-height: {nodeHeight}px; --node-color: {nodeColor};"
+	style="min-width: {minNodeWidth}px; min-height: {minNodeHeight}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -361,7 +364,7 @@
 				type="target"
 				position={inputPosition()}
 				id={port.id}
-				style={isVertical ? `left: ${getPortPosition(i, data.inputs.length)};` : `top: ${getPortPosition(i, data.inputs.length)};`}
+				style={isVertical ? `left: ${getPortPositionCalc(i, data.inputs.length)};` : `top: ${getPortPositionCalc(i, data.inputs.length)};`}
 				class="handle handle-input"
 				onmouseenter={(e) => handleInputMouseEnter(e, port)}
 				onmouseleave={() => handleInputMouseLeave(port)}
@@ -376,7 +379,7 @@
 				type="source"
 				position={outputPosition()}
 				id={port.id}
-				style={isVertical ? `left: ${getPortPosition(i, data.outputs.length)};` : `top: ${getPortPosition(i, data.outputs.length)};`}
+				style={isVertical ? `left: ${getPortPositionCalc(i, data.outputs.length)};` : `top: ${getPortPositionCalc(i, data.outputs.length)};`}
 				class="handle handle-output"
 				onmouseenter={(e) => handleOutputMouseEnter(e, port)}
 				onmouseleave={() => handleOutputMouseLeave(port)}
@@ -388,12 +391,14 @@
 <style>
 	.node {
 		position: relative;
-		min-width: 90px;
-		min-height: 36px;
+		/* Center node on its position point (node center = local origin) */
+		transform: translate(-50%, -50%);
+		/* Dimensions set via inline style using grid constants */
+		display: flex;
+		flex-direction: column;
 		background: var(--surface-raised);
 		border: 1px solid var(--edge);
 		font-size: 10px;
-		transition: all 0.15s ease;
 		overflow: visible;
 	}
 
@@ -412,7 +417,8 @@
 
 	.shape-diamond {
 		border-radius: 4px;
-		transform: rotate(45deg);
+		/* Compose with center transform */
+		transform: translate(-50%, -50%) rotate(45deg);
 	}
 
 	.shape-diamond .node-content {
@@ -447,7 +453,7 @@
 		z-index: 1000 !important;
 	}
 
-	/* Inner wrapper for proper border-radius clipping */
+	/* Inner wrapper for content */
 	.node-inner {
 		border-radius: inherit;
 		overflow: hidden;
