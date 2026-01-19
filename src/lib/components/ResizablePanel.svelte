@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { untrack } from 'svelte';
@@ -115,6 +116,9 @@
 		}
 	});
 
+	// Track active resize cleanup for component destroy
+	let activeCleanup: (() => void) | null = null;
+
 	function startResize(edge: 'left' | 'right' | 'top' | 'bottom') {
 		return (event: MouseEvent) => {
 			event.preventDefault();
@@ -146,19 +150,29 @@
 				}
 			}
 
-			function onMouseUp() {
-				isResizing = false;
-				resizeEdge = null;
+			function cleanup() {
 				document.removeEventListener('mousemove', onMouseMove);
 				document.removeEventListener('mouseup', onMouseUp);
 				document.body.classList.remove('resizing-ew', 'resizing-ns');
+				activeCleanup = null;
 			}
 
+			function onMouseUp() {
+				isResizing = false;
+				resizeEdge = null;
+				cleanup();
+			}
+
+			activeCleanup = cleanup;
 			document.addEventListener('mousemove', onMouseMove);
 			document.addEventListener('mouseup', onMouseUp);
 			document.body.classList.add((edge === 'left' || edge === 'right') ? 'resizing-ew' : 'resizing-ns');
 		};
 	}
+
+	onDestroy(() => {
+		activeCleanup?.();
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions, a11y_no_noninteractive_element_interactions -->
