@@ -11,7 +11,7 @@
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
 	import { paramInput } from '$lib/actions/paramInput';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
-	import { NODE, snapTo2G } from '$lib/constants/dimensions';
+	import { NODE, snapTo2G, getPortPositionCalc } from '$lib/constants/dimensions';
 	import PlotPreview from './PlotPreview.svelte';
 
 	interface Props {
@@ -148,22 +148,6 @@
 			? snapTo2G(Math.max(NODE.baseWidth, minPortDimension))
 			: snapTo2G(NODE.baseWidth)
 	);
-
-	// Calculate port position as offset from center (using calc for CSS)
-	// This ensures ports stay grid-aligned regardless of actual node dimensions
-	// because the node center is at a grid-aligned position
-	function getPortPositionCalc(index: number, total: number): string {
-		if (total <= 0 || total === 1) {
-			return '50%'; // Single port at center
-		}
-		// For N ports with spacing S: span = (N-1)*S, offset from center = -span/2 + i*S
-		const span = (total - 1) * NODE.portSpacing;
-		const offsetFromCenter = -span / 2 + index * NODE.portSpacing;
-		if (offsetFromCenter === 0) {
-			return '50%';
-		}
-		return `calc(50% + ${offsetFromCenter}px)`;
-	}
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
 	const isSubsystemNode = $derived(isSubsystem(data));

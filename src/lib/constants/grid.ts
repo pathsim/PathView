@@ -20,20 +20,12 @@ export const G = {
 	unit: GRID_SIZE,
 	/** 2 grid units - standard port spacing */
 	x2: GRID_SIZE * 2,
-	/** 3 grid units */
-	x3: GRID_SIZE * 3,
-	/** 4 grid units */
+	/** 4 grid units - standard node base height */
 	x4: GRID_SIZE * 4,
-	/** 5 grid units */
-	x5: GRID_SIZE * 5,
 	/** 10 grid units - standard node width */
 	x10: GRID_SIZE * 10,
 	/** Convert grid units to pixels */
-	px: (units: number) => units * GRID_SIZE,
-	/** Snap a pixel value to nearest grid point */
-	snap: (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE,
-	/** Check if a value is on grid */
-	isAligned: (value: number) => value % GRID_SIZE === 0,
+	px: (units: number) => units * GRID_SIZE
 } as const;
 
 /** SvelteFlow snap grid configuration [x, y] */
