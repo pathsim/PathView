@@ -23,7 +23,7 @@
 	import { selectedNodeIds as graphSelectedNodeIds } from '$lib/stores/graph/state';
 	import { historyStore } from '$lib/stores/history';
 	import { themeStore, type Theme } from '$lib/stores/theme';
-	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection } from '$lib/stores/viewActions';
+	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection, triggerFitView } from '$lib/stores/viewActions';
 	import { dropTargetBridge } from '$lib/stores/dropTargetBridge';
 	import { contextMenuStore } from '$lib/stores/contextMenu';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
@@ -726,6 +726,14 @@
 		event.preventDefault();
 		contextMenuStore.openForCanvas({ x: event.clientX, y: event.clientY });
 	}
+
+	function handleCanvasDoubleClick(event: MouseEvent) {
+		// Only trigger fit view if clicking on the canvas background (not on nodes/edges)
+		const target = event.target as HTMLElement;
+		if (target.closest('.svelte-flow__pane')) {
+			triggerFitView();
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -738,6 +746,7 @@
 	ondragover={handleDragOver}
 	ondragenter={handleDragEnter}
 	ondragleave={handleDragLeave}
+	ondblclick={handleCanvasDoubleClick}
 >
 	{#if isFileDragOver}
 		<div class="drop-zone-overlay">
@@ -772,6 +781,7 @@
 		edgesReconnectable
 		edgesFocusable
 		edgesSelectable={false}
+		zoomOnDoubleClick={false}
 		proOptions={{ hideAttribution: true }}
 	>
 		<FlowUpdater pendingUpdates={pendingNodeUpdates} onUpdatesProcessed={clearPendingUpdates} />
