@@ -209,6 +209,9 @@
 	.annotation-wrapper {
 		width: 100%;
 		height: 100%;
+		/* Counteract SvelteFlow's nodeOrigin=[0.5, 0.5] centering.
+		   Annotations use top-left origin for resize/positioning behavior. */
+		transform: translate(50%, 50%);
 	}
 
 	/* Style NodeResizer handles and lines to match annotation color */
