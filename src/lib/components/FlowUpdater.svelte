@@ -195,7 +195,7 @@
 		}
 	});
 
-	// Listen for pan triggers
+	// Listen for pan triggers (no duration for instant keyboard response)
 	let lastPanId = 0;
 	panTrigger.subscribe((value) => {
 		if (value.id > lastPanId) {
@@ -204,7 +204,7 @@
 				x: viewport.x + value.x,
 				y: viewport.y + value.y,
 				zoom: viewport.zoom
-			}, { duration: 100 });
+			});
 			lastPanId = value.id;
 		}
 	});
