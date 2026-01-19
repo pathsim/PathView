@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { get } from 'svelte/store';
@@ -22,7 +23,7 @@
 	let eventId = $state<string | null>(null);
 	let event = $state<EventInstance | null>(null);
 
-	eventDialogStore.subscribe((id) => {
+	const unsubscribeDialog = eventDialogStore.subscribe((id) => {
 		eventId = id;
 		if (id) {
 			event = eventStore.getEvent(id) || null;
@@ -32,10 +33,15 @@
 	});
 
 	// Keep event updated when params change
-	eventStore.eventsArray.subscribe((events) => {
+	const unsubscribeEvents = eventStore.eventsArray.subscribe((events) => {
 		if (eventId) {
 			event = events.find(e => e.id === eventId) || null;
 		}
+	});
+
+	onDestroy(() => {
+		unsubscribeDialog();
+		unsubscribeEvents();
 	});
 
 	// Get type definition
