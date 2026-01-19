@@ -1,50 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="340" viewBox="510 180 720 340">
+<svg xmlns="http://www.w3.org/2000/svg" width="810.0000363746924" height="420.0000150504645" viewBox="629.9999849495355 119.99999247476774 810.0000363746924 420.0000150504645">
 <g class="edges">
-<g class="edge"><path d="M653.8333333333334 370L673.8333333333334 370L 684.5,370Q 692.5,370 692.5,362L 692.5,298Q 692.5,290 700.5,290L711.1666666666666 290L731.1666666666666 290" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(731.1666870117188, 290) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M843.8333333333334 300L863.8333333333334 300L887.5 300L887.5 300L911.1666666666666 300L931.1666666666666 300" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(931.1666870117188, 300) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M843.8333333333334 300L863.8333333333334 300L 884.4166666666667,300Q 890,300 890,294.4166666666667L890 288.83333333333337L890 268.83333333333337" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(890, 268.8333435058594) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M1043.8333333333333 300L 1055.8333333333333,300Q 1063.8333333333333,300 1063.8333333333333,308L 1063.8333333333333,362Q 1063.8333333333333,370 1055.8333333333333,370L968.8333333333334 370L948.8333333333334 370" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(948.8333129882812, 370) rotate(180) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M836.1666666666666 370L816.1666666666666 370L 719.1666666666666,370Q 711.1666666666666,370 711.1666666666666,362L 711.1666666666666,318Q 711.1666666666666,310 719.1666666666666,310L731.1666666666666 310" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(731.1666870117188, 310) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M1043.8333333333333 300L1063.8333333333333 300L 1124.4166666666667,300Q 1130,300 1130,294.4166666666667L1130 288.83333333333337L1130 268.83333333333337" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1130, 268.8333435058594) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M653.8333333333334 370L673.8333333333334 370L 684.5,370Q 692.5,370 692.5,378L 692.5,462Q 692.5,470 700.5,470L711.1666666666666 470L731.1666666666666 470" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(731.1666870117188, 470) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M836.1666666666666 370L816.1666666666666 370L 719.1666666666666,370Q 711.1666666666666,370 711.1666666666666,378L 711.1666666666666,442Q 711.1666666666666,450 719.1666666666666,450L731.1666666666666 450" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(731.1666870117188, 450) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M753.8333333333334 480L773.8333333333334 480L 802,480Q 810,480 810,472L810 458.8333333333333L810 438.8333333333333" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(810, 438.8333435058594) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M820 386.1666666666667L820 366.1666666666667L 820,308Q 820,300 828,300L851.1666666666666 300L871.1666666666666 300" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(871.1666870117188, 300) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M820 386.1666666666667L820 366.1666666666667L820 297.5L820 297.5L820 228.83333333333334L820 208.83333333333334" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(820, 208.8333282470703) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M1043.8333333333333 300L1063.8333333333333 300L1082.5 300L1082.5 300L1101.1666666666667 300L1121.1666666666667 300" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1121.1666259765625, 300) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M1213.8333333333333 300L 1225.8333333333333,300Q 1233.8333333333333,300 1233.8333333333333,308L 1233.8333333333333,450.8333333333333Q 1233.8333333333333,458.8333333333333 1225.8333333333333,458.8333333333333L 838,458.8333333333333Q 830,458.8333333333333 830,450.8333333333333L830 438.8333333333333" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(830, 438.8333435058594) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M1043.8333333333333 300L1063.8333333333333 300L 1072,300Q 1080,300 1080,292L1080 228.83333333333334L1080 208.83333333333334" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1080, 208.8333282470703) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M1213.8333333333333 300L1233.8333333333333 300L 1322,300Q 1330,300 1330,292L1330 228.83333333333334L1330 208.83333333333334" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1330, 208.8333282470703) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M753.8333333333334 480L773.8333333333334 480L 1342,480Q 1350,480 1350,472L1350 228.83333333333334L1350 208.83333333333334" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1350, 208.8333282470703) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
 </g>
 <g class="nodes">
 <g class="node" data-id="setpoint">
-<rect x="550" y="350" width="100" height="40" rx="20" fill="#1c1c26"/>
-<rect x="550" y="350" width="100" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="600" y="366" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Setpoint</text>
-<text x="600" y="378" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">StepSource</text>
-<g transform="translate(644.33, 366.00)">
+<rect x="669.9999849495355" y="459.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="20" fill="#1c1c26"/>
+<rect x="669.9999849495355" y="459.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="710" y="476" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Setpoint</text>
+<text x="710" y="488" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">StepSource</text>
+<g transform="translate(744.33, 476.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="error">
-<rect x="740" y="280" width="100" height="40" rx="4" fill="#1c1c26"/>
-<rect x="740" y="280" width="100" height="40" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="790" y="296" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Error</text>
-<text x="790" y="308" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Adder</text>
-<g transform="translate(735.67, 286.00)">
-	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<rect x="779.9999849495355" y="389.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="4" fill="#1c1c26"/>
+<rect x="779.9999849495355" y="389.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="820" y="406" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Error</text>
+<text x="820" y="418" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Adder</text>
+<g transform="translate(806.00, 424.33)">
+	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
+	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(735.67, 306.00)">
-	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<g transform="translate(826.00, 424.33)">
+	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
+	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(834.33, 296.00)">
-	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<g transform="translate(816.00, 385.67)">
+	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
+	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="pid">
-<rect x="940" y="280" width="100" height="40" rx="4" fill="#1c1c26"/>
-<rect x="940" y="280" width="100" height="40" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="990" y="296" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">PID</text>
-<text x="990" y="308" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">PID</text>
-<g transform="translate(935.67, 296.00)">
+<rect x="879.999969899071" y="239.999978675772" width="160.00006020185822" height="120.00004264845599" rx="4" fill="#1c1c26"/>
+<rect x="879.999969899071" y="239.999978675772" width="160.00006020185822" height="120.00004264845599" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="960" y="256.3333036618149" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">PID</text>
+<text x="960" y="268.3333036618149" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">PID</text>
+<line x1="879.999969899071" y1="280.6666286478578" x2="1040.000030100929" y2="280.6666286478578" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+<path d="M880.999969899071,281.6666286478578 h158.00006020185822 v74.66668016368128 a3,3 0 0 1 -3,3 h-152.00006020185822 a3,3 0 0 1 -3,-3 v-74.66668016368128 z" fill="#08080c"/>
+<text x="890.66656916204" y="295.3332827284456" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Kp</text>
+<rect x="906.947838297459" y="285.3332658254067" width="122.38546238774228" height="20.000007525232277" rx="10" fill="#1c1c26" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+<text x="914.947838297459" y="295.33326958802286" dominant-baseline="middle" fill="#f0f0f5" font-size="9" font-family="ui-monospace, monospace">1.5</text>
+<text x="890.66656916204" y="319.33329125813685" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Ki</text>
+<rect x="904.1041006357804" y="309.33327435509796" width="125.22922007292229" height="20.000007525232277" rx="10" fill="#1c1c26" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+<text x="912.1041006357804" y="319.3332781177141" dominant-baseline="middle" fill="#f0f0f5" font-size="9" font-family="ui-monospace, monospace">0.5</text>
+<text x="890.66656916204" y="343.333299787828" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Kd</text>
+<rect x="906.6248992676917" y="333.3332828847891" width="122.70840141750959" height="20.000007525232277" rx="10" fill="#1c1c26" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+<text x="914.6248992676917" y="343.33328664740526" dominant-baseline="middle" fill="#f0f0f5" font-size="9" font-family="ui-monospace, monospace">0.1</text>
+<g transform="translate(875.67, 296.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
@@ -54,49 +65,49 @@
 </g>
 </g>
 <g class="node" data-id="scope">
-<rect x="740" y="440" width="140" height="40" rx="20" fill="#1c1c26"/>
-<rect x="740" y="440" width="140" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="810" y="456" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Setpoint vs Plant</text>
-<text x="810" y="468" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(735.67, 446.00)">
-	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<rect x="1279.999978675772" y="159.99999247476774" width="120.00004264845599" height="40.000015050464555" rx="20" fill="#1c1c26"/>
+<rect x="1279.999978675772" y="159.99999247476774" width="120.00004264845599" height="40.000015050464555" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="1340" y="176" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Setpoint vs Plant</text>
+<text x="1340" y="188" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(1326.00, 194.33)">
+	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
+	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(735.67, 466.00)">
-	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<g transform="translate(1346.00, 194.33)">
+	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
+	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="98bd8eae-5636-43fa-bdd8-0eace540da0b">
-<rect x="840" y="220" width="100" height="40" rx="20" fill="#1c1c26"/>
-<rect x="840" y="220" width="100" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="890" y="236" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Error</text>
-<text x="890" y="248" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(886.00, 254.33)">
+<rect x="779.9999849495355" y="159.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="20" fill="#1c1c26"/>
+<rect x="779.9999849495355" y="159.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="820" y="176" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Error</text>
+<text x="820" y="188" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(816.00, 194.33)">
 	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
 	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="367985a4-df42-46b1-97af-94302aaf3234">
-<rect x="840" y="350" width="100" height="40" rx="4" fill="#1c1c26"/>
-<rect x="840" y="350" width="100" height="40" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" stroke-dasharray="4 2"/>
-<text x="890" y="366" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Plant</text>
-<text x="890" y="378" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Subsystem</text>
-<g transform="translate(934.33, 366.00)">
-	<path d="M 5.00 0.00 L 9.00 0.00 Q 10.00 0.00 10.00 1.00 L 10.00 7.00 Q 10.00 8.00 9.00 8.00 L 5.00 8.00 Q 4.00 8.00 3.29 7.29 L 0.71 4.71 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 5.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 4.21 0.00 L 7.20 0.00 Q 8.00 0.00 8.00 0.80 L 8.00 5.20 Q 8.00 6.00 7.20 6.00 L 4.21 6.00 Q 3.41 6.00 2.85 5.43 L 0.98 3.57 Q 0.41 3.00 0.98 2.43 L 2.85 0.57 Q 3.41 0.00 4.21 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<rect x="1129.9999849495355" y="279.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="4" fill="#1c1c26"/>
+<rect x="1129.9999849495355" y="279.99999247476774" width="80.00003010092911" height="40.000015050464555" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" stroke-dasharray="4 2"/>
+<text x="1170" y="296" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Plant</text>
+<text x="1170" y="308" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Subsystem</text>
+<g transform="translate(1125.67, 296.00)">
+	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
+	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(835.67, 366.00)">
-	<path d="M 5.00 0.00 L 9.00 0.00 Q 10.00 0.00 10.00 1.00 L 10.00 7.00 Q 10.00 8.00 9.00 8.00 L 5.00 8.00 Q 4.00 8.00 3.29 7.29 L 0.71 4.71 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 5.00 0.00 Z" fill="#7F7F7F"/>
-	<path d="M 4.21 0.00 L 7.20 0.00 Q 8.00 0.00 8.00 0.80 L 8.00 5.20 Q 8.00 6.00 7.20 6.00 L 4.21 6.00 Q 3.41 6.00 2.85 5.43 L 0.98 3.57 Q 0.41 3.00 0.98 2.43 L 2.85 0.57 Q 3.41 0.00 4.21 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
+<g transform="translate(1204.33, 296.00)">
+	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
+	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="4674b251-a882-45b9-baf1-01db4d0f7a22">
-<rect x="1070" y="220" width="120" height="40" rx="20" fill="#1c1c26"/>
-<rect x="1070" y="220" width="120" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="1130" y="236" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Control Signal</text>
-<text x="1130" y="248" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(1126.00, 254.33)">
+<rect x="1029.9999555318082" y="159.99999247476774" width="100.00008893638359" height="40.000015050464555" rx="20" fill="#1c1c26"/>
+<rect x="1029.9999555318082" y="159.99999247476774" width="100.00008893638359" height="40.000015050464555" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="1080" y="176" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Control Signal</text>
+<text x="1080" y="188" text-anchor="middle" dominant-baseline="middle" fill="#808090" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(1076.00, 194.33)">
 	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
 	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#1c1c26" transform="translate(1, 1)"/>
 </g>
