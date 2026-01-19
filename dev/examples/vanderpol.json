@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:33:08.523Z",
-    "modified": "2026-01-14T10:33:08.523Z",
-    "name": "Van der Pol",
-    "description": "Stiff Nonlinear System"
+    "created": "2026-01-19T16:15:10.866Z",
+    "modified": "2026-01-19T16:15:10.866Z",
+    "name": "vanderpol"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "Integrator",
         "name": "X2",
         "position": {
-          "x": 405,
-          "y": 225
+          "x": 390,
+          "y": 220
         },
         "inputs": [
           {
@@ -45,8 +44,8 @@
         "type": "Integrator",
         "name": "X1",
         "position": {
-          "x": 615,
-          "y": 225
+          "x": 610,
+          "y": 220
         },
         "inputs": [
           {
@@ -77,8 +76,8 @@
         "type": "Adder",
         "name": "Difference",
         "position": {
-          "x": 630,
-          "y": 405
+          "x": 660,
+          "y": 400
         },
         "inputs": [
           {
@@ -118,8 +117,8 @@
         "type": "Pow",
         "name": "Square",
         "position": {
-          "x": 735,
-          "y": 300
+          "x": 720,
+          "y": 290
         },
         "inputs": [
           {
@@ -151,8 +150,8 @@
         "type": "Amplifier",
         "name": "Param-Mu",
         "position": {
-          "x": 510,
-          "y": 585
+          "x": 490,
+          "y": 500
         },
         "inputs": [
           {
@@ -184,8 +183,8 @@
         "type": "Constant",
         "name": "One",
         "position": {
-          "x": 615,
-          "y": 300
+          "x": 600,
+          "y": 290
         },
         "inputs": [],
         "outputs": [
@@ -208,8 +207,8 @@
         "type": "Multiplier",
         "name": "Multiplier",
         "position": {
-          "x": 510,
-          "y": 510
+          "x": 490,
+          "y": 420
         },
         "inputs": [
           {
@@ -248,8 +247,8 @@
         "type": "Adder",
         "name": "Difference",
         "position": {
-          "x": 810,
-          "y": 690
+          "x": 780,
+          "y": 520
         },
         "inputs": [
           {
@@ -289,8 +288,8 @@
         "type": "Scope",
         "name": "X1(t)",
         "position": {
-          "x": 735,
-          "y": 135
+          "x": 720,
+          "y": 140
         },
         "inputs": [
           {
@@ -312,8 +311,8 @@
         "type": "Scope",
         "name": "X2(t)",
         "position": {
-          "x": 495,
-          "y": 135
+          "x": 480,
+          "y": 140
         },
         "inputs": [
           {
@@ -421,8 +420,8 @@
       {
         "id": "892e58cc-029b-4498-b7b5-f54b301028e4",
         "position": {
-          "x": 915,
-          "y": 240
+          "x": 70,
+          "y": 200
         },
         "content": "# Van der Pol\n\nThis is the Van der Pol system \n\n$$ \\ddot{x} - \\mu (1 - x^2) \\dot{x} + x = 0$$\n\nmodeled as discrete components.\n\nIt is famous for its stiffness which is controled through the paramter $\\mu$. \nFor small values $\\mu \\approx 10$ its not very stiff and explicit integrators such as **RKCK54** can handle it quite well. \nBut for larger values $\\mu > 100$, the gradients become increasingly steep and explicit integrators become inefficient due to their limited (numerical) stability region. \nThen using implicit integrators such as **GEAR52A** or **ESDIRK43** makes sense. ",
         "width": 215,

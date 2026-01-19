@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:21:54.899Z",
-    "modified": "2026-01-14T10:21:54.899Z",
-    "name": "Bouncing Ball",
-    "description": "Gravity, Collisions and discrete Events"
+    "created": "2026-01-19T16:03:09.415Z",
+    "modified": "2026-01-19T16:03:09.415Z",
+    "name": "bouncing-ball"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "Integrator",
         "name": "pos",
         "position": {
-          "x": 705,
-          "y": 255
+          "x": 750,
+          "y": 250
         },
         "inputs": [
           {
@@ -45,8 +44,8 @@
         "type": "Integrator",
         "name": "vel",
         "position": {
-          "x": 480,
-          "y": 255
+          "x": 530,
+          "y": 250
         },
         "inputs": [
           {
@@ -75,8 +74,8 @@
         "type": "Scope",
         "name": "x(t)",
         "position": {
-          "x": 825,
-          "y": 330
+          "x": 860,
+          "y": 340
         },
         "inputs": [
           {
@@ -98,8 +97,8 @@
         "type": "Constant",
         "name": "gravity",
         "position": {
-          "x": 390,
-          "y": 150
+          "x": 430,
+          "y": 160
         },
         "inputs": [],
         "outputs": [
@@ -122,8 +121,8 @@
         "type": "Scope",
         "name": "v(t)",
         "position": {
-          "x": 585,
-          "y": 330
+          "x": 620,
+          "y": 340
         },
         "inputs": [
           {
@@ -145,8 +144,8 @@
         "type": "Function",
         "name": "total energy",
         "position": {
-          "x": 705,
-          "y": 150
+          "x": 750,
+          "y": 160
         },
         "inputs": [
           {
@@ -186,8 +185,8 @@
         "type": "Scope",
         "name": "E(t)",
         "position": {
-          "x": 1065,
-          "y": 330
+          "x": 1100,
+          "y": 340
         },
         "inputs": [
           {
@@ -260,8 +259,8 @@
       {
         "id": "deeecd86-71ac-4a13-a289-c64c946e667c",
         "position": {
-          "x": -45,
-          "y": 90
+          "x": -50,
+          "y": 60
         },
         "content": "# Bouncing Ball Physics\n\nThis is an example of a hybrid system with continuous dynamics (free falling ball) and discrete events (bounces).\n\nIntegrating the gravitational acceleration gives the ball velocity in free fall:\n\n$$ v(t) = - \\int_0^t g \\, d\\tau $$\n\nAnd the position is the integrated velocity:\n\n$$ x(t) = \\int_0^t v(\\tau) \\, d\\tau $$\n\nWe use an event node to define the discrete dynamics of the ball hitting the ground. Whenever the position crosses zero\n\n$$ |x(t)| = 0 $$\n\nthe sign of the velocity is flipped and a coefficient of restitution ($b$) is applied to model the energy loss from the deformation of the ball:\n\n$$ y(t) \\leftarrow -b \\, y(t)  $$\n\nWhen the total energy drops below a certain threshold we consider that a Zeno state and stop the simulation.",
         "width": 425,
@@ -275,8 +274,8 @@
       "type": "pathsim.events.ZeroCrossing",
       "name": "Bounce",
       "position": {
-        "x": 945,
-        "y": 225
+        "x": 980,
+        "y": 260
       },
       "params": {
         "func_evt": "bounce_detect",
@@ -289,7 +288,7 @@
       "name": "Zeno",
       "position": {
         "x": 1200,
-        "y": 225
+        "y": 260
       },
       "params": {
         "func_evt": "zeno_detect",

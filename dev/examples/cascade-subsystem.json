@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:23:07.377Z",
-    "modified": "2026-01-14T10:23:07.377Z",
-    "name": "Cascade PI Controler",
-    "description": "Cascade Control of a Plant modeled as nested Subsystems"
+    "created": "2026-01-19T16:01:11.207Z",
+    "modified": "2026-01-19T16:01:11.207Z",
+    "name": "cascade-subsystem"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "StepSource",
         "name": "Setpoint",
         "position": {
-          "x": 735,
-          "y": 435
+          "x": 720,
+          "y": 440
         },
         "inputs": [],
         "outputs": [
@@ -38,7 +37,7 @@
         "type": "PID",
         "name": "PI-1",
         "position": {
-          "x": 1065,
+          "x": 1090,
           "y": 330
         },
         "inputs": [
@@ -73,7 +72,7 @@
         "type": "Adder",
         "name": "Error-1",
         "position": {
-          "x": 915,
+          "x": 910,
           "y": 330
         },
         "inputs": [
@@ -114,8 +113,8 @@
         "type": "Adder",
         "name": "Error-2",
         "position": {
-          "x": 1245,
-          "y": 330
+          "x": 1240,
+          "y": 340
         },
         "inputs": [
           {
@@ -155,8 +154,8 @@
         "type": "PID",
         "name": "PI-2",
         "position": {
-          "x": 1395,
-          "y": 330
+          "x": 1410,
+          "y": 340
         },
         "inputs": [
           {
@@ -190,8 +189,8 @@
         "type": "Subsystem",
         "name": "Plant",
         "position": {
-          "x": 1320,
-          "y": 405
+          "x": 1330,
+          "y": 410
         },
         "inputs": [
           {
@@ -231,8 +230,8 @@
               "type": "Interface",
               "name": "Subsystem",
               "position": {
-                "x": -285,
-                "y": -360
+                "x": -250,
+                "y": -320
               },
               "inputs": [],
               "outputs": [],
@@ -245,8 +244,8 @@
               "type": "TransferFunctionZPG",
               "name": "TF-2",
               "position": {
-                "x": -420,
-                "y": -105
+                "x": -410,
+                "y": -120
               },
               "inputs": [
                 {
@@ -280,8 +279,8 @@
               "type": "TransferFunctionZPG",
               "name": "TF-1",
               "position": {
-                "x": -420,
-                "y": -285
+                "x": -410,
+                "y": -280
               },
               "inputs": [
                 {
@@ -315,8 +314,8 @@
               "type": "Subsystem",
               "name": "Disturbance",
               "position": {
-                "x": -405,
-                "y": -195
+                "x": -410,
+                "y": -200
               },
               "inputs": [
                 {
@@ -348,20 +347,22 @@
                     "type": "Interface",
                     "name": "Subsystem",
                     "position": {
-                      "x": 105,
-                      "y": 60
+                      "x": 270,
+                      "y": 0
                     },
                     "inputs": [],
                     "outputs": [],
-                    "params": {}
+                    "params": {
+                      "_rotation": 2
+                    }
                   },
                   {
                     "id": "09e7895b-f3f5-448a-a5c7-14f8c9225db4",
                     "type": "Adder",
                     "name": "Combiner",
                     "position": {
-                      "x": 240,
-                      "y": 120
+                      "x": 270,
+                      "y": 70
                     },
                     "inputs": [
                       {
@@ -392,7 +393,7 @@
                       }
                     ],
                     "params": {
-                      "_rotation": 1
+                      "_rotation": 0
                     }
                   },
                   {
@@ -400,8 +401,8 @@
                     "type": "WhiteNoise",
                     "name": "Noise",
                     "position": {
-                      "x": 105,
-                      "y": -15
+                      "x": 120,
+                      "y": 80
                     },
                     "inputs": [],
                     "outputs": [
@@ -416,7 +417,6 @@
                     ],
                     "params": {
                       "spectral_density": "noise_psd",
-                      "sampling_rate": "0.5",
                       "_rotation": 0
                     }
                   },
@@ -425,8 +425,8 @@
                     "type": "Scope",
                     "name": "Disturbed Signal",
                     "position": {
-                      "x": 405,
-                      "y": 120
+                      "x": 450,
+                      "y": 70
                     },
                     "inputs": [
                       {
@@ -478,8 +478,8 @@
                   {
                     "id": "c3103ad7-22d5-455d-8078-579809c95ad6",
                     "position": {
-                      "x": 345,
-                      "y": -15
+                      "x": 360,
+                      "y": -90
                     },
                     "content": "# Disturbance\n\nThe inline disturbance adds a white noise signal on top of the input signal.",
                     "width": 155,
@@ -530,8 +530,8 @@
             {
               "id": "4dc50a79-58b7-4cbd-b049-110bfbbd117e",
               "position": {
-                "x": -600,
-                "y": -255
+                "x": -180,
+                "y": -280
               },
               "content": "# Plant\n\nThe plant contains two transfer functions and an additive inline disturbance...\n\n... which is modeled by a subsystem too.",
               "width": 140,
@@ -545,8 +545,8 @@
         "type": "Scope",
         "name": "Plant vs Setpoint",
         "position": {
-          "x": 1095,
-          "y": 510
+          "x": 1020,
+          "y": 500
         },
         "inputs": [
           {
@@ -577,7 +577,7 @@
         "type": "Scope",
         "name": "Err-1 and PI-1",
         "position": {
-          "x": 1005,
+          "x": 1010,
           "y": 240
         },
         "inputs": [
@@ -609,7 +609,7 @@
         "type": "Scope",
         "name": "Err-2 and PI-2",
         "position": {
-          "x": 1335,
+          "x": 1340,
           "y": 240
         },
         "inputs": [
@@ -734,8 +734,8 @@
       {
         "id": "416e7281-7496-4b94-8c9f-ab802029d5e9",
         "position": {
-          "x": 720,
-          "y": 225
+          "x": 690,
+          "y": 220
         },
         "content": "# Cascade PI Controler\n\nThis example is a cascade controler. The plant is modeled as a **Subsystem**. Double click to enter.",
         "width": 230,

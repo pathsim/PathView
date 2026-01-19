@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:41:38.312Z",
-    "modified": "2026-01-14T10:41:38.312Z",
-    "name": "Feedback Loop",
-    "description": "Linear Feedback System with Step Excitation"
+    "created": "2026-01-19T15:57:32.963Z",
+    "modified": "2026-01-19T15:57:32.963Z",
+    "name": "feedback-system"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "Adder",
         "name": "Difference",
         "position": {
-          "x": 825,
-          "y": 390
+          "x": 840,
+          "y": 400
         },
         "inputs": [
           {
@@ -53,8 +52,8 @@
         "type": "Amplifier",
         "name": "Feedback",
         "position": {
-          "x": 900,
-          "y": 480
+          "x": 970,
+          "y": 460
         },
         "inputs": [
           {
@@ -86,8 +85,8 @@
         "type": "Integrator",
         "name": "Integrator",
         "position": {
-          "x": 960,
-          "y": 390
+          "x": 970,
+          "y": 400
         },
         "inputs": [
           {
@@ -114,43 +113,12 @@
         }
       },
       {
-        "id": "c196290c-d86e-473b-b4a9-e1fac84cce98",
-        "type": "Scope",
-        "name": "Result",
-        "position": {
-          "x": 1140,
-          "y": 345
-        },
-        "inputs": [
-          {
-            "id": "c196290c-d86e-473b-b4a9-e1fac84cce98-input-0",
-            "nodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
-            "name": "in 0",
-            "direction": "input",
-            "index": 0,
-            "color": "#969696"
-          },
-          {
-            "id": "c196290c-d86e-473b-b4a9-e1fac84cce98-input-1",
-            "nodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
-            "name": "in 1",
-            "direction": "input",
-            "index": 1,
-            "color": "#969696"
-          }
-        ],
-        "outputs": [],
-        "params": {
-          "_rotation": 0
-        }
-      },
-      {
         "id": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
         "type": "StepSource",
         "name": "Unit Step",
         "position": {
-          "x": 675,
-          "y": 270
+          "x": 700,
+          "y": 360
         },
         "inputs": [],
         "outputs": [
@@ -166,7 +134,38 @@
         "params": {
           "amplitude": 1,
           "tau": "tau",
-          "_rotation": 1
+          "_rotation": 0
+        }
+      },
+      {
+        "id": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+        "type": "Scope",
+        "name": "Result",
+        "position": {
+          "x": 1150,
+          "y": 370
+        },
+        "inputs": [
+          {
+            "id": "c584e30b-577b-4e0d-86f5-19f53f93e697-input-0",
+            "nodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "c584e30b-577b-4e0d-86f5-19f53f93e697-input-1",
+            "nodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 0
         }
       }
     ],
@@ -200,17 +199,17 @@
         "targetPortIndex": 0
       },
       {
-        "id": "e9120582-ab70-49b1-8216-990467a56b37",
+        "id": "20a10f29-2b97-4215-9199-b748cc598407",
         "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
         "sourcePortIndex": 0,
-        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "targetNodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
         "targetPortIndex": 1
       },
       {
-        "id": "9c46810a-56b3-4cc6-8bb2-d8e711644de7",
+        "id": "3171aea1-d803-47a2-bb51-9cc688dd79ee",
         "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
         "sourcePortIndex": 0,
-        "targetNodeId": "c196290c-d86e-473b-b4a9-e1fac84cce98",
+        "targetNodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
         "targetPortIndex": 0
       }
     ],
@@ -218,12 +217,12 @@
       {
         "id": "a0d9ddea-c4f8-4363-9c0a-5e19e6c52491",
         "position": {
-          "x": 810,
-          "y": 225
+          "x": 650,
+          "y": 250
         },
         "content": "# Linear Feedback System\n\nA linear feedback system with a delayed step excitation and some decaying initial conditions. Check the code editor (E) for the global system parameters.",
-        "width": 380,
-        "height": 100
+        "width": 550,
+        "height": 80
       }
     ]
   },

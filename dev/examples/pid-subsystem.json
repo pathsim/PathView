@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:35:26.069Z",
-    "modified": "2026-01-14T10:35:26.069Z",
-    "name": "PID Controler",
-    "description": "PID Control of a linear Plant"
+    "created": "2026-01-19T16:09:45.159Z",
+    "modified": "2026-01-19T16:09:45.159Z",
+    "name": "pid-subsystem"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "StepSource",
         "name": "Setpoint",
         "position": {
-          "x": 660,
-          "y": 450
+          "x": 600,
+          "y": 370
         },
         "inputs": [],
         "outputs": [
@@ -29,7 +28,7 @@
         "params": {
           "amplitude": "[1, 0.5]",
           "tau": "[20+tau_1, 40+tau_2]",
-          "_rotation": 3
+          "_rotation": 0
         }
       },
       {
@@ -37,7 +36,7 @@
         "type": "Adder",
         "name": "Error",
         "position": {
-          "x": 795,
+          "x": 790,
           "y": 300
         },
         "inputs": [
@@ -108,8 +107,8 @@
         "type": "Scope",
         "name": "Setpoint vs Plant",
         "position": {
-          "x": 855,
-          "y": 450
+          "x": 810,
+          "y": 460
         },
         "inputs": [
           {
@@ -130,7 +129,7 @@
         ],
         "outputs": [],
         "params": {
-          "_rotation": 1
+          "_rotation": 0
         }
       },
       {
@@ -138,7 +137,7 @@
         "type": "Scope",
         "name": "Error",
         "position": {
-          "x": 885,
+          "x": 890,
           "y": 240
         },
         "inputs": [
@@ -160,8 +159,8 @@
         "type": "Subsystem",
         "name": "Plant",
         "position": {
-          "x": 990,
-          "y": 375
+          "x": 890,
+          "y": 370
         },
         "inputs": [
           {
@@ -193,20 +192,22 @@
               "type": "Interface",
               "name": "Subsystem",
               "position": {
-                "x": 165,
-                "y": -15
+                "x": 120,
+                "y": 60
               },
               "inputs": [],
               "outputs": [],
-              "params": {}
+              "params": {
+                "_rotation": 3
+              }
             },
             {
               "id": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
               "type": "Integrator",
               "name": "Quantity",
               "position": {
-                "x": 240,
-                "y": 75
+                "x": 250,
+                "y": 60
               },
               "inputs": [
                 {
@@ -238,8 +239,8 @@
               "type": "Amplifier",
               "name": "Gain",
               "position": {
-                "x": 240,
-                "y": 225
+                "x": 250,
+                "y": 180
               },
               "inputs": [
                 {
@@ -271,8 +272,8 @@
               "type": "Scope",
               "name": "Plant Quantity",
               "position": {
-                "x": 345,
-                "y": 150
+                "x": 360,
+                "y": 120
               },
               "inputs": [
                 {
@@ -328,7 +329,7 @@
         "type": "Scope",
         "name": "Control Signal",
         "position": {
-          "x": 1125,
+          "x": 1130,
           "y": 240
         },
         "inputs": [
@@ -383,24 +384,24 @@
         "targetPortIndex": 1
       },
       {
-        "id": "73846b60-c98b-4933-9a79-02b17b439af7",
-        "sourceNodeId": "setpoint",
+        "id": "bf75489a-0404-41ac-b709-bc0579e2a217",
+        "sourceNodeId": "pid",
         "sourcePortIndex": 0,
-        "targetNodeId": "scope",
+        "targetNodeId": "4674b251-a882-45b9-baf1-01db4d0f7a22",
         "targetPortIndex": 0
       },
       {
-        "id": "b82afa70-4a3e-4b10-8adb-4c162bcafce8",
-        "sourceNodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+        "id": "1586a2ba-ad23-41ed-8f6b-fda1f4af5841",
+        "sourceNodeId": "setpoint",
         "sourcePortIndex": 0,
         "targetNodeId": "scope",
         "targetPortIndex": 1
       },
       {
-        "id": "bf75489a-0404-41ac-b709-bc0579e2a217",
-        "sourceNodeId": "pid",
+        "id": "e2dba788-4f14-4fcb-90d0-168061d01d22",
+        "sourceNodeId": "367985a4-df42-46b1-97af-94302aaf3234",
         "sourcePortIndex": 0,
-        "targetNodeId": "4674b251-a882-45b9-baf1-01db4d0f7a22",
+        "targetNodeId": "scope",
         "targetPortIndex": 0
       }
     ],

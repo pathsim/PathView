@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-14T10:18:53.891Z",
-    "modified": "2026-01-14T10:18:53.891Z",
-    "name": "Thermostat",
-    "description": "Relay based Temperature Control of a House"
+    "created": "2026-01-19T16:12:13.267Z",
+    "modified": "2026-01-19T16:12:13.267Z",
+    "name": "thermostat"
   },
   "graph": {
     "nodes": [
@@ -13,8 +12,8 @@
         "type": "Relay",
         "name": "Relay",
         "position": {
-          "x": 735,
-          "y": 180
+          "x": 710,
+          "y": 190
         },
         "inputs": [
           {
@@ -49,8 +48,8 @@
         "type": "Constant",
         "name": "Ambient Const",
         "position": {
-          "x": 405,
-          "y": 120
+          "x": 400,
+          "y": 140
         },
         "inputs": [],
         "outputs": [
@@ -72,8 +71,8 @@
         "type": "SinusoidalSource",
         "name": "Ambient Day",
         "position": {
-          "x": 405,
-          "y": 180
+          "x": 410,
+          "y": 200
         },
         "inputs": [],
         "outputs": [
@@ -96,8 +95,8 @@
         "type": "Adder",
         "name": "Adder",
         "position": {
-          "x": 540,
-          "y": 255
+          "x": 550,
+          "y": 260
         },
         "inputs": [
           {
@@ -136,8 +135,8 @@
         "type": "Subsystem",
         "name": "House",
         "position": {
-          "x": 735,
-          "y": 255
+          "x": 710,
+          "y": 260
         },
         "inputs": [
           {
@@ -187,8 +186,8 @@
               "type": "Adder",
               "name": "Total Flux",
               "position": {
-                "x": 270,
-                "y": 225
+                "x": 230,
+                "y": 180
               },
               "inputs": [
                 {
@@ -237,8 +236,8 @@
               "type": "Amplifier",
               "name": "Capacity",
               "position": {
-                "x": 105,
-                "y": 150
+                "x": 100,
+                "y": 110
               },
               "inputs": [
                 {
@@ -285,8 +284,8 @@
               "type": "Integrator",
               "name": "Heat",
               "position": {
-                "x": 105,
-                "y": 285
+                "x": 100,
+                "y": 240
               },
               "inputs": [
                 {
@@ -369,12 +368,12 @@
             {
               "id": "72cf3be3-a804-4dd0-a34a-94e06ee104e6",
               "position": {
-                "x": -315,
-                "y": 165
+                "x": -340,
+                "y": 90
               },
               "content": "# House\n\nInternally the subsystem house is modeled by a 1st order linear ode:\n\n$$\n\\dot{T} = C (T_a - T) + H \n$$",
               "width": 200,
-              "height": 115
+              "height": 150
             }
           ]
         }
@@ -384,8 +383,8 @@
         "type": "Scope",
         "name": "Temperature",
         "position": {
-          "x": 900,
-          "y": 315
+          "x": 910,
+          "y": 320
         },
         "inputs": [
           {
@@ -413,8 +412,8 @@
         "type": "Scope",
         "name": "Heater",
         "position": {
-          "x": 900,
-          "y": 120
+          "x": 910,
+          "y": 140
         },
         "inputs": [
           {
@@ -492,7 +491,7 @@
       {
         "id": "584cd15b-ff8a-47f9-b137-e704ad1c44b4",
         "position": {
-          "x": 240,
+          "x": 230,
           "y": 240
         },
         "content": "# Thermostat\nA relay based thermostat heating system of a house. The house is modeled as a subsystem.\n- Double click the subsystem to view internals\n- Open the code editor (E) to adjust the parameters.",
