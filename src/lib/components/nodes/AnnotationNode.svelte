@@ -6,6 +6,7 @@
 	import { renderMarkdown } from '$lib/utils/markdownRenderer';
 	import { getKatexCssUrl } from '$lib/utils/katexLoader';
 	import { DEFAULT_NODE_COLOR } from '$lib/utils/colors';
+	import { GRID_SIZE } from '$lib/constants/grid';
 	import { tooltip } from '$lib/components/Tooltip.svelte';
 	import ColorPicker from '$lib/components/dialogs/shared/ColorPicker.svelte';
 	import Icon from '$lib/components/icons/Icon.svelte';
@@ -129,6 +130,15 @@
 		}
 	}
 
+	// Snap resize dimensions to grid
+	function handleResizeEnd(_event: unknown, params: { width: number; height: number }) {
+		const snappedWidth = Math.round(params.width / GRID_SIZE) * GRID_SIZE;
+		const snappedHeight = Math.round(params.height / GRID_SIZE) * GRID_SIZE;
+		graphStore.updateAnnotation(id, {
+			width: Math.max(100, snappedWidth),
+			height: Math.max(50, snappedHeight)
+		});
+	}
 </script>
 
 <svelte:head>
@@ -141,6 +151,7 @@
 		minWidth={100}
 		minHeight={50}
 		isVisible={selected}
+		onResizeEnd={handleResizeEnd}
 	/>
 
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
