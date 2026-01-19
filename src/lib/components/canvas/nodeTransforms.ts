@@ -7,38 +7,28 @@ import { historyStore } from '$lib/stores/history';
 import type { Node } from '@xyflow/svelte';
 
 /** Rotation values: 0=normal, 1=90°, 2=180°, 3=270° */
-export type RotationValue = 0 | 1 | 2 | 3;
+type RotationValue = 0 | 1 | 2 | 3;
 
-/**
- * Get current rotation value from node params
- */
-export function getRotation(nodeId: string): RotationValue {
+/** Get current rotation value from node params */
+function getRotation(nodeId: string): RotationValue {
 	const node = graphStore.getNode(nodeId);
 	return ((node?.params?.['_rotation'] as number) || 0) as RotationValue;
 }
 
-/**
- * Calculate next rotation (90° clockwise)
- */
-export function rotateClockwise(current: RotationValue): RotationValue {
+/** Calculate next rotation (90° clockwise) */
+function rotateClockwise(current: RotationValue): RotationValue {
 	return ((current + 1) % 4) as RotationValue;
 }
 
-/**
- * Calculate horizontal flip.
- * Horizontal flip swaps 0 <-> 2, leaves 1 and 3 unchanged.
- */
-export function flipHorizontal(current: RotationValue): RotationValue {
+/** Horizontal flip: swaps 0 <-> 2, leaves 1 and 3 unchanged */
+function flipHorizontal(current: RotationValue): RotationValue {
 	if (current === 0) return 2;
 	if (current === 2) return 0;
 	return current;
 }
 
-/**
- * Calculate vertical flip.
- * Vertical flip swaps 1 <-> 3, leaves 0 and 2 unchanged.
- */
-export function flipVertical(current: RotationValue): RotationValue {
+/** Vertical flip: swaps 1 <-> 3, leaves 0 and 2 unchanged */
+function flipVertical(current: RotationValue): RotationValue {
 	if (current === 1) return 3;
 	if (current === 3) return 1;
 	return current;
