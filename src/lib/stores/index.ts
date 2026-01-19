@@ -14,9 +14,6 @@ export { codeContextStore } from './codeContext';
 export { nodeDialogStore, openNodeDialog, closeNodeDialog } from './nodeDialog';
 export { eventDialogStore, openEventDialog, closeEventDialog } from './eventDialog';
 
-// Unified event facade (simplifies event operations across root/subsystem)
-export { unifiedEvents } from './eventFacade';
-
 // UI state stores
 export { contextMenuStore } from './contextMenu';
 export { nodeUpdatesStore } from './nodeUpdates';
