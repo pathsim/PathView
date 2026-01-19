@@ -152,13 +152,13 @@
 						<button class="example-card" onclick={() => handleExample(example.file)}>
 							<div class="example-info">
 								<div class="example-name">{example.name}</div>
+								{#if example.description}
+									<div class="example-description">{example.description}</div>
+								{/if}
 							</div>
 							<div class="example-preview">
 								<img src="{example.previewBase}-{isDark ? 'dark' : 'light'}.svg" alt="{example.name} preview" />
 							</div>
-							{#if example.description}
-								<div class="example-description">{example.description}</div>
-							{/if}
 						</button>
 					{/each}
 				</div>
@@ -278,46 +278,55 @@
 		transform: scale(1.03);
 	}
 
-	.example-description {
+	.example-info {
 		position: absolute;
-		bottom: 0;
+		top: 0;
 		left: 0;
 		right: 0;
-		padding: 6px 8px;
-		background: var(--surface);
-		border-top: 1px solid var(--border);
-		border-radius: 0 0 var(--radius-md) var(--radius-md);
-		font-size: 10px;
-		color: var(--text-muted);
-		opacity: 0;
-		transition: opacity 0.15s ease;
-	}
-
-	.example-card:hover .example-description {
-		opacity: 1;
-	}
-
-	.example-preview {
-		background: var(--surface);
-		width: 100%;
-	}
-
-	.example-preview img {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-
-	.example-info {
+		z-index: 1;
 		padding: 6px 8px;
 		text-align: left;
+		background: var(--surface);
 		border-bottom: 1px solid var(--border);
+		border-radius: var(--radius-md) var(--radius-md) 0 0;
+		transition: padding 0.15s ease;
+	}
+
+	.example-card:hover .example-info {
+		border-radius: var(--radius-md);
 	}
 
 	.example-name {
 		font-size: 11px;
 		font-weight: 500;
 		color: var(--text-muted);
+	}
+
+	.example-description {
+		font-size: 10px;
+		color: var(--text-muted);
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		transition: max-height 0.15s ease, opacity 0.15s ease, margin 0.15s ease;
+	}
+
+	.example-card:hover .example-description {
+		max-height: 100px;
+		opacity: 1;
+		margin-top: 4px;
+	}
+
+	.example-preview {
+		background: var(--surface);
+		width: 100%;
+		padding-top: 28px; /* Space for the header */
+	}
+
+	.example-preview img {
+		display: block;
+		width: 100%;
+		height: auto;
 	}
 
 	@media (max-width: 700px) {
