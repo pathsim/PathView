@@ -773,6 +773,7 @@
 		onnodecontextmenu={handleNodeContextMenu}
 		onedgecontextmenu={handleEdgeContextMenu}
 		onpanecontextmenu={handlePaneContextMenu}
+		nodeOrigin={[0.5, 0.5]}
 		{...{ snapToGrid: true, snapGrid: SNAP_GRID } as any}
 		deleteKeyCode={['Delete', 'Backspace']}
 		selectionKeyCode={['Shift']}

@@ -391,9 +391,8 @@
 <style>
 	.node {
 		position: relative;
-		/* Center node on its position point (node center = local origin) */
-		transform: translate(-50%, -50%);
 		/* Dimensions set via inline style using grid constants */
+		/* Note: center-origin handled by SvelteFlow's nodeOrigin={[0.5, 0.5]} */
 		display: flex;
 		flex-direction: column;
 		background: var(--surface-raised);
@@ -417,8 +416,7 @@
 
 	.shape-diamond {
 		border-radius: 4px;
-		/* Compose with center transform */
-		transform: translate(-50%, -50%) rotate(45deg);
+		transform: rotate(45deg);
 	}
 
 	.shape-diamond .node-content {
