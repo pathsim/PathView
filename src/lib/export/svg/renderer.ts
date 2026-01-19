@@ -356,13 +356,26 @@ function calculateBounds(nodes: NodeInstance[], events: EventInstance[]): Bounds
 	}
 
 	for (const event of events) {
-		// Events also use center-origin
-		const left = event.position.x - EVENT.size / 2;
-		const top = event.position.y - EVENT.size / 2;
+		// Events use center-origin, get actual bounding box from DOM
+		const wrapper = document.querySelector(`[data-id="${event.id}"]`) as HTMLElement;
+		let boundingSize = EVENT.size; // Fallback
+
+		if (wrapper) {
+			const diamondEl = wrapper.querySelector('.diamond') as HTMLElement;
+			if (diamondEl) {
+				const zoom = getZoom();
+				const diamondSize = diamondEl.getBoundingClientRect().width / zoom;
+				// Rotated 45° square has bounding box of size * sqrt(2)
+				boundingSize = diamondSize * Math.SQRT2;
+			}
+		}
+
+		const left = event.position.x - boundingSize / 2;
+		const top = event.position.y - boundingSize / 2;
 		bounds.minX = Math.min(bounds.minX, left);
 		bounds.minY = Math.min(bounds.minY, top);
-		bounds.maxX = Math.max(bounds.maxX, left + EVENT.size);
-		bounds.maxY = Math.max(bounds.maxY, top + EVENT.size);
+		bounds.maxX = Math.max(bounds.maxX, left + boundingSize);
+		bounds.maxY = Math.max(bounds.maxY, top + boundingSize);
 	}
 
 	return isFinite(bounds.minX) ? bounds : { minX: 0, minY: 0, maxX: 200, maxY: 200 };

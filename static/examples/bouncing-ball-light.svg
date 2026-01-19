@@ -1,80 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="940.0001563645924" height="300.00011981858745" viewBox="339.9998436354076 99.9999400907063 940.0001563645924 300.00011981858745">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100.000065636128" height="330.00002673109645" viewBox="239.99993436387194 69.99996718193597 1100.000065636128 330.00002673109645">
 <g class="edges">
-<g class="edge"><path d="M430.00015697955143 183.83344132864516L430.00015697955143 203.83344132864516L 430.00015697955143,242.00004441204393Q 430.00015697955143,250.00004441204393 438.00015697955143,250.00004441204393L451.1666478029222 250.00004441204393L471.1666478029222 250.00004441204393" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(471.1666564941406, 250.0000457763672) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M583.8335961558398 250.00004441204393L603.8335961558398 250.00004441204393L637.5000985434409 250.00004441204393L637.5000985434409 250.00004441204393L671.166600931042 250.00004441204393L691.166600931042 250.00004441204393" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(691.1666259765625, 250.0000457763672) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M803.8335961558398 250.00004441204393L823.8335961558398 250.00004441204393L 852.000063235791,250.00004441204393Q 860.000063235791,250.00004441204393 860.000063235791,258.00004441204396L860.000063235791 291.16662436698215L860.000063235791 311.16662436698215" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(860.0000610351562, 311.1666259765625) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M583.8335961558398 250.00004441204393L603.8335961558398 250.00004441204393L 612.0002038514317,250.00004441204393Q 620.0002038514317,250.00004441204393 620.0002038514317,258.00004441204396L620.0002038514317 291.16662436698215L620.0002038514317 311.16662436698215" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(620.0001831054688, 311.1666259765625) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M583.8335961558398 250.00004441204393L603.8335961558398 250.00004441204393L 629.5000985434409,250.00004441204393Q 637.5000985434409,250.00004441204393 637.5000985434409,242.00004441204393L 637.5000985434409,157.9999990775614Q 637.5000985434409,149.9999990775614 645.5000985434409,149.9999990775614L671.166600931042 149.9999990775614L691.166600931042 149.9999990775614" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(691.1666259765625, 150) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M803.8335961558398 250.00004441204393L 815.8335961558398,250.00004441204393Q 823.8335961558398,250.00004441204393 823.8335961558398,242.00004441204393L 823.8335961558398,218.00006122030018Q 823.8335961558398,210.00006122030018 815.8335961558398,210.00006122030018L 679.166600931042,210.00006122030018Q 671.166600931042,210.00006122030018 671.166600931042,202.00006122030018L 671.166600931042,178.00007802855643Q 671.166600931042,170.00007802855643 679.166600931042,170.00007802855643L691.166600931042 170.00007802855643" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(691.1666259765625, 170.0000762939453) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M803.8335961558398 160.00004441204393L823.8335961558398 160.00004441204393L 1092.000063235791,160.00004441204393Q 1100.000063235791,160.00004441204393 1100.000063235791,168.00004441204393L1100.000063235791 291.16662436698215L1100.000063235791 311.16662436698215" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1100.0001220703125, 311.1666259765625) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M360.00008006992135 193.83339645266895L360.00008006992135 213.83339645266895L 360.00008006992135,242.00007818385671Q 360.00008006992135,250.00007818385671 368.00008006992135,250.00007818385671L381.16664059194346 250.00007818385671L401.16664059194346 250.00007818385671" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(401.1666259765625, 250.0000762939453) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M573.8335352007957 250.00007818385671L593.8335352007957 250.00007818385671L617.5001328883689 250.00007818385671L617.5001328883689 250.00007818385671L641.1667305759419 250.00007818385671L661.1667305759419 250.00007818385671" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(661.166748046875, 250.0000762939453) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M833.8335352007957 250.00007818385671L853.8335352007957 250.00007818385671L 871.9999881998584,250.00007818385671Q 879.9999881998584,250.00007818385671 879.9999881998584,258.0000781838567L879.9999881998584 291.16668558394264L879.9999881998584 311.16668558394264" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(880, 311.16668701171875) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M573.8335352007957 250.00007818385671L593.8335352007957 250.00007818385671L 612.0000781838568,250.00007818385671Q 620.0000781838568,250.00007818385671 620.0000781838568,258.0000781838567L620.0000781838568 291.16668558394264L620.0000781838568 311.16668558394264" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(620.0000610351562, 311.16668701171875) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M573.8335352007957 250.00007818385671L593.8335352007957 250.00007818385671L 629.5001328883689,250.00007818385671Q 637.5001328883689,250.00007818385671 637.5001328883689,242.00007818385671L 637.5001328883689,128.0000430253089Q 637.5001328883689,120.0000430253089 645.5001328883689,120.0000430253089L681.1667305759419 120.0000430253089L701.1667305759419 120.0000430253089" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(701.166748046875, 120.00004577636719) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M833.8335352007957 250.00007818385671L 845.8335352007957,250.00007818385671Q 853.8335352007957,250.00007818385671 853.8335352007957,242.00007818385671L 853.8335352007957,203.00007232409877Q 853.8335352007957,195.00007232409877 845.8335352007957,195.00007232409877L 689.1667305759419,195.00007232409877Q 681.1667305759419,195.00007232409877 681.1667305759419,187.00007232409877L 681.1667305759419,148.0000664643408Q 681.1667305759419,140.0000664643408 689.1667305759419,140.0000664643408L701.1667305759419 140.0000664643408" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(701.166748046875, 140.00006103515625) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M793.8334414446681 130.00005474482484L813.8334414446681 130.00005474482484L 1132.0000781838567,130.00005474482484Q 1140.0000781838567,130.00005474482484 1140.0000781838567,138.00005474482484L1140.0000781838567 291.16668558394264L1140.0000781838567 311.16668558394264" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1140.0001220703125, 311.16668701171875) rotate(90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
 </g>
 <g class="events">
 <g class="event" data-id="1455e789-9e7d-4139-8a4e-896feecff3d3">
-<rect x="952" y="232" width="56" height="56" rx="4" fill="#ffffff" transform="rotate(45 980 260)"/>
-<rect x="952" y="232" width="56" height="56" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" transform="rotate(45 980 260)"/>
-<text x="980" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Bounce</text>
-<text x="980" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">ZeroCrossing</text>
+<rect x="943.4314357155986" y="203.43143571559858" width="113.13712856880281" height="113.13712856880281" rx="4" fill="#ffffff" transform="rotate(45 1000 260)"/>
+<rect x="943.4314357155986" y="203.43143571559858" width="113.13712856880281" height="113.13712856880281" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" transform="rotate(45 1000 260)"/>
+<text x="1000" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Bounce</text>
+<text x="1000" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">ZeroCrossing</text>
 </g>
 <g class="event" data-id="eda13d11-f264-4861-ba54-e17c48884905">
-<rect x="1172" y="232" width="56" height="56" rx="4" fill="#ffffff" transform="rotate(45 1200 260)"/>
-<rect x="1172" y="232" width="56" height="56" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" transform="rotate(45 1200 260)"/>
-<text x="1200" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Zeno</text>
-<text x="1200" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Condition</text>
+<rect x="1203.4314357155986" y="203.43143571559858" width="113.13712856880281" height="113.13712856880281" rx="4" fill="#ffffff" transform="rotate(45 1260 260)"/>
+<rect x="1203.4314357155986" y="203.43143571559858" width="113.13712856880281" height="113.13712856880281" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1" transform="rotate(45 1260 260)"/>
+<text x="1260" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Zeno</text>
+<text x="1260" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Condition</text>
 </g>
 </g>
 <g class="nodes">
 <g class="node" data-id="1642f372-0929-4a73-a786-11a5a9b2ce0b">
-<rect x="699.9998905072879" y="229.99995620291514" width="100.00021898542433" height="40.00008759416973" rx="4" fill="#ffffff"/>
-<rect x="699.9998905072879" y="229.99995620291514" width="100.00021898542433" height="40.00008759416973" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="750" y="246" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">pos</text>
-<text x="750" y="258" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Integrator</text>
-<g transform="translate(695.67, 246.00)">
+<rect x="669.9999062438725" y="209.99995312193624" width="160.00018751225508" height="80.00009375612754" rx="4" fill="#ffffff"/>
+<rect x="669.9999062438725" y="209.99995312193624" width="160.00018751225508" height="80.00009375612754" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="750" y="230.33331347302507" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">pos</text>
+<text x="750" y="242.33331347302507" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Integrator</text>
+<line x1="669.9999062438725" y1="258.6666738241139" x2="830.0000937561276" y2="258.6666738241139" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<path d="M670.9999062438725,259.6666738241139 h158.00018751225508 v26.66666755024954 a3,3 0 0 1 -3,3 h-152.00018751225508 a3,3 0 0 1 -3,-3 v-26.66666755024954 z" fill="#f0f0f4"/>
+<text x="680.666609407089" y="273.33331615553806" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">initial_value</text>
+<rect x="729.552036217232" y="263.3333339620215" width="89.7813543756791" height="20.000023439031885" rx="10" fill="#ffffff" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<text x="737.552036217232" y="273.3333456815375" dominant-baseline="middle" fill="#1a1a1f" font-size="9" font-family="ui-monospace, monospace">x0 </text>
+<g transform="translate(665.67, 246.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(794.33, 246.00)">
+<g transform="translate(824.33, 246.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="d6b8ebf1-173b-4f71-a160-d86545a80cb9">
-<rect x="479.9998260584525" y="229.99995620291514" width="100.0003478830949" height="40.00008759416973" rx="4" fill="#ffffff"/>
-<rect x="479.9998260584525" y="229.99995620291514" width="100.0003478830949" height="40.00008759416973" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="530" y="246" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">vel</text>
-<text x="530" y="258" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Integrator</text>
-<g transform="translate(475.67, 246.00)">
+<rect x="409.9999624838714" y="209.99995312193624" width="160.00007503225717" height="80.00009375612754" rx="4" fill="#ffffff"/>
+<rect x="409.9999624838714" y="209.99995312193624" width="160.00007503225717" height="80.00009375612754" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="490" y="230.33331347302507" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">vel</text>
+<text x="490" y="242.33331347302507" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Integrator</text>
+<line x1="409.9999624838714" y1="258.6666738241139" x2="570.0000375161286" y2="258.6666738241139" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<path d="M410.9999624838714,259.6666738241139 h158.00007503225717 v26.66666755024954 a3,3 0 0 1 -3,3 h-152.00007503225717 a3,3 0 0 1 -3,-3 v-26.66666755024954 z" fill="#f0f0f4"/>
+<text x="420.66666564708794" y="273.33331615553806" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">initial_value</text>
+<rect x="469.55209245723086" y="263.3333339620215" width="89.78123627168128" height="20.000023439031885" rx="10" fill="#ffffff" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<text x="477.55209245723086" y="273.3333456815375" dominant-baseline="middle" fill="#1a1a1f" font-size="9" font-family="ui-monospace, monospace">0.0</text>
+<g transform="translate(405.67, 246.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(574.33, 246.00)">
+<g transform="translate(564.33, 246.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="c76c21f3-21cd-453e-9437-8e8af946d1c7">
-<rect x="809.9998260584525" y="319.99994009070633" width="100.0003478830949" height="40.00011981858737" rx="20" fill="#ffffff"/>
-<rect x="809.9998260584525" y="319.99994009070633" width="100.0003478830949" height="40.00011981858737" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="860" y="336" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">x(t)</text>
-<text x="860" y="348" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(856.00, 315.67)">
+<rect x="839.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="#ffffff"/>
+<rect x="839.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="880" y="336" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">x(t)</text>
+<text x="880" y="348" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(876.00, 315.67)">
 	<path d="M 1.00 0.00 L 7.00 0.00 Q 8.00 0.00 8.00 1.00 L 8.00 5.00 Q 8.00 6.00 7.29 6.71 L 4.71 9.29 Q 4.00 10.00 3.29 9.29 L 0.71 6.71 Q 0.00 6.00 0.00 5.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 5.20 0.00 Q 6.00 0.00 6.00 0.80 L 6.00 3.79 Q 6.00 4.59 5.43 5.15 L 3.57 7.02 Q 3.00 7.59 2.43 7.02 L 0.57 5.15 Q 0.00 4.59 0.00 3.79 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="49a2f6d3-5327-485a-8f1b-b98a3d425a57">
-<rect x="379.9998436354076" y="139.9999400907063" width="100.00031272918474" height="40.00011981858737" rx="20" fill="#ffffff"/>
-<rect x="379.9998436354076" y="139.9999400907063" width="100.00031272918474" height="40.00011981858737" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="430" y="156" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">gravity</text>
-<text x="430" y="168" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Constant</text>
-<g transform="translate(426.00, 174.33)">
+<rect x="279.99993436387194" y="109.99996718193597" width="160.00013127225614" height="80.00006563612807" rx="20" fill="#ffffff"/>
+<rect x="279.99993436387194" y="109.99996718193597" width="160.00013127225614" height="80.00006563612807" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="360" y="130.3333275330248" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">gravity</text>
+<text x="360" y="142.3333275330248" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Constant</text>
+<line x1="279.99993436387194" y1="158.66668788411363" x2="440.00006563612806" y2="158.66668788411363" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<path d="M280.99993436387194,159.66668788411363 h158.00013127225614 v10.666698482248968 a19,19 0 0 1 -19,19 h-120.00013127225614 a19,19 0 0 1 -19,-19 v-10.666698482248968 z" fill="#f0f0f4"/>
+<text x="290.6666375270885" y="173.33337520753693" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">value</text>
+<rect x="316.9479039862416" y="163.33339301402046" width="112.38551472666886" height="19.99999391303243" rx="10" fill="#ffffff" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
+<text x="324.9479039862416" y="173.33338997053667" dominant-baseline="middle" fill="#1a1a1f" font-size="9" font-family="ui-monospace, monospace">-g</text>
+<g transform="translate(356.00, 184.33)">
 	<path d="M 1.00 0.00 L 7.00 0.00 Q 8.00 0.00 8.00 1.00 L 8.00 5.00 Q 8.00 6.00 7.29 6.71 L 4.71 9.29 Q 4.00 10.00 3.29 9.29 L 0.71 6.71 Q 0.00 6.00 0.00 5.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 5.20 0.00 Q 6.00 0.00 6.00 0.80 L 6.00 3.79 Q 6.00 4.59 5.43 5.15 L 3.57 7.02 Q 3.00 7.59 2.43 7.02 L 0.57 5.15 Q 0.00 4.59 0.00 3.79 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="d73713d6-eb61-442e-a69b-c4d168180ef4">
-<rect x="569.9998260584525" y="319.99994009070633" width="100.0003478830949" height="40.00011981858737" rx="20" fill="#ffffff"/>
-<rect x="569.9998260584525" y="319.99994009070633" width="100.0003478830949" height="40.00011981858737" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<rect x="579.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="#ffffff"/>
+<rect x="579.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
 <text x="620" y="336" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">v(t)</text>
 <text x="620" y="348" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
 <g transform="translate(616.00, 315.67)">
@@ -83,29 +98,29 @@
 </g>
 </g>
 <g class="node" data-id="db488fa8-9004-40f7-a724-bc9846dd2f85">
-<rect x="699.9998905072879" y="139.9999400907063" width="100.00021898542433" height="40.00011981858737" rx="4" fill="#ffffff"/>
-<rect x="699.9998905072879" y="139.9999400907063" width="100.00021898542433" height="40.00011981858737" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="750" y="156" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">total energy</text>
-<text x="750" y="168" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Function</text>
-<g transform="translate(695.67, 146.00)">
+<rect x="709.9999531219362" y="109.99997656096812" width="80.00009375612754" height="40.00004687806377" rx="4" fill="#ffffff"/>
+<rect x="709.9999531219362" y="109.99997656096812" width="80.00009375612754" height="40.00004687806377" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="750" y="126" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">energy</text>
+<text x="750" y="138" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Function</text>
+<g transform="translate(705.67, 116.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(695.67, 166.00)">
+<g transform="translate(705.67, 136.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(794.33, 156.00)">
+<g transform="translate(784.33, 126.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="78f720fe-8774-42c3-be6b-5a4ef30e00df">
-<rect x="1049.9998905072878" y="319.99994009070633" width="100.00021898542433" height="40.00011981858737" rx="20" fill="#ffffff"/>
-<rect x="1049.9998905072878" y="319.99994009070633" width="100.00021898542433" height="40.00011981858737" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="1100" y="336" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">E(t)</text>
-<text x="1100" y="348" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(1096.00, 315.67)">
+<rect x="1099.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="#ffffff"/>
+<rect x="1099.9999531219362" y="320.0000060869676" width="80.00009375612754" height="39.99998782606486" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="1140" y="336" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">E(t)</text>
+<text x="1140" y="348" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(1136.00, 315.67)">
 	<path d="M 1.00 0.00 L 7.00 0.00 Q 8.00 0.00 8.00 1.00 L 8.00 5.00 Q 8.00 6.00 7.29 6.71 L 4.71 9.29 Q 4.00 10.00 3.29 9.29 L 0.71 6.71 Q 0.00 6.00 0.00 5.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 5.20 0.00 Q 6.00 0.00 6.00 0.80 L 6.00 3.79 Q 6.00 4.59 5.43 5.15 L 3.57 7.02 Q 3.00 7.59 2.43 7.02 L 0.57 5.15 Q 0.00 4.59 0.00 3.79 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>

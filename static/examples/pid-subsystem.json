@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T16:09:45.159Z",
-    "modified": "2026-01-19T16:09:45.159Z",
+    "created": "2026-01-19T22:25:14.633Z",
+    "modified": "2026-01-19T22:25:14.633Z",
     "name": "pid-subsystem"
   },
   "graph": {
@@ -12,8 +12,8 @@
         "type": "StepSource",
         "name": "Setpoint",
         "position": {
-          "x": 600,
-          "y": 370
+          "x": 700,
+          "y": 240
         },
         "inputs": [],
         "outputs": [
@@ -28,7 +28,7 @@
         "params": {
           "amplitude": "[1, 0.5]",
           "tau": "[20+tau_1, 40+tau_2]",
-          "_rotation": 0
+          "_rotation": 1
         }
       },
       {
@@ -74,7 +74,7 @@
         "type": "PID",
         "name": "PID",
         "position": {
-          "x": 990,
+          "x": 1010,
           "y": 300
         },
         "inputs": [
@@ -159,7 +159,7 @@
         "type": "Subsystem",
         "name": "Plant",
         "position": {
-          "x": 890,
+          "x": 900,
           "y": 370
         },
         "inputs": [
@@ -409,8 +409,8 @@
       {
         "id": "2e8245a1-8247-4527-acbe-11ffa83669c4",
         "position": {
-          "x": 1215,
-          "y": 315
+          "x": 1120,
+          "y": 310
         },
         "content": "# PID Loop\n\nThe classic PID control loop. The plant is modeled as a subsystem, double click to view the internals.",
         "width": 200,
