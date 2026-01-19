@@ -215,9 +215,15 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 			`<line x1="${x}" y1="${pinnedY}" x2="${x + width}" y2="${pinnedY}" stroke="${ctx.theme.border}" stroke-width="1"/>`
 		);
 
-		// Background for pinned params area
+		// Background for pinned params area (square top, rounded bottom to match node)
+		const px = x + 1;
+		const py = pinnedY + 1;
+		const pw = width - 2;
+		const ph = pinnedParamsHeight - 2;
+		const br = Math.max(0, borderRadius - 1);
+		// Path: start top-left, go right, down, rounded bottom-right, left, rounded bottom-left, up
 		parts.push(
-			`<rect x="${x + 1}" y="${pinnedY + 1}" width="${width - 2}" height="${pinnedParamsHeight - 2}" rx="${Math.max(0, borderRadius - 1)}" fill="${ctx.theme.surface}"/>`
+			`<path d="M${px},${py} h${pw} v${ph - br} a${br},${br} 0 0 1 -${br},${br} h-${pw - 2 * br} a${br},${br} 0 0 1 -${br},-${br} v-${ph - br} z" fill="${ctx.theme.surface}"/>`
 		);
 
 		// Each pinned param row
