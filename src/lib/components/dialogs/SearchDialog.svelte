@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { graphStore, type SearchableNode } from '$lib/stores/graph';
@@ -21,8 +22,12 @@
 	let currentPath = $state<string[]>([]);
 
 	// Subscribe to current path for prioritizing current view
-	graphStore.currentPath.subscribe((path) => {
+	const unsubscribePath = graphStore.currentPath.subscribe((path) => {
 		currentPath = path;
+	});
+
+	onDestroy(() => {
+		unsubscribePath();
 	});
 
 	// Refresh node list when dialog opens
