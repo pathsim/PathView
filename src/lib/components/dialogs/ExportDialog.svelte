@@ -27,7 +27,7 @@
 	let currentTheme = $state<Theme>('dark');
 
 	// Subscribe to theme changes
-	themeStore.subscribe((theme) => {
+	const unsubscribeTheme = themeStore.subscribe((theme) => {
 		currentTheme = theme;
 		if (editorView && cmModules && editorContainer) {
 			recreateEditor();
@@ -125,6 +125,7 @@
 	}
 
 	onDestroy(() => {
+		unsubscribeTheme();
 		destroyEditor();
 	});
 </script>
