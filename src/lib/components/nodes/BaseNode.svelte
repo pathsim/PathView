@@ -144,11 +144,20 @@
 	// = 11 + 20*N + 4*(N-1) = 7 + 24*N for N > 0
 	const pinnedParamsHeight = $derived(pinnedCount > 0 ? 7 + 24 * pinnedCount : 0);
 
-	// Width: base width, or more for vertical orientation with many ports
+	// Width calculation:
+	// - Base width: 100px
+	// - Name width: ~6px per char + 24px padding, estimate from name length
+	// - Pinned params: need ~120px minimum for label + input
+	// - Vertical orientation: also consider port count
+	const nameWidth = $derived(data.name.length * 6 + 24);
+	const pinnedParamsWidth = $derived(pinnedCount > 0 ? 120 : 0);
 	const nodeWidth = $derived(
-		isVertical
-			? snapTo2G(Math.max(NODE.baseWidth, minPortDimension))
-			: snapTo2G(NODE.baseWidth)
+		snapTo2G(Math.max(
+			NODE.baseWidth,
+			nameWidth,
+			pinnedParamsWidth,
+			isVertical ? minPortDimension : 0
+		))
 	);
 
 	// Height: base + pinned params, or more for horizontal orientation with many ports
