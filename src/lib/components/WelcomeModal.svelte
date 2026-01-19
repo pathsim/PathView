@@ -7,6 +7,7 @@
 
 	interface Example {
 		name: string;
+		description?: string;
 		file: string;
 		previewBase: string;
 	}
@@ -51,6 +52,7 @@
 								const baseName = filename.replace('.json', '');
 								return {
 									name: data.metadata?.name || baseName,
+									description: data.metadata?.description,
 									file: `${base}/examples/${filename}`,
 									previewBase: `${base}/examples/${baseName}`
 								};
@@ -154,6 +156,9 @@
 							<div class="example-preview">
 								<img src="{example.previewBase}-{isDark ? 'dark' : 'light'}.svg" alt="{example.name} preview" />
 							</div>
+							{#if example.description}
+								<div class="example-description">{example.description}</div>
+							{/if}
 						</button>
 					{/each}
 				</div>
@@ -253,6 +258,7 @@
 	}
 
 	.example-card {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
@@ -261,14 +267,34 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
 		cursor: pointer;
-		transition: all 0.15s ease;
+		transition: transform 0.15s ease;
 		text-align: left;
 		overflow: hidden;
 		font-family: inherit;
 	}
 
 	.example-card:hover {
-		border-color: var(--accent);
+		transform: scale(1.03);
+	}
+
+	.example-description {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 6px 8px;
+		background: color-mix(in srgb, var(--surface) 90%, transparent);
+		backdrop-filter: blur(4px);
+		border-top: 1px solid var(--border);
+		border-radius: 0 0 var(--radius-md) var(--radius-md);
+		font-size: 10px;
+		color: var(--text-muted);
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+
+	.example-card:hover .example-description {
+		opacity: 1;
 	}
 
 	.example-preview {

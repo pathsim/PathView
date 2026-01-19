@@ -82,7 +82,7 @@
 		let position = typeof params === 'string' ? 'bottom' : (params.position ?? 'bottom');
 
 		function handleMouseEnter() {
-			showTooltip(text, node, position, shortcut, maxWidth);
+			if (text) showTooltip(text, node, position, shortcut, maxWidth);
 		}
 
 		function handleMouseLeave() {
