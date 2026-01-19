@@ -134,19 +134,28 @@
 	});
 
 	const maxPortsOnSide = $derived(Math.max(data.inputs.length, data.outputs.length));
+	const pinnedCount = $derived(validPinnedParams().length);
 
-	// Minimum node dimensions based on port count (grid-aligned to 2G)
-	// Content can expand beyond these minimums
+	// Node dimensions - calculated from data, always grid-snapped
+	// Port dimension: space needed for ports on one side
 	const minPortDimension = $derived(Math.max(1, maxPortsOnSide) * NODE.portSpacing);
-	const minNodeHeight = $derived(
-		isVertical
-			? snapTo2G(NODE.baseHeight)
-			: snapTo2G(Math.max(NODE.baseHeight, minPortDimension))
-	);
-	const minNodeWidth = $derived(
+
+	// Pinned params height: border(1) + padding(10) + rows(20 each) + gaps(4 between)
+	// = 11 + 20*N + 4*(N-1) = 7 + 24*N for N > 0
+	const pinnedParamsHeight = $derived(pinnedCount > 0 ? 7 + 24 * pinnedCount : 0);
+
+	// Width: base width, or more for vertical orientation with many ports
+	const nodeWidth = $derived(
 		isVertical
 			? snapTo2G(Math.max(NODE.baseWidth, minPortDimension))
 			: snapTo2G(NODE.baseWidth)
+	);
+
+	// Height: base + pinned params, or more for horizontal orientation with many ports
+	const nodeHeight = $derived(
+		isVertical
+			? snapTo2G(NODE.baseHeight + pinnedParamsHeight)
+			: snapTo2G(Math.max(NODE.baseHeight, minPortDimension) + pinnedParamsHeight)
 	);
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
@@ -285,7 +294,7 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	data-rotation={rotation}
-	style="width: {minNodeWidth}px; min-height: {minNodeHeight}px; --node-color: {nodeColor};"
+	style="width: {nodeWidth}px; height: {nodeHeight}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -451,21 +460,25 @@
 		z-index: 1000 !important;
 	}
 
-	/* Inner wrapper for content */
+	/* Inner wrapper for content - fills node, clips to rounded corners */
 	.node-inner {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 		border-radius: inherit;
 		overflow: hidden;
-		/* Constrain content to node width */
-		width: 100%;
+		min-height: 0;
 	}
 
-	/* Content - must fit within base dimensions (40px height, 100px width) */
+	/* Content - centered in available space */
 	.node-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 		padding: 6px 12px;
-		background: var(--surface-raised);
 		text-align: center;
 		line-height: 1.2;
-		/* Prevent content from expanding node width */
 		min-width: 0;
 		overflow: hidden;
 	}
