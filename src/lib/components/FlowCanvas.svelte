@@ -392,7 +392,8 @@
 				graphNode.inputs.length,
 				graphNode.outputs.length,
 				pinnedParamCount,
-				rotation
+				rotation,
+				typeDef?.name
 			);
 
 			// If node exists, update data but don't preserve selection here

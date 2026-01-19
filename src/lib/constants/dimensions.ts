@@ -81,7 +81,8 @@ export function calculateNodeDimensions(
 	inputCount: number,
 	outputCount: number,
 	pinnedParamCount: number,
-	rotation: number
+	rotation: number,
+	typeName?: string
 ): { width: number; height: number } {
 	const isVertical = rotation === 1 || rotation === 3;
 	const maxPortsOnSide = Math.max(inputCount, outputCount);
@@ -90,12 +91,15 @@ export function calculateNodeDimensions(
 	// Pinned params height: border(1) + padding(10) + rows(20 each) + gaps(4 between)
 	const pinnedParamsHeight = pinnedParamCount > 0 ? 7 + 24 * pinnedParamCount : 0;
 
-	// Width: base, name estimate, pinned params minimum, port dimension (if vertical)
+	// Width: base, name estimate, type name estimate, pinned params minimum, port dimension (if vertical)
+	// Name uses 10px font (~6px per char), type uses 8px font (~5px per char)
 	const nameWidth = name.length * 6 + 24;
+	const typeWidth = typeName ? typeName.length * 5 + 24 : 0;
 	const pinnedParamsWidth = pinnedParamCount > 0 ? 160 : 0;
 	const width = snapTo2G(Math.max(
 		NODE.baseWidth,
 		nameWidth,
+		typeWidth,
 		pinnedParamsWidth,
 		isVertical ? minPortDimension : 0
 	));

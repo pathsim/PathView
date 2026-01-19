@@ -142,7 +142,8 @@
 		data.inputs.length,
 		data.outputs.length,
 		pinnedCount,
-		rotation
+		rotation,
+		typeDef?.name
 	));
 	const nodeWidth = $derived(nodeDimensions.width);
 	const nodeHeight = $derived(nodeDimensions.height);
