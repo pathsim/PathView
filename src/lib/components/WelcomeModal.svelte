@@ -268,15 +268,11 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius-md);
 		cursor: pointer;
-		transition: transform 0.15s ease;
 		text-align: left;
 		overflow: hidden;
 		font-family: inherit;
 	}
 
-	.example-card:hover {
-		transform: scale(1.03);
-	}
 
 	.example-info {
 		position: absolute;
