@@ -11,6 +11,7 @@
 import { get } from 'svelte/store';
 import { graphStore } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
+import { nodeRegistry } from '$lib/nodes';
 import { getThemeColors } from '$lib/constants/theme';
 import { NODE, EVENT } from '$lib/constants/dimensions';
 import { getHandlePath } from '$lib/constants/handlePaths';
@@ -171,26 +172,84 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 		`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${borderRadius}" fill="none" stroke="${ctx.theme.edge}" stroke-width="1"${strokeDasharray}/>`
 	);
 
+	// Get pinned params info
+	const typeDef = nodeRegistry.get(node.type);
+	const validPinnedParams = node.pinnedParams?.filter(
+		(name) => typeDef?.params.some((p) => p.name === name)
+	) || [];
+	const hasPinnedParams = validPinnedParams.length > 0;
+
+	// Calculate content area height (excluding pinned params)
+	// Pinned params: 7px top padding + 24px per row
+	const pinnedParamsHeight = hasPinnedParams ? 7 + 24 * validPinnedParams.length : 0;
+	const contentHeight = height - pinnedParamsHeight;
+
 	// Labels
 	if (ctx.options.showLabels) {
 		const centerX = x + width / 2;
-		const centerY = y + height / 2;
+		const contentCenterY = y + contentHeight / 2;
 
 		if (ctx.options.showTypeLabels && nodeType) {
 			// Name above center
 			parts.push(
-				`<text x="${centerX}" y="${centerY - 4}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
+				`<text x="${centerX}" y="${contentCenterY - 4}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
 			);
 			// Type below center
 			parts.push(
-				`<text x="${centerX}" y="${centerY + 8}" text-anchor="middle" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeType)}</text>`
+				`<text x="${centerX}" y="${contentCenterY + 8}" text-anchor="middle" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeType)}</text>`
 			);
 		} else {
 			// Just name, centered
 			parts.push(
-				`<text x="${centerX}" y="${centerY}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
+				`<text x="${centerX}" y="${contentCenterY}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
 			);
 		}
+	}
+
+	// Pinned parameters
+	if (hasPinnedParams && typeDef) {
+		const pinnedY = y + contentHeight;
+
+		// Separator line
+		parts.push(
+			`<line x1="${x}" y1="${pinnedY}" x2="${x + width}" y2="${pinnedY}" stroke="${ctx.theme.border}" stroke-width="1"/>`
+		);
+
+		// Background for pinned params area
+		parts.push(
+			`<rect x="${x + 1}" y="${pinnedY + 1}" width="${width - 2}" height="${pinnedParamsHeight - 2}" rx="${Math.max(0, borderRadius - 1)}" fill="${ctx.theme.surface}"/>`
+		);
+
+		// Each pinned param row
+		validPinnedParams.forEach((paramName, index) => {
+			const paramDef = typeDef.params.find((p) => p.name === paramName);
+			const value = node.params[paramName];
+			const displayValue = value !== undefined && value !== '' ? String(value) : (paramDef?.default !== undefined ? String(paramDef.default) : '');
+
+			// Row Y position: 7px top padding + 24px per row, center each row
+			const rowY = pinnedY + 7 + index * 24 + 10; // +10 for vertical centering in 20px row
+
+			// Label (left side)
+			parts.push(
+				`<text x="${x + 10}" y="${rowY}" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(paramName)}</text>`
+			);
+
+			// Value (right side, in a box)
+			const inputX = x + 60;
+			const inputWidth = width - 70;
+			const inputY = rowY - 10;
+			const inputHeight = 20;
+
+			// Input background
+			parts.push(
+				`<rect x="${inputX}" y="${inputY}" width="${inputWidth}" height="${inputHeight}" rx="4" fill="${ctx.theme.surfaceRaised}" stroke="${ctx.theme.border}" stroke-width="1"/>`
+			);
+
+			// Input value
+			parts.push(
+				`<text x="${inputX + 8}" y="${rowY}" dominant-baseline="middle" fill="${ctx.theme.text}" font-size="9" font-family="ui-monospace, monospace">${escapeXml(displayValue)}</text>`
+			);
+		});
 	}
 
 	// Handles
