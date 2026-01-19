@@ -39,7 +39,6 @@
 		toFlowEdge,
 		toEventNode,
 		toAnnotationNode,
-		parseHandlePort,
 		rotateSelectedNodes,
 		flipSelectedNodesHorizontal,
 		flipSelectedNodesVertical,

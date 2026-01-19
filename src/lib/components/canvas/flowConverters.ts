@@ -61,12 +61,3 @@ export function toFlowEdge(conn: Connection): Edge {
 		animated: false
 	};
 }
-
-/**
- * Parse port index from a SvelteFlow handle ID
- * Handle format: "{nodeId}-{direction}-{index}" e.g., "node1-output-0"
- * @deprecated Use HANDLE_ID.parseIndex instead
- */
-export function parseHandlePort(handle: string, direction: 'input' | 'output'): number | null {
-	return HANDLE_ID.parseIndex(handle, direction);
-}
