@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T16:03:09.415Z",
-    "modified": "2026-01-19T16:03:09.415Z",
+    "created": "2026-01-19T22:28:52.786Z",
+    "modified": "2026-01-19T22:28:52.786Z",
     "name": "bouncing-ball"
   },
   "graph": {
@@ -37,14 +37,17 @@
         ],
         "params": {
           "initial_value": "x0 "
-        }
+        },
+        "pinnedParams": [
+          "initial_value"
+        ]
       },
       {
         "id": "d6b8ebf1-173b-4f71-a160-d86545a80cb9",
         "type": "Integrator",
         "name": "vel",
         "position": {
-          "x": 530,
+          "x": 490,
           "y": 250
         },
         "inputs": [
@@ -67,14 +70,17 @@
             "color": "#969696"
           }
         ],
-        "params": {}
+        "params": {},
+        "pinnedParams": [
+          "initial_value"
+        ]
       },
       {
         "id": "c76c21f3-21cd-453e-9437-8e8af946d1c7",
         "type": "Scope",
         "name": "x(t)",
         "position": {
-          "x": 860,
+          "x": 880,
           "y": 340
         },
         "inputs": [
@@ -97,8 +103,8 @@
         "type": "Constant",
         "name": "gravity",
         "position": {
-          "x": 430,
-          "y": 160
+          "x": 360,
+          "y": 150
         },
         "inputs": [],
         "outputs": [
@@ -114,7 +120,10 @@
         "params": {
           "value": "-g",
           "_rotation": 1
-        }
+        },
+        "pinnedParams": [
+          "value"
+        ]
       },
       {
         "id": "d73713d6-eb61-442e-a69b-c4d168180ef4",
@@ -142,10 +151,10 @@
       {
         "id": "db488fa8-9004-40f7-a724-bc9846dd2f85",
         "type": "Function",
-        "name": "total energy",
+        "name": "energy",
         "position": {
           "x": 750,
-          "y": 160
+          "y": 130
         },
         "inputs": [
           {
@@ -178,14 +187,15 @@
         "params": {
           "func": "lambda v, x: m*(v**2/2 + g*x)",
           "_rotation": 0
-        }
+        },
+        "pinnedParams": []
       },
       {
         "id": "78f720fe-8774-42c3-be6b-5a4ef30e00df",
         "type": "Scope",
         "name": "E(t)",
         "position": {
-          "x": 1100,
+          "x": 1140,
           "y": 340
         },
         "inputs": [
@@ -259,8 +269,8 @@
       {
         "id": "deeecd86-71ac-4a13-a289-c64c946e667c",
         "position": {
-          "x": -50,
-          "y": 60
+          "x": -160,
+          "y": 40
         },
         "content": "# Bouncing Ball Physics\n\nThis is an example of a hybrid system with continuous dynamics (free falling ball) and discrete events (bounces).\n\nIntegrating the gravitational acceleration gives the ball velocity in free fall:\n\n$$ v(t) = - \\int_0^t g \\, d\\tau $$\n\nAnd the position is the integrated velocity:\n\n$$ x(t) = \\int_0^t v(\\tau) \\, d\\tau $$\n\nWe use an event node to define the discrete dynamics of the ball hitting the ground. Whenever the position crosses zero\n\n$$ |x(t)| = 0 $$\n\nthe sign of the velocity is flipped and a coefficient of restitution ($b$) is applied to model the energy loss from the deformation of the ball:\n\n$$ y(t) \\leftarrow -b \\, y(t)  $$\n\nWhen the total energy drops below a certain threshold we consider that a Zeno state and stop the simulation.",
         "width": 425,
@@ -274,7 +284,7 @@
       "type": "pathsim.events.ZeroCrossing",
       "name": "Bounce",
       "position": {
-        "x": 980,
+        "x": 1000,
         "y": 260
       },
       "params": {
@@ -287,7 +297,7 @@
       "type": "pathsim.events.Condition",
       "name": "Zeno",
       "position": {
-        "x": 1200,
+        "x": 1260,
         "y": 260
       },
       "params": {
@@ -297,7 +307,7 @@
     }
   ],
   "codeContext": {
-    "code": "# initial position \nx0 = 1\n\n# mass\nm = 1\n\n# gravity\ng = 9.81\n\n# bounce back coefficient (randomized)\nb = 0.85 + 0.1*np.random.rand()\n\n# zeno energy threshold\ne_th = 0.5\n\n# event detection function\ndef bounce_detect(t):\n    return pos.engine.state\n\n# event resolution function\ndef bounce_resolve(t):\n    pos.engine.set(-pos.engine.state)\n    vel.engine.set(-b*vel.engine.state)\n\n# zeno state detection\ndef zeno_detect(t):\n    e = total_energy.outputs[0]\n    return e < e_th\n\n# stop simulation \ndef zeno_resolve(t):\n    sim.stop()\n"
+    "code": "# initial position \nx0 = 1\n\n# mass\nm = 1\n\n# gravity\ng = 9.81\n\n# bounce back coefficient (randomized)\nb = 0.85 + 0.1*np.random.rand()\n\n# zeno energy threshold\ne_th = 0.5\n\n# event detection function\ndef bounce_detect(t):\n    return pos.engine.state\n\n# event resolution function\ndef bounce_resolve(t):\n    pos.engine.set(-pos.engine.state)\n    vel.engine.set(-b*vel.engine.state)\n\n# zeno state detection\ndef zeno_detect(t):\n    e = energy.outputs[0]\n    return e < e_th\n\n# stop simulation \ndef zeno_resolve(t):\n    sim.stop()\n"
   },
   "simulationSettings": {
     "duration": "50",

@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T16:01:11.207Z",
-    "modified": "2026-01-19T16:01:11.207Z",
+    "created": "2026-01-19T22:45:20.066Z",
+    "modified": "2026-01-19T22:45:20.066Z",
     "name": "cascade-subsystem"
   },
   "graph": {
@@ -12,8 +12,8 @@
         "type": "StepSource",
         "name": "Setpoint",
         "position": {
-          "x": 720,
-          "y": 440
+          "x": 740,
+          "y": 470
         },
         "inputs": [],
         "outputs": [
@@ -65,14 +65,18 @@
           "Ki": "0.015/0.716",
           "Kd": "0",
           "f_max": "10"
-        }
+        },
+        "pinnedParams": [
+          "Ki",
+          "Kp"
+        ]
       },
       {
         "id": "b449fb93-54e1-4cfd-862b-cbb66d919d91",
         "type": "Adder",
         "name": "Error-1",
         "position": {
-          "x": 910,
+          "x": 900,
           "y": 330
         },
         "inputs": [
@@ -113,7 +117,7 @@
         "type": "Adder",
         "name": "Error-2",
         "position": {
-          "x": 1240,
+          "x": 1270,
           "y": 340
         },
         "inputs": [
@@ -154,7 +158,7 @@
         "type": "PID",
         "name": "PI-2",
         "position": {
-          "x": 1410,
+          "x": 1460,
           "y": 340
         },
         "inputs": [
@@ -182,7 +186,11 @@
           "Ki": "0.244/0.134",
           "Kd": "0",
           "f_max": "10"
-        }
+        },
+        "pinnedParams": [
+          "Kp",
+          "Ki"
+        ]
       },
       {
         "id": "40ac8e75-a709-4434-9001-63bc1d73106c",
@@ -190,7 +198,7 @@
         "name": "Plant",
         "position": {
           "x": 1330,
-          "y": 410
+          "y": 450
         },
         "inputs": [
           {
@@ -545,8 +553,8 @@
         "type": "Scope",
         "name": "Plant vs Setpoint",
         "position": {
-          "x": 1020,
-          "y": 500
+          "x": 1040,
+          "y": 540
         },
         "inputs": [
           {
@@ -577,8 +585,8 @@
         "type": "Scope",
         "name": "Err-1 and PI-1",
         "position": {
-          "x": 1010,
-          "y": 240
+          "x": 990,
+          "y": 200
         },
         "inputs": [
           {
@@ -609,8 +617,8 @@
         "type": "Scope",
         "name": "Err-2 and PI-2",
         "position": {
-          "x": 1340,
-          "y": 240
+          "x": 1360,
+          "y": 200
         },
         "inputs": [
           {
@@ -734,12 +742,12 @@
       {
         "id": "416e7281-7496-4b94-8c9f-ab802029d5e9",
         "position": {
-          "x": 690,
-          "y": 220
+          "x": 700,
+          "y": 180
         },
         "content": "# Cascade PI Controler\n\nThis example is a cascade controler. The plant is modeled as a **Subsystem**. Double click to enter.",
-        "width": 230,
-        "height": 115
+        "width": 220,
+        "height": 120
       }
     ]
   },
