@@ -11,7 +11,6 @@
 import { get } from 'svelte/store';
 import { graphStore } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
-import { nodeRegistry } from '$lib/nodes';
 import { getThemeColors } from '$lib/constants/theme';
 import { NODE, EVENT } from '$lib/constants/dimensions';
 import { getHandlePath } from '$lib/constants/handlePaths';
@@ -172,22 +171,22 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 		`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${borderRadius}" fill="none" stroke="${ctx.theme.edge}" stroke-width="1"${strokeDasharray}/>`
 	);
 
-	// Get pinned params info
-	const typeDef = nodeRegistry.get(node.type);
-	const validPinnedParams = node.pinnedParams?.filter(
-		(name) => typeDef?.params.some((p) => p.name === name)
-	) || [];
-	const hasPinnedParams = validPinnedParams.length > 0;
+	// Check for pinned params section in DOM
+	const pinnedParamsEl = nodeEl.querySelector('.pinned-params') as HTMLElement;
+	const zoom = getZoom();
+	const nodeRect = wrapper.getBoundingClientRect();
 
-	// Calculate content area height (excluding pinned params)
-	// Pinned params: 7px top padding + 24px per row
-	const pinnedParamsHeight = hasPinnedParams ? 7 + 24 * validPinnedParams.length : 0;
-	const contentHeight = height - pinnedParamsHeight;
+	// Calculate content center (above pinned params if present)
+	let contentCenterY = y + height / 2;
+	if (pinnedParamsEl) {
+		const pinnedRect = pinnedParamsEl.getBoundingClientRect();
+		const pinnedTop = (pinnedRect.top - nodeRect.top) / zoom;
+		contentCenterY = y + pinnedTop / 2;
+	}
 
 	// Labels
 	if (ctx.options.showLabels) {
 		const centerX = x + width / 2;
-		const contentCenterY = y + contentHeight / 2;
 
 		if (ctx.options.showTypeLabels && nodeType) {
 			// Name above center
@@ -206,54 +205,61 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 		}
 	}
 
-	// Pinned parameters
-	if (hasPinnedParams && typeDef) {
-		const pinnedY = y + contentHeight;
+	// Pinned parameters - read positions from DOM
+	if (pinnedParamsEl) {
+		const pinnedRect = pinnedParamsEl.getBoundingClientRect();
+		const pinnedTop = y + (pinnedRect.top - nodeRect.top) / zoom;
+		const pinnedHeight = pinnedRect.height / zoom;
 
 		// Separator line
 		parts.push(
-			`<line x1="${x}" y1="${pinnedY}" x2="${x + width}" y2="${pinnedY}" stroke="${ctx.theme.border}" stroke-width="1"/>`
+			`<line x1="${x}" y1="${pinnedTop}" x2="${x + width}" y2="${pinnedTop}" stroke="${ctx.theme.border}" stroke-width="1"/>`
 		);
 
 		// Background for pinned params area (square top, rounded bottom to match node)
 		const px = x + 1;
-		const py = pinnedY + 1;
+		const py = pinnedTop + 1;
 		const pw = width - 2;
-		const ph = pinnedParamsHeight - 2;
+		const ph = pinnedHeight - 1;
 		const br = Math.max(0, borderRadius - 1);
 		// Path: start top-left, go right, down, rounded bottom-right, left, rounded bottom-left, up
 		parts.push(
 			`<path d="M${px},${py} h${pw} v${ph - br} a${br},${br} 0 0 1 -${br},${br} h-${pw - 2 * br} a${br},${br} 0 0 1 -${br},-${br} v-${ph - br} z" fill="${ctx.theme.surface}"/>`
 		);
 
-		// Each pinned param row
-		validPinnedParams.forEach((paramName, index) => {
-			const paramDef = typeDef.params.find((p) => p.name === paramName);
-			const value = node.params[paramName];
-			const displayValue = value !== undefined && value !== '' ? String(value) : (paramDef?.default !== undefined ? String(paramDef.default) : '');
+		// Each pinned param row - read from DOM
+		pinnedParamsEl.querySelectorAll('.pinned-param').forEach((paramEl) => {
+			const labelEl = paramEl.querySelector('label') as HTMLElement;
+			const inputEl = paramEl.querySelector('input') as HTMLInputElement;
+			if (!labelEl || !inputEl) return;
 
-			// Row Y position: 7px top padding + 24px per row, center each row
-			const rowY = pinnedY + 7 + index * 24 + 10; // +10 for vertical centering in 20px row
+			const labelRect = labelEl.getBoundingClientRect();
+			const inputRect = inputEl.getBoundingClientRect();
 
-			// Label (left side)
+			// Label position
+			const labelX = x + (labelRect.left - nodeRect.left) / zoom;
+			const labelY = y + (labelRect.top + labelRect.height / 2 - nodeRect.top) / zoom;
+			const labelText = labelEl.textContent || '';
+
 			parts.push(
-				`<text x="${x + 10}" y="${rowY}" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(paramName)}</text>`
+				`<text x="${labelX}" y="${labelY}" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(labelText)}</text>`
 			);
 
-			// Value (right side, in a box)
-			const inputX = x + 60;
-			const inputWidth = width - 70;
-			const inputY = rowY - 10;
-			const inputHeight = 20;
+			// Input box position
+			const inputX = x + (inputRect.left - nodeRect.left) / zoom;
+			const inputY = y + (inputRect.top - nodeRect.top) / zoom;
+			const inputW = inputRect.width / zoom;
+			const inputH = inputRect.height / zoom;
+			const inputValue = inputEl.value || inputEl.placeholder || '';
 
 			// Input background
 			parts.push(
-				`<rect x="${inputX}" y="${inputY}" width="${inputWidth}" height="${inputHeight}" rx="4" fill="${ctx.theme.surfaceRaised}" stroke="${ctx.theme.border}" stroke-width="1"/>`
+				`<rect x="${inputX}" y="${inputY}" width="${inputW}" height="${inputH}" rx="4" fill="${ctx.theme.surfaceRaised}" stroke="${ctx.theme.border}" stroke-width="1"/>`
 			);
 
 			// Input value
 			parts.push(
-				`<text x="${inputX + 8}" y="${rowY}" dominant-baseline="middle" fill="${ctx.theme.text}" font-size="9" font-family="ui-monospace, monospace">${escapeXml(displayValue)}</text>`
+				`<text x="${inputX + 8}" y="${inputY + inputH / 2}" dominant-baseline="middle" fill="${ctx.theme.text}" font-size="9" font-family="ui-monospace, monospace">${escapeXml(inputValue)}</text>`
 			);
 		});
 	}
