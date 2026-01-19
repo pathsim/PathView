@@ -103,4 +103,35 @@
 		gap: var(--space-sm);
 		padding: var(--space-sm) var(--space-md) var(--space-md);
 	}
+
+	.dialog-footer button {
+		padding: var(--space-sm) var(--space-md);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		font-size: 11px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all var(--transition-fast);
+	}
+
+	.dialog-footer button.ghost {
+		background: transparent;
+		color: var(--text-muted);
+	}
+
+	.dialog-footer button.ghost:hover {
+		background: var(--surface-hover);
+		color: var(--text);
+		border-color: var(--border-focus);
+	}
+
+	.dialog-footer button:not(.ghost) {
+		background: var(--accent);
+		color: var(--surface);
+		border-color: var(--accent);
+	}
+
+	.dialog-footer button:not(.ghost):hover {
+		filter: brightness(1.1);
+	}
 </style>
