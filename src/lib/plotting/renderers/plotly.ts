@@ -15,16 +15,10 @@ export const PLOTLY_CONFIG: Partial<Plotly.Config> = {
 	responsive: true,
 	displaylogo: false,
 	displayModeBar: 'hover',
-	modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+	modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toImage'],
 	modeBarButtonsToAdd: [],
-	toImageButtonOptions: {
-		format: 'svg',
-		filename: 'pathview_plot',
-		height: 600,
-		width: 1000,
-		scale: 2
-	},
-	scrollZoom: true
+	scrollZoom: true,
+	doubleClick: 'reset'
 };
 
 // ============================================================

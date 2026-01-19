@@ -470,17 +470,6 @@ function buildPlotMenu(nodeId: string, plotEl: HTMLDivElement): MenuItemType[] {
 
 	return [
 		{
-			label: 'Download PNG',
-			icon: 'image',
-			action: () => downloadPlotImage(plotEl, 'png', nodeName)
-		},
-		{
-			label: 'Download SVG',
-			icon: 'image',
-			action: () => downloadPlotImage(plotEl, 'svg', nodeName)
-		},
-		DIVIDER,
-		{
 			label: 'Export CSV',
 			icon: 'table',
 			action: () => exportRecordingData(nodeId, nodeName, nodeType),
@@ -495,6 +484,7 @@ function buildPlotMenu(nodeId: string, plotEl: HTMLDivElement): MenuItemType[] {
 		{
 			label: 'Reset View',
 			icon: 'maximize',
+			shortcut: 'Dbl-click',
 			action: async () => {
 				const Plotly = await import('plotly.js-dist-min');
 				Plotly.relayout(plotEl, {
