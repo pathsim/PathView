@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import Icon from '$lib/components/icons/Icon.svelte';
@@ -35,6 +36,10 @@
 	// Sync from store - update entire settings object for reactivity
 	const unsubscribe = plotSettingsStore.subscribe((s) => {
 		settings = s;
+	});
+
+	onDestroy(() => {
+		unsubscribe();
 	});
 
 	function handleKeydown(event: KeyboardEvent) {
