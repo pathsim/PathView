@@ -6,6 +6,7 @@
 import type { Backend } from './types';
 import { PyodideBackend } from './pyodide/backend';
 import type { BackendPreference } from '$lib/types';
+import { backendPreferenceStore } from '$lib/stores';
 
 export type BackendType = 'pyodide' | 'local' | 'remote';
 
@@ -15,8 +16,8 @@ let currentBackendType: BackendPreference | null = null;
 /**
  * Get the current backend, creating a Pyodide backend if none exists
  */
-export function getBackend(currentBackendPreference: null | BackendPreference = null): Backend {
-	console.log("(registry.ts) Current Backend Preference is: ", currentBackendPreference)
+export function getBackend(): Backend {
+	let currentBackendPreference = backendPreferenceStore.get()
 	if (!currentBackend) {
 		if(currentBackendPreference == null) currentBackendPreference = "pyodide"
 		currentBackend = createBackend(currentBackendPreference);

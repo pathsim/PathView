@@ -44,8 +44,8 @@ export const replState = {
 /**
  * Initialize the backend
  */
-export async function init(currentBackendPreference: null | BackendPreference): Promise<void> {
-	const backend = getBackend(currentBackendPreference);
+export async function init(): Promise<void> {
+	const backend = getBackend();
 
 	// Set up console output callbacks
 	backend.onStdout((value) => consoleStore.output(value));

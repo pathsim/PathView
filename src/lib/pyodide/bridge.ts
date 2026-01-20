@@ -192,9 +192,8 @@ async function injectHelpers(): Promise<void> {
 /**
  * Initialize Pyodide
  */
-export async function initPyodide(currentBackendPreference: null | BackendPreference): Promise<void> {
-	console.log("(bridge, initPyodide) Current Backend Preference: ", currentBackendPreference)
-	await initRepl(currentBackendPreference);
+export async function initPyodide(): Promise<void> {
+	await initRepl();
 	await injectHelpers();
 }
 
@@ -512,13 +511,11 @@ export async function resetSimulation(): Promise<void> {
  */
 export async function validateGraph(
 	codeContext: string,
-	nodeParams: Record<string, Record<string, string>>,
-	currentBackendPreference: null | BackendPreference
+	nodeParams: Record<string, Record<string, string>>
 ): Promise<ValidationResult> {
 	const state = get(replState);
 	if (!state.initialized) {
-		console.log("(bridge) Current Backend Preference: ", currentBackendPreference)
-		await initPyodide(currentBackendPreference);
+		await initPyodide();
 	}
 
 	try {

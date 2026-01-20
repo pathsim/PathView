@@ -10,13 +10,13 @@ import { PROGRESS_MESSAGES, ERROR_MESSAGES } from "$lib/constants/messages";
 import type { Backend, REPLRequest, REPLResponse } from "../types";
 
 import type { PyodideInterface } from "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.mjs";
-import type { BackendPreference } from "$lib/types";
 import { getFlaskBackendUrl } from "$lib/utils/flaskRoutes";
+import { backendPreferenceStore } from "$lib/stores";
+import type { BackendPreference } from "$lib/types";
 
 let pyodide: PyodideInterface | null = null;
 let isInitialized = false;
-let backendPreference : null | BackendPreference = null
-let isFlaskInitialized = true;
+let backendPreference : null | BackendPreference = "pyodide"
 let streamingActive = false;
 const streamingCodeQueue: string[] = [];
 
@@ -30,7 +30,9 @@ function send(response: REPLResponse): void {
 /**
  * Initialize Pyodide and install packages (Needs FLASK Rework)
  */
-async function initialize(): Promise<void> {
+async function initialize(eventPreference : BackendPreference): Promise<void> {
+  console.log(`(worker.ts, initialize) Setting the backend preference to: ${eventPreference}`)
+  backendPreference = eventPreference
   if (!backendPreference || backendPreference == "pyodide") { // Default to pyodide use
     if (isInitialized) {
       send({ type: "ready" });
@@ -82,13 +84,18 @@ print(f"PathSim {pathsim.__version__} loaded successfully")
   } else {
     /*	By default the isFlaskInitialized variable is true as we have the backend constantly running on a hosted server
      */
+    if (isInitialized) {
+      send({ type: "ready" });
+      return;
+    }
 
     console.log(
-      "We are ready, this is a flask web server so we don't concern with initialization"
+      "We are ready, this is a flask web server so we don't concern with initialization. Our only concern is whether the server is currently running."
     );
-    send({ type: "ready" });
 
-    return;
+    isInitialized = true;
+    console.log("Concluded intiialziation state change")
+    send({ type: "ready" });
   }
 }
 
@@ -96,9 +103,12 @@ print(f"PathSim {pathsim.__version__} loaded successfully")
  * Execute Python code (no return value) (Needs FLASK Rework)
  */
 async function execCode(id: string, code: string): Promise<void> {
-  console.log("(worker.ts, execCode) The backend preference is: ", backendPreference)
+  console.log("(execCode) This backends preference is " + backendPreference)
   if (!backendPreference || backendPreference == "pyodide") { // Default to pyodide use
-    if (!pyodide) throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+    if (!pyodide) {
+			console.log(`Within execCode() I have an uninitialized worker!`) // Debugging console
+      throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+    }
     try {
       await pyodide.runPythonAsync(code);
       send({ type: "ok", id });
@@ -159,7 +169,10 @@ async function execCodeWithFlask(id: string, code: string): Promise <void> {
  */
 async function evalExpr(id: string, expr: string, backendPreference = null): Promise<void> {
   if (!backendPreference || backendPreference == "pyodide") { // Default to pyodide use
-    if (!pyodide) throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+    if (!pyodide) {
+			console.log(`Within evalExpr() I have an uninitialized worker!`) // Debugging console
+      throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+    }
 
     try {
       const result = await pyodide.runPythonAsync(`
@@ -223,7 +236,10 @@ async function evalExprWithFlask(id: string, expr: string) : Promise<void> {
  * Runs autonomously until done or stopped (Needs FLASK Rework)
  */
 async function runStreamingLoop(id: string, expr: string): Promise<void> {
-  if (!pyodide) throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+  if (!pyodide) {
+			console.log(`Within runStreamingLoop() I have an uninitialized worker!`) // Debugging console
+      throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
+  }
 
   streamingActive = true;
   // Clear any stale code from previous runs
@@ -295,11 +311,6 @@ function stopStreaming(): void {
   streamingActive = false;
 }
 
-export function setWorkerBackendPreference(preference : null | BackendPreference): void {
-  console.log(`(worker.ts) Setting the backend preference to: `, preference)
-  backendPreference = preference
-}
-
 // Handle messages from main thread
 self.onmessage = async (event: MessageEvent<REPLRequest>) => {
   const { type } = event.data;
@@ -308,10 +319,13 @@ self.onmessage = async (event: MessageEvent<REPLRequest>) => {
   const code = "code" in event.data ? event.data.code : undefined;
   const expr = "expr" in event.data ? event.data.expr : undefined;
 
+  const preference = "backendPreference" in event.data ? event.data.backendPreference : "pyodide"
+
   try {
     switch (type) {
       case "init":
-        await initialize();
+        console.log("Event Data is: ", event.data)
+        await initialize(preference);
         break;
 
       case "exec":

@@ -9,7 +9,6 @@ import { backendState } from '../state';
 import { TIMEOUTS } from '$lib/constants/python';
 import { PROGRESS_MESSAGES, STATUS_MESSAGES } from '$lib/constants/messages';
 import type { BackendPreference } from '$lib/types';
-import { setWorkerBackendPreference } from './worker';
 
 interface PendingRequest {
 	resolve: (value: string | undefined) => void;
@@ -52,7 +51,7 @@ export class PyodideBackend implements Backend {
 	// Lifecycle
 	// -------------------------------------------------------------------------
 
-	async init(currentBackendPreference : null | BackendPreference = null): Promise<void> {
+	async init(): Promise<void> {
 		const state = this.getState();
 
 		// Already initialized or loading - nothing to do
@@ -77,11 +76,12 @@ export class PyodideBackend implements Backend {
 		try {
 			console.log("(backend.ts, init) The backend preference is: ", this.backendPreference)
 			this.worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-			setWorkerBackendPreference(this.backendPreference)
 
 			this.worker.onmessage = (event: MessageEvent<REPLResponse>) => {
 				this.handleResponse(event.data);
 			};
+
+			console.log("The worker is: ", this.worker)
 
 			this.worker.onerror = (event) => {
 				backendState.update((s) => ({
@@ -92,7 +92,7 @@ export class PyodideBackend implements Backend {
 			};
 
 			// Send init message
-			this.sendRequest({ type: 'init' });
+			this.sendRequest({ type: 'init', backendPreference: this.backendPreference });
 
 			// Wait for ready
 			await new Promise<void>((resolve, reject) => {

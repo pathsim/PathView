@@ -25,6 +25,7 @@ import {
 	sanitizeName
 } from './codeBuilder';
 import type { BackendPreference } from '$lib/types';
+import { backendPreferenceStore } from '$lib/stores';
 
 // Re-export sanitizeName for external use
 export { sanitizeName } from './codeBuilder';
@@ -1067,12 +1068,10 @@ function extractNodeParams(nodes: NodeInstance[]): Record<string, Record<string,
  */
 export async function validateGraphSimulation(
 	nodes: NodeInstance[],
-	codeContext: string,
-	currentBackendPreference: null | BackendPreference
+	codeContext: string
 ): Promise<ValidationResult> {
 	const nodeParams = extractNodeParams(nodes);
-	console.log("(pathsimRunner) Backend preference passed in: ", currentBackendPreference)
-	return validateGraphBridge(codeContext, nodeParams, currentBackendPreference);
+	return validateGraphBridge(codeContext, nodeParams);
 }
 
 export type { ValidationResult };
