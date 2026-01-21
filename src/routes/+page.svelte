@@ -728,7 +728,7 @@
 		if (!pyodideReady && usingPyodide) {
 			try {
 				console.log("Initializing Pyodide")
-				await initPyodide("pyodide");
+				await initPyodide();
 			} catch (error) {
 				console.error('Failed to initialize Pyodide:', error);
 				return;
@@ -762,7 +762,7 @@
 				let validation
 
 				// if(usingPyodide) {
-				validation = await validateGraphSimulation(nodes, codeContext, currentBackendPreference);
+				validation = await validateGraphSimulation(nodes, codeContext);
 				// } else {
 				// 	console.log("[Sending to Flask web server] The node registry is: ", nodeRegistry.getAll())
 				// 	let fetchedData = await fetch(getFlaskBackendUrl()+"/validateGraphSimulation", {
@@ -810,6 +810,7 @@
 			// Run streaming simulation
 			try {
 				const events = eventStore.toJSON();
+				console.log("-- Starting STREAMING --")
 				await runGraphStreamingSimulation(
 					nodes,
 					connections,

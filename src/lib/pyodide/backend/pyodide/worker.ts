@@ -34,7 +34,7 @@ async function initialize(eventPreference: BackendPreference): Promise<void> {
   console.log(
     `(worker.ts, initialize) Setting the backend preference to: ${eventPreference}`,
   );
-  backendPreference = eventPreference;
+  backendPreference = eventPreference as BackendPreference;
   if (!backendPreference || backendPreference == "pyodide") {
     // Default to pyodide use
     if (isInitialized) {
@@ -97,7 +97,8 @@ print(f"PathSim {pathsim.__version__} loaded successfully")
     );
 
     isInitialized = true;
-    console.log("Concluded intiialziation state change");
+    send({ type: "stdout", value: "Your backend preference has been set to a Flask web server, initialization has already occured"})
+    console.log("Concluded intialziation state change");
     send({ type: "ready" });
   }
 }
@@ -144,12 +145,17 @@ async function execCodeWithFlask(id: string, code: string): Promise<void> {
       },
       body: JSON.stringify({ code: code }),
     }).then((res) => res.json());
-    if (data.success) {
+    if (data.success && !data.error) {
+      if(data.output) {
+        send({type: "stdout", value: data.output })
+      }
       send({ type: "ok", id });
     } else {
       throw Error(data.error);
     }
-  } catch (error) {
+  } catch (error) { 
+    // This traceback may actually be unnecessary in all Flaskc ases,
+    // unless there is someway that the error output doesn't fully capture all the relevant information
     return runTracebackWithFlask(id, error);
   }
 }
@@ -204,8 +210,10 @@ async function evalExprWithFlask(id: string, expr: string): Promise<void> {
       },
       body: JSON.stringify({ expr: expr }),
     }).then((res) => res.json());
-
-    if (data.success) {
+    if (data.success && !data.error) {
+      if(data.output) {
+        send({type: "stdout", value: data.output })
+      }
       console.log(
         "\n\n(Flask) The evaluated result from evaluating the expression: ",
         JSON.stringify(data.result),
@@ -273,6 +281,10 @@ json.dumps(_eval_result, default=_to_json if '_to_json' in dir() else str)
         }
 
         // Send result and continue
+        console.log(
+          "(Pyodide) Done streaming data, the final value is....",
+          JSON.parse(result as string)
+        );
         send({ type: "stream-data", id, value: result as string });
       }
     } catch (error) {
@@ -306,28 +318,30 @@ async function runStreamingLoopWithFlask(id: string, expr: string) {
     while (streamingActive) {
       // Execute any queued code first (for runtime parameter changes, events, etc.)
       // Errors in queued code are reported but don't stop the simulation
-      consoleStore.info("Evaluating streaming code queue, which has length of: " + streamingCodeQueue.length)
       while (streamingCodeQueue.length > 0) {
         const code = streamingCodeQueue.shift()!;
         try {
           // Simply sending requests to the Flask api to execute code, we only really care if errors are produced so we
           // don't handle any data response
 
-          await fetch(getFlaskBackendUrl() + "/execute-code", {
+          let data = await fetch(getFlaskBackendUrl() + "/execute-code", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ code: code }),
-          });
+          }).then(res => res.json());
+          if(data.success && !data.error && data.output) {
+            send({ type: "stdout", value: data.output })
+          } else {
+            throw Error(data.error)
+          }
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : String(error);
           send({ type: "stderr", value: `Stream exec error: ${errorMsg}` });
         }
       }
-
-      consoleStore.info("Streaming code queue has reached a length of 0")
 
       let data = await fetch(getFlaskBackendUrl() + "/evaluate-expression", {
         method: "POST",
@@ -337,8 +351,23 @@ async function runStreamingLoopWithFlask(id: string, expr: string) {
         body: JSON.stringify({ expr: expr }),
       }).then((res) => res.json());
 
+      if (data.success && !data.error) {
+        if(data.output) {
+          send({ type: "stdout", value: data.output })
+        }
+        data = data.result;
+      } else {
+        throw Error(data.error);
+      }
+
+      // console.log("Resultant returned is: ", data)
+
       if (!streamingActive) {
         if (!data.done && data.result) {
+          // console.log("Still streaming data....")
+          if(data.result) {
+            console.log("(Flask) Still streaming data, but this value was returned: ", data.result)
+          }
           send({
             type: "stream-data",
             id,
@@ -352,16 +381,22 @@ async function runStreamingLoopWithFlask(id: string, expr: string) {
         break;
       }
 
+      console.log(
+        "(Flask) Done streaming data, the final value is....",
+        data,
+      );
+
       send({
         type: "stream-data",
         id,
-        value: JSON.stringify(data.result) as string,
+        value: JSON.stringify(data) as string,
       });
     }
   } catch (error) {
     return runTracebackWithFlask(id, error);
   } finally {
     streamingActive = false;
+    console.log("Have completely finished streaming!");
     send({ type: "stream-done", id });
   }
 }
@@ -405,7 +440,7 @@ self.onmessage = async (event: MessageEvent<REPLRequest>) => {
     switch (type) {
       case "init":
         console.log("Event Data is: ", event.data);
-        await initialize(preference);
+        await initialize(preference as BackendPreference);
         break;
 
       case "exec":

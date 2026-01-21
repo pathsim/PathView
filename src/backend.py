@@ -77,11 +77,12 @@ def execute_code():
             error_output = stderr_capture.getvalue()
 
             if error_output:
-                return jsonify({"success": False, "error": error_output}), 400
+                return jsonify({"success": False, "error": error_output})
             
             return jsonify(
                 {
-                    "success": True
+                    "success": True,
+                    "output": output
                 }
             )
 
@@ -117,12 +118,13 @@ def evaluate_expression():
             error_output = stderr_capture.getvalue()
 
             if error_output:
-                return jsonify({"success": False, "error": error_output}), 400
+                return jsonify({"success": False, "error": error_output})
             
             return jsonify(
                 {
                     "success": True,
-                    "result": result
+                    "result": result,
+                    "output": output
                 }
             )
 
