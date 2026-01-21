@@ -235,6 +235,7 @@ export class PyodideBackend implements Backend {
 					try {
 						resolve(JSON.parse(value) as T);
 					} catch {
+						console.log("Error in evaluating the expression:", value)
 						reject(new Error(`Failed to parse eval result: ${value}`));
 					}
 				},

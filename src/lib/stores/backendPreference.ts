@@ -6,6 +6,7 @@
 
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { switchBackend } from '$lib/pyodide';
 
 export type BackendPreference = 'pyodide' | 'flask';
 
@@ -40,11 +41,10 @@ export const backendPreferenceStore = {
 	 * Toggle between a preference for flask or pyodide
 	 */
 	toggle(): void {
+		console.log(`Value (Before), ${this.get()}`)
 		backendPreference.update((current) => (current === 'pyodide' ? 'flask' : 'pyodide'));
-		if(typeof window !== "undefined") {
-			// To avoid complications with the initialization state of the Pyodide Backend class I will just reload the page
-			window.location.reload()
-		}
+		console.log(`Value (After), ${this.get()}`)
+		switchBackend(this.get())
 	},
 
 	/**
