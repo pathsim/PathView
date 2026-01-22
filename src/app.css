@@ -20,9 +20,11 @@
 	--accent-bg: rgba(0, 112, 192, 0.15);
 
 	/* ===== STATUS ===== */
+	--success: #22c55e;
+	--success-bg: rgba(34, 197, 94, 0.1);
 	--warning: #eab308;
-	--error: #ef4444;
 	--warning-bg: rgba(234, 179, 8, 0.1);
+	--error: #ef4444;
 	--error-bg: rgba(239, 68, 68, 0.1);
 
 	/* ===== SPECIAL ===== */
@@ -50,6 +52,9 @@
 	--space-md: 12px;
 	--space-lg: 16px;
 	--space-xl: 24px;
+	--space-2xl: 32px;
+	--space-3xl: 48px;
+	--space-4xl: 64px;
 
 	/* ===== BORDER RADIUS ===== */
 	--radius-sm: 6px;
@@ -77,6 +82,12 @@
 	--header-height: 40px;
 	--panel-gap: var(--space-md);
 	--panel-toggles-width: 52px;
+
+	/* ===== Z-INDEX ===== */
+	--z-dropdown: 100;
+	--z-sticky: 200;
+	--z-modal: 1000;
+	--z-tooltip: 1100;
 }
 
 /* Light Theme */
@@ -257,7 +268,7 @@ input::placeholder {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 1000;
+	z-index: var(--z-modal);
 }
 
 /* Nested dialogs skip tint to avoid compounding, but keep blur to hide modal underneath */
@@ -479,13 +490,18 @@ body.resizing-ns {
 }
 
 .cm-scroller {
-	font-family: var(--font-mono);
+	font-family: var(--font-mono) !important;
 	font-weight: 500;
 }
 
 .cm-content {
 	padding: 8px 0;
 	caret-color: var(--accent);
+	font-family: var(--font-mono) !important;
+}
+
+.cm-line {
+	font-family: var(--font-mono) !important;
 }
 
 /* Cursor styling */

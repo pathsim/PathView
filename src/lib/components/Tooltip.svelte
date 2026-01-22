@@ -76,6 +76,9 @@
 
 	// Svelte action for easy tooltip usage
 	export function tooltip(node: HTMLElement, params: TooltipParams) {
+		// SSR guard - return no-op on server
+		if (typeof window === 'undefined') return { destroy: () => {} };
+
 		let text = typeof params === 'string' ? params : params.text;
 		let shortcut = typeof params === 'string' ? undefined : params.shortcut;
 		let maxWidth = typeof params === 'string' ? undefined : params.maxWidth;
@@ -143,7 +146,7 @@
 		font-size: 11px;
 		color: var(--text-muted);
 		pointer-events: none;
-		z-index: 10000;
+		z-index: var(--z-tooltip);
 		box-shadow: var(--shadow-lg);
 		animation: fadeIn var(--transition-fast) ease-out;
 	}
