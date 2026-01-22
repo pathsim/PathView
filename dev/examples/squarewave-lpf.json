@@ -1,0 +1,173 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2026-01-19T22:09:29.705Z",
+    "modified": "2026-01-19T22:09:29.705Z",
+    "name": "squarewave-lpf"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "41fcc215-6f0e-4e55-b2bf-9ea0190af114",
+        "type": "SquareWaveSource",
+        "name": "Signal",
+        "position": {
+          "x": 650,
+          "y": 260
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "41fcc215-6f0e-4e55-b2bf-9ea0190af114-output-0",
+            "nodeId": "41fcc215-6f0e-4e55-b2bf-9ea0190af114",
+            "name": "out",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "frequency": "1"
+        },
+        "pinnedParams": [
+          "frequency"
+        ]
+      },
+      {
+        "id": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+        "type": "ButterworthLowpassFilter",
+        "name": "LPF",
+        "position": {
+          "x": 880,
+          "y": 260
+        },
+        "inputs": [
+          {
+            "id": "73cba56a-f82c-433c-9230-effc0b0ff2d0-input-0",
+            "nodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+            "name": "in",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "73cba56a-f82c-433c-9230-effc0b0ff2d0-output-0",
+            "nodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+            "name": "out",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "Fc": "1",
+          "n": "2"
+        },
+        "pinnedParams": [
+          "Fc"
+        ]
+      },
+      {
+        "id": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
+        "type": "Scope",
+        "name": "Signal",
+        "position": {
+          "x": 760,
+          "y": 180
+        },
+        "inputs": [
+          {
+            "id": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde-input-0",
+            "nodeId": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3
+        }
+      },
+      {
+        "id": "c64e7115-4baa-40d7-b3f7-af5953248b74",
+        "type": "Scope",
+        "name": "Filtered",
+        "position": {
+          "x": 1000,
+          "y": 180
+        },
+        "inputs": [
+          {
+            "id": "c64e7115-4baa-40d7-b3f7-af5953248b74-input-0",
+            "nodeId": "c64e7115-4baa-40d7-b3f7-af5953248b74",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "fed130f4-b4c3-4463-a5fc-4b0e61b0ffd9",
+        "sourceNodeId": "41fcc215-6f0e-4e55-b2bf-9ea0190af114",
+        "sourcePortIndex": 0,
+        "targetNodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "bf3af73f-d3e4-4589-b9fc-56211a98f387",
+        "sourceNodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c64e7115-4baa-40d7-b3f7-af5953248b74",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "f31c2d34-63ab-4405-ae2e-069b385b41b6",
+        "sourceNodeId": "41fcc215-6f0e-4e55-b2bf-9ea0190af114",
+        "sourcePortIndex": 0,
+        "targetNodeId": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
+        "targetPortIndex": 0
+      }
+    ],
+    "annotations": [
+      {
+        "id": "34f0e638-760e-421b-9d4a-6fc606387a87",
+        "position": {
+          "x": 1060,
+          "y": 200
+        },
+        "content": "Filtering the high frequency contents out of a square wave with a low pass filter. \n\nParameters can be pinned, see block property dialog (double click).\n\nHover over **Scope** blocks to see plot preview. Or just pin all previews (P).",
+        "width": 250,
+        "height": 140,
+        "fontSize": 11
+      }
+    ]
+  },
+  "events": [],
+  "codeContext": {
+    "code": ""
+  },
+  "simulationSettings": {
+    "duration": "",
+    "dt": "",
+    "solver": "SSPRK22",
+    "adaptive": true,
+    "atol": "",
+    "rtol": "1e-2",
+    "ftol": "",
+    "dt_min": "",
+    "dt_max": "",
+    "ghostTraces": 3,
+    "plotResults": true
+  }
+}

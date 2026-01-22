@@ -1,0 +1,447 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2026-01-19T22:41:42.323Z",
+    "modified": "2026-01-19T22:41:42.323Z",
+    "name": "pid-subsystem"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "setpoint",
+        "type": "StepSource",
+        "name": "Setpoint",
+        "position": {
+          "x": 710,
+          "y": 480
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "setpoint-output-0",
+            "nodeId": "setpoint",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "amplitude": "[1, 0.5]",
+          "tau": "[20+tau_1, 40+tau_2]",
+          "_rotation": 0
+        }
+      },
+      {
+        "id": "error",
+        "type": "Adder",
+        "name": "Error",
+        "position": {
+          "x": 820,
+          "y": 410
+        },
+        "inputs": [
+          {
+            "id": "error-input-0",
+            "nodeId": "error",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          },
+          {
+            "id": "error-input-1",
+            "nodeId": "error",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": "error-output-0",
+            "nodeId": "error",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "operations": "\"+-\"",
+          "_rotation": 3
+        }
+      },
+      {
+        "id": "pid",
+        "type": "PID",
+        "name": "PID Controler",
+        "position": {
+          "x": 960,
+          "y": 300
+        },
+        "inputs": [
+          {
+            "id": "pid-input-0",
+            "nodeId": "pid",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "pid-output-0",
+            "nodeId": "pid",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0
+          }
+        ],
+        "params": {
+          "Kp": "1.5",
+          "Ki": "0.5",
+          "Kd": "0.1",
+          "f_max": "10"
+        },
+        "pinnedParams": [
+          "Kp",
+          "Ki",
+          "Kd"
+        ]
+      },
+      {
+        "id": "scope",
+        "type": "Scope",
+        "name": "Setpoint vs Plant",
+        "position": {
+          "x": 1340,
+          "y": 180
+        },
+        "inputs": [
+          {
+            "id": "scope-input-0",
+            "nodeId": "scope",
+            "name": "setpoint",
+            "direction": "input",
+            "index": 0
+          },
+          {
+            "id": "scope-input-1",
+            "nodeId": "scope",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3,
+          "labels": "[\"plant\", \"setpoint\"]"
+        }
+      },
+      {
+        "id": "98bd8eae-5636-43fa-bdd8-0eace540da0b",
+        "type": "Scope",
+        "name": "Error",
+        "position": {
+          "x": 820,
+          "y": 180
+        },
+        "inputs": [
+          {
+            "id": "98bd8eae-5636-43fa-bdd8-0eace540da0b-input-0",
+            "nodeId": "98bd8eae-5636-43fa-bdd8-0eace540da0b",
+            "name": "setpoint",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3,
+          "labels": "[\"err\"]"
+        }
+      },
+      {
+        "id": "367985a4-df42-46b1-97af-94302aaf3234",
+        "type": "Subsystem",
+        "name": "Plant",
+        "position": {
+          "x": 1170,
+          "y": 300
+        },
+        "inputs": [
+          {
+            "id": "367985a4-df42-46b1-97af-94302aaf3234-input-0",
+            "nodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "367985a4-df42-46b1-97af-94302aaf3234-output-0",
+            "nodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "_rotation": 0
+        },
+        "graph": {
+          "nodes": [
+            {
+              "id": "160f6744-e691-44b9-aac4-49c0a65f76e1",
+              "type": "Interface",
+              "name": "Subsystem",
+              "position": {
+                "x": 120,
+                "y": 60
+              },
+              "inputs": [],
+              "outputs": [],
+              "params": {
+                "_rotation": 3
+              }
+            },
+            {
+              "id": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+              "type": "Integrator",
+              "name": "Quantity",
+              "position": {
+                "x": 250,
+                "y": 60
+              },
+              "inputs": [
+                {
+                  "id": "3a36165c-154d-4dc2-9744-e20fa06c99b6-input-0",
+                  "nodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+                  "name": "in 0",
+                  "direction": "input",
+                  "index": 0,
+                  "color": "#969696"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "3a36165c-154d-4dc2-9744-e20fa06c99b6-output-0",
+                  "nodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+                  "name": "out 0",
+                  "direction": "output",
+                  "index": 0,
+                  "color": "#969696"
+                }
+              ],
+              "params": {
+                "initial_value": "0.0",
+                "_rotation": 1
+              }
+            },
+            {
+              "id": "5b62efdd-3988-462c-a240-7c45e938d15c",
+              "type": "Amplifier",
+              "name": "Gain",
+              "position": {
+                "x": 250,
+                "y": 180
+              },
+              "inputs": [
+                {
+                  "id": "5b62efdd-3988-462c-a240-7c45e938d15c-input-0",
+                  "nodeId": "5b62efdd-3988-462c-a240-7c45e938d15c",
+                  "name": "in 0",
+                  "direction": "input",
+                  "index": 0,
+                  "color": "#969696"
+                }
+              ],
+              "outputs": [
+                {
+                  "id": "5b62efdd-3988-462c-a240-7c45e938d15c-output-0",
+                  "nodeId": "5b62efdd-3988-462c-a240-7c45e938d15c",
+                  "name": "out 0",
+                  "direction": "output",
+                  "index": 0,
+                  "color": "#969696"
+                }
+              ],
+              "params": {
+                "gain": "g_rng",
+                "_rotation": 1
+              }
+            },
+            {
+              "id": "ec16ee5e-e904-47d0-b322-7098b2808e9e",
+              "type": "Scope",
+              "name": "Plant Quantity",
+              "position": {
+                "x": 360,
+                "y": 120
+              },
+              "inputs": [
+                {
+                  "id": "ec16ee5e-e904-47d0-b322-7098b2808e9e-input-0",
+                  "nodeId": "ec16ee5e-e904-47d0-b322-7098b2808e9e",
+                  "name": "in 0",
+                  "direction": "input",
+                  "index": 0,
+                  "color": "#969696"
+                }
+              ],
+              "outputs": [],
+              "params": {
+                "t_wait": "0.0",
+                "_rotation": 0,
+                "labels": "[\"plant qty\"]"
+              }
+            }
+          ],
+          "connections": [
+            {
+              "id": "4c86a8d3-a6d7-49ac-b24b-5488cb89dd1e",
+              "sourceNodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+              "sourcePortIndex": 0,
+              "targetNodeId": "ec16ee5e-e904-47d0-b322-7098b2808e9e",
+              "targetPortIndex": 0
+            },
+            {
+              "id": "98694a13-71df-491b-aee9-77c6c75a8bb2",
+              "sourceNodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+              "sourcePortIndex": 0,
+              "targetNodeId": "5b62efdd-3988-462c-a240-7c45e938d15c",
+              "targetPortIndex": 0
+            },
+            {
+              "id": "976f3788-0d0f-4133-a8b3-ee43000d5b61",
+              "sourceNodeId": "5b62efdd-3988-462c-a240-7c45e938d15c",
+              "sourcePortIndex": 0,
+              "targetNodeId": "160f6744-e691-44b9-aac4-49c0a65f76e1",
+              "targetPortIndex": 0
+            },
+            {
+              "id": "d68ddbcc-a4fd-42bf-9bc0-cb406ccb6f67",
+              "sourceNodeId": "160f6744-e691-44b9-aac4-49c0a65f76e1",
+              "sourcePortIndex": 0,
+              "targetNodeId": "3a36165c-154d-4dc2-9744-e20fa06c99b6",
+              "targetPortIndex": 0
+            }
+          ]
+        }
+      },
+      {
+        "id": "4674b251-a882-45b9-baf1-01db4d0f7a22",
+        "type": "Scope",
+        "name": "Control Signal",
+        "position": {
+          "x": 1080,
+          "y": 180
+        },
+        "inputs": [
+          {
+            "id": "4674b251-a882-45b9-baf1-01db4d0f7a22-input-0",
+            "nodeId": "4674b251-a882-45b9-baf1-01db4d0f7a22",
+            "name": "setpoint",
+            "direction": "input",
+            "index": 0
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3,
+          "labels": "[\"ctrl\"]"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c1",
+        "sourceNodeId": "setpoint",
+        "sourcePortIndex": 0,
+        "targetNodeId": "error",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "c5",
+        "sourceNodeId": "error",
+        "sourcePortIndex": 0,
+        "targetNodeId": "pid",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "ec0a2ed4-9d00-4c64-abc0-3126ecee69c8",
+        "sourceNodeId": "error",
+        "sourcePortIndex": 0,
+        "targetNodeId": "98bd8eae-5636-43fa-bdd8-0eace540da0b",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "d4dbaa0f-2b25-4612-b1e9-7173e1c2e7a4",
+        "sourceNodeId": "pid",
+        "sourcePortIndex": 0,
+        "targetNodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "fb1602fb-661a-49d5-ad24-c95bdea2f328",
+        "sourceNodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+        "sourcePortIndex": 0,
+        "targetNodeId": "error",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "bf75489a-0404-41ac-b709-bc0579e2a217",
+        "sourceNodeId": "pid",
+        "sourcePortIndex": 0,
+        "targetNodeId": "4674b251-a882-45b9-baf1-01db4d0f7a22",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "09fb7ca4-d71c-46dd-b4bf-95d7275f74b2",
+        "sourceNodeId": "367985a4-df42-46b1-97af-94302aaf3234",
+        "sourcePortIndex": 0,
+        "targetNodeId": "scope",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "bd75dcef-06d4-422d-b97f-a9e6a9149f75",
+        "sourceNodeId": "setpoint",
+        "sourcePortIndex": 0,
+        "targetNodeId": "scope",
+        "targetPortIndex": 1
+      }
+    ],
+    "annotations": [
+      {
+        "id": "2e8245a1-8247-4527-acbe-11ffa83669c4",
+        "position": {
+          "x": 890,
+          "y": 370
+        },
+        "content": "# PID Loop\n\nThe classic PID control loop. The plant is modeled as a subsystem, double click to view the internals.",
+        "width": 290,
+        "height": 80
+      }
+    ]
+  },
+  "events": [],
+  "codeContext": {
+    "code": "# randomized feedback gaing\ng_rng = 0.4 + 0.3*np.random.rand()\n\n# randomized step delay\ntau_1, tau_2 = 5*np.random.rand(2)"
+  },
+  "simulationSettings": {
+    "duration": "60",
+    "dt": "0.1",
+    "solver": "SSPRK22",
+    "adaptive": true,
+    "atol": "1e-8",
+    "rtol": "1e-5",
+    "ftol": "1e-9",
+    "dt_min": "",
+    "dt_max": "",
+    "ghostTraces": 6,
+    "plotResults": true
+  }
+}

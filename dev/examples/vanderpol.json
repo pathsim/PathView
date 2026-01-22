@@ -1,0 +1,449 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2026-01-19T16:15:10.866Z",
+    "modified": "2026-01-19T16:15:10.866Z",
+    "name": "vanderpol"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+        "type": "Integrator",
+        "name": "X2",
+        "position": {
+          "x": 390,
+          "y": 220
+        },
+        "inputs": [
+          {
+            "id": "fb169c0f-3a05-42dc-8400-94b92be9cee0-input-0",
+            "nodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "fb169c0f-3a05-42dc-8400-94b92be9cee0-output-0",
+            "nodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": "x20"
+        }
+      },
+      {
+        "id": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+        "type": "Integrator",
+        "name": "X1",
+        "position": {
+          "x": 610,
+          "y": 220
+        },
+        "inputs": [
+          {
+            "id": "440919f7-c63c-40d7-8f78-67871a0f89f6-input-0",
+            "nodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "440919f7-c63c-40d7-8f78-67871a0f89f6-output-0",
+            "nodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": "x10"
+        }
+      },
+      {
+        "id": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "type": "Adder",
+        "name": "Difference",
+        "position": {
+          "x": 660,
+          "y": 400
+        },
+        "inputs": [
+          {
+            "id": "03d10f15-3f0e-48f4-881b-281485faefd6-input-0",
+            "nodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "03d10f15-3f0e-48f4-881b-281485faefd6-input-1",
+            "nodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "03d10f15-3f0e-48f4-881b-281485faefd6-output-0",
+            "nodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "operations": "\"+-\"",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+        "type": "Pow",
+        "name": "Square",
+        "position": {
+          "x": 720,
+          "y": 290
+        },
+        "inputs": [
+          {
+            "id": "9e7d89cc-bd31-4615-b34b-1b7a11850be3-input-0",
+            "nodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "9e7d89cc-bd31-4615-b34b-1b7a11850be3-output-0",
+            "nodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "exponent": "2",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "8db3f239-5418-4068-b92c-18ee1d42c427",
+        "type": "Amplifier",
+        "name": "Param-Mu",
+        "position": {
+          "x": 490,
+          "y": 500
+        },
+        "inputs": [
+          {
+            "id": "8db3f239-5418-4068-b92c-18ee1d42c427-input-0",
+            "nodeId": "8db3f239-5418-4068-b92c-18ee1d42c427",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "8db3f239-5418-4068-b92c-18ee1d42c427-output-0",
+            "nodeId": "8db3f239-5418-4068-b92c-18ee1d42c427",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "gain": "mu",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
+        "type": "Constant",
+        "name": "One",
+        "position": {
+          "x": 600,
+          "y": 290
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "3c9f84cd-ee77-4232-9596-aaf057dd0254-output-0",
+            "nodeId": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "value": "1",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+        "type": "Multiplier",
+        "name": "Multiplier",
+        "position": {
+          "x": 490,
+          "y": 420
+        },
+        "inputs": [
+          {
+            "id": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d-input-0",
+            "nodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d-input-1",
+            "nodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d-output-0",
+            "nodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+        "type": "Adder",
+        "name": "Difference",
+        "position": {
+          "x": 780,
+          "y": 520
+        },
+        "inputs": [
+          {
+            "id": "ee2391d1-5c61-45de-859b-ff98ad13f4a4-input-0",
+            "nodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "ee2391d1-5c61-45de-859b-ff98ad13f4a4-input-1",
+            "nodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "ee2391d1-5c61-45de-859b-ff98ad13f4a4-output-0",
+            "nodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "operations": "\"+-\"",
+          "_rotation": 1
+        }
+      },
+      {
+        "id": "34e172de-4aa4-4f33-9844-f78184aa1a19",
+        "type": "Scope",
+        "name": "X1(t)",
+        "position": {
+          "x": 720,
+          "y": 140
+        },
+        "inputs": [
+          {
+            "id": "34e172de-4aa4-4f33-9844-f78184aa1a19-input-0",
+            "nodeId": "34e172de-4aa4-4f33-9844-f78184aa1a19",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3
+        }
+      },
+      {
+        "id": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
+        "type": "Scope",
+        "name": "X2(t)",
+        "position": {
+          "x": 480,
+          "y": 140
+        },
+        "inputs": [
+          {
+            "id": "b2b48c31-985f-4917-bef9-6dcecdc2e928-input-0",
+            "nodeId": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 3
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "48eef8a3-5625-4502-b8cd-ebfa3a257e5e",
+        "sourceNodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+        "sourcePortIndex": 0,
+        "targetNodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "0dda274c-5717-4299-b0b4-33a57d3e7a39",
+        "sourceNodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+        "sourcePortIndex": 0,
+        "targetNodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "add1302b-0e10-4f52-8063-f00ebd9ffa96",
+        "sourceNodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+        "sourcePortIndex": 0,
+        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "47f7860d-96e2-4b70-ac67-0f09bc1ca28c",
+        "sourceNodeId": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
+        "sourcePortIndex": 0,
+        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "0eff1dcf-d2fa-4f3a-a595-fb45dfa93495",
+        "sourceNodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+        "sourcePortIndex": 0,
+        "targetNodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "bc74531b-f510-4083-91e5-cfeb344f59ed",
+        "sourceNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "sourcePortIndex": 0,
+        "targetNodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "52bd1f46-7dac-4b85-8df7-90f69d737551",
+        "sourceNodeId": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
+        "sourcePortIndex": 0,
+        "targetNodeId": "8db3f239-5418-4068-b92c-18ee1d42c427",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "b506a182-540d-40f5-9dca-4f375de4c1be",
+        "sourceNodeId": "8db3f239-5418-4068-b92c-18ee1d42c427",
+        "sourcePortIndex": 0,
+        "targetNodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "197efb22-ce6a-456c-96a3-eab24b577df6",
+        "sourceNodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+        "sourcePortIndex": 0,
+        "targetNodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "66ef60f3-ad5d-4867-a361-2433230846d5",
+        "sourceNodeId": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
+        "sourcePortIndex": 0,
+        "targetNodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "99b20bfb-e303-44cb-a0f4-ef0f4fd67cf0",
+        "sourceNodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
+        "sourcePortIndex": 0,
+        "targetNodeId": "34e172de-4aa4-4f33-9844-f78184aa1a19",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "63219387-af24-4b22-b7c4-f09c340ccb54",
+        "sourceNodeId": "fb169c0f-3a05-42dc-8400-94b92be9cee0",
+        "sourcePortIndex": 0,
+        "targetNodeId": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
+        "targetPortIndex": 0
+      }
+    ],
+    "annotations": [
+      {
+        "id": "892e58cc-029b-4498-b7b5-f54b301028e4",
+        "position": {
+          "x": 70,
+          "y": 200
+        },
+        "content": "# Van der Pol\n\nThis is the Van der Pol system \n\n$$ \\ddot{x} - \\mu (1 - x^2) \\dot{x} + x = 0$$\n\nmodeled as discrete components.\n\nIt is famous for its stiffness which is controled through the paramter $\\mu$. \nFor small values $\\mu \\approx 10$ its not very stiff and explicit integrators such as **RKCK54** can handle it quite well. \nBut for larger values $\\mu > 100$, the gradients become increasingly steep and explicit integrators become inefficient due to their limited (numerical) stability region. \nThen using implicit integrators such as **GEAR52A** or **ESDIRK43** makes sense. ",
+        "width": 215,
+        "height": 355
+      }
+    ]
+  },
+  "events": [],
+  "codeContext": {
+    "code": "# initial conditions\nx10, x20 = 2, 0\n\n# van der pol parameter \nmu = 1000"
+  },
+  "simulationSettings": {
+    "duration": "3*mu",
+    "dt": "",
+    "solver": "GEAR52A",
+    "adaptive": true,
+    "atol": "1e-6",
+    "rtol": "1e-4",
+    "ftol": "1e-8",
+    "dt_min": "",
+    "dt_max": "",
+    "ghostTraces": 0,
+    "plotResults": true
+  }
+}
