@@ -99,8 +99,6 @@
 			<img src="{base}/pathview_logo.png" alt="PathView" class="logo" />
 		</div>
 
-		<div class="separator"></div>
-
 		<div class="actions">
 			<a href="https://pathsim.org" target="_blank" class="action-card">
 				<Icon name="home" size={20} />
