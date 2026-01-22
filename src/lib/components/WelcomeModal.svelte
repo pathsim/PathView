@@ -14,12 +14,11 @@
 
 	interface Props {
 		onNew: () => void;
-		onOpen: () => void;
 		onLoadExample: (file: string) => void;
 		onClose: () => void;
 	}
 
-	let { onNew, onOpen, onLoadExample, onClose }: Props = $props();
+	let { onNew, onLoadExample, onClose }: Props = $props();
 
 	let examples = $state<Example[]>([]);
 	let loading = $state(true);
@@ -78,11 +77,6 @@
 		onClose();
 	}
 
-	function handleOpen() {
-		onOpen();
-		onClose();
-	}
-
 	function handleExample(file: string) {
 		onLoadExample(file);
 		onClose();
@@ -108,14 +102,14 @@
 		<div class="separator"></div>
 
 		<div class="actions">
+			<a href="https://pathsim.org" target="_blank" class="action-card">
+				<Icon name="home" size={20} />
+				<span class="action-label">Home</span>
+			</a>
+
 			<button class="action-card" onclick={handleNew}>
 				<Icon name="new-canvas" size={20} />
 				<span class="action-label">New</span>
-			</button>
-
-			<button class="action-card" onclick={handleOpen}>
-				<Icon name="download" size={20} />
-				<span class="action-label">Open</span>
 			</button>
 
 			<a href="https://docs.pathsim.org" target="_blank" class="action-card">

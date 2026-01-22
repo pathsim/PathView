@@ -1295,7 +1295,6 @@
 	{#if showWelcomeModal}
 		<WelcomeModal
 			onNew={handleNew}
-			onOpen={handleOpen}
 			onLoadExample={handleLoadExample}
 			onClose={() => showWelcomeModal = false}
 		/>
