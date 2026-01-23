@@ -395,9 +395,11 @@
 
 	/* NumPy-style section headers converted to <p><strong> */
 	.docs-content :global(p:has(> strong:only-child)) {
-		font-size: 10px;
+		font-size: 9px;
 		font-weight: 600;
 		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 		margin-top: var(--space-md);
 		margin-bottom: var(--space-xs);
 	}
@@ -420,7 +422,7 @@
 
 	/* KaTeX styling */
 	.docs-content :global(.katex) {
-		font-size: 1em;
+		font-size: 1.3em;
 	}
 
 	.docs-content :global(.katex-display) {
