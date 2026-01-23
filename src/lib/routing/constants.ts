@@ -4,8 +4,8 @@
 
 import { G } from '$lib/constants/grid';
 
-/** Margin around nodes for routing (0.5G = 5px) */
-export const ROUTING_MARGIN = G.unit / 2;
+/** Margin around nodes for routing (0.25G = 2.5px) */
+export const ROUTING_MARGIN = G.unit / 4;
 
 /** Minimum distance from source port before first turn (0 - handle offset is enough) */
 export const SOURCE_CLEARANCE = 0;
