@@ -63,9 +63,9 @@ export function calculateRoute(
 
 	// Calculate clearance points to enforce entry/exit directions
 	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
-	// Target clearance: approach from the OPPOSITE direction (wire enters into port)
-	const targetApproachDir = getOppositeDirection(targetDir);
-	const targetClearance = getClearancePoint(targetPos, targetApproachDir);
+	// Target clearance: place point outside the block in the direction the port faces
+	// Wire will travel TO this point, then straight INTO the port
+	const targetClearance = getClearancePoint(targetPos, targetDir);
 
 	// Build path: source -> sourceClearance -> [waypoints] -> targetClearance -> target
 	const allPoints: Position[] = [];
@@ -138,18 +138,6 @@ export function calculateRoute(
 }
 
 /**
- * Get the opposite direction
- */
-function getOppositeDirection(dir: Direction): Direction {
-	switch (dir) {
-		case 'up': return 'down';
-		case 'down': return 'up';
-		case 'left': return 'right';
-		case 'right': return 'left';
-	}
-}
-
-/**
  * Get direction from a path segment
  */
 function getDirectionFromSegment(from: Position, to: Position): Direction {
@@ -210,8 +198,7 @@ export function calculateSimpleRoute(
 
 	// Calculate clearance points
 	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
-	const targetApproachDir = getOppositeDirection(targetDir);
-	const targetClearance = getClearancePoint(targetPos, targetApproachDir);
+	const targetClearance = getClearancePoint(targetPos, targetDir);
 
 	// Add source clearance
 	path.push(sourceClearance);
