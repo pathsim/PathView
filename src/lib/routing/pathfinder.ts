@@ -9,7 +9,7 @@ import { worldToGrid, gridToWorld } from './gridBuilder';
 import { GRID_SIZE } from './constants';
 
 /** Cost for making a 90-degree turn (in grid units) */
-const TURN_PENALTY = 2;
+const TURN_PENALTY = 0;
 
 /** Map direction to its opposite (for blocking 180-degree turns) */
 const OPPOSITE_DIR: Record<Direction, Direction> = {
