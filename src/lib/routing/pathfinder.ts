@@ -1,5 +1,5 @@
 /**
- * A* pathfinding with turn penalty
+ * A* pathfinding with turn penalty and no 180-degree turns
  */
 
 import PF from 'pathfinding';
@@ -11,6 +11,22 @@ import { GRID_SIZE } from './constants';
 /** Cost for making a 90-degree turn (in grid units) */
 const TURN_PENALTY = 2;
 
+/** Map direction to its opposite (for blocking 180-degree turns) */
+const OPPOSITE_DIR: Record<Direction, Direction> = {
+	up: 'down',
+	down: 'up',
+	left: 'right',
+	right: 'left'
+};
+
+/** Neighbor offsets with their directions */
+const NEIGHBORS: Array<{ dx: number; dy: number; dir: Direction }> = [
+	{ dx: 1, dy: 0, dir: 'right' },
+	{ dx: -1, dy: 0, dir: 'left' },
+	{ dx: 0, dy: 1, dir: 'down' },
+	{ dx: 0, dy: -1, dir: 'up' }
+];
+
 /** Priority queue node for A* with direction tracking */
 interface AStarNode {
 	x: number;
@@ -19,16 +35,17 @@ interface AStarNode {
 	h: number; // Heuristic to end
 	f: number; // Total cost (g + h)
 	parent: AStarNode | null;
-	direction: 'horizontal' | 'vertical' | null;
+	direction: Direction; // Actual direction we arrived from
 }
 
 /**
  * Find orthogonal path between two points using A* with turn penalty
+ * Only allows 90-degree turns (no reversing/180-degree turns)
  * @param start - Start position in world coordinates
  * @param end - End position in world coordinates
  * @param grid - Pathfinding grid (will be cloned)
  * @param offset - Grid offset (canvas origin)
- * @param initialDir - Initial direction of travel (affects first turn penalty)
+ * @param initialDir - Initial direction of travel
  * @returns Array of positions in world coordinates
  */
 export function findPathWithTurnPenalty(
@@ -67,12 +84,9 @@ export function findPathWithTurnPenalty(
 	walkable.add(`${endGx},${endGy}`);
 
 	// Initialize open and closed sets
+	// Key includes direction to allow revisiting with different directions
 	const openSet: AStarNode[] = [];
 	const closedSet = new Map<string, AStarNode>();
-
-	// Determine initial direction type
-	const initialDirType: 'horizontal' | 'vertical' =
-		(initialDir === 'left' || initialDir === 'right') ? 'horizontal' : 'vertical';
 
 	// Create start node
 	const startNode: AStarNode = {
@@ -82,18 +96,10 @@ export function findPathWithTurnPenalty(
 		h: manhattanDistance(startGx, startGy, endGx, endGy),
 		f: 0,
 		parent: null,
-		direction: initialDirType
+		direction: initialDir
 	};
 	startNode.f = startNode.g + startNode.h;
 	openSet.push(startNode);
-
-	// Neighbor offsets (4-directional)
-	const neighbors = [
-		{ dx: 1, dy: 0, dir: 'horizontal' as const },
-		{ dx: -1, dy: 0, dir: 'horizontal' as const },
-		{ dx: 0, dy: 1, dir: 'vertical' as const },
-		{ dx: 0, dy: -1, dir: 'vertical' as const }
-	];
 
 	while (openSet.length > 0) {
 		// Find node with lowest f score
@@ -113,40 +119,47 @@ export function findPathWithTurnPenalty(
 
 		// Move current from open to closed
 		openSet.splice(lowestIdx, 1);
-		closedSet.set(`${current.x},${current.y}`, current);
+		const closedKey = `${current.x},${current.y},${current.direction}`;
+		closedSet.set(closedKey, current);
+
+		// Get the direction we must NOT go (opposite of current direction = 180-degree turn)
+		const blockedDir = OPPOSITE_DIR[current.direction];
 
 		// Explore neighbors
-		for (const { dx, dy, dir } of neighbors) {
+		for (const { dx, dy, dir } of NEIGHBORS) {
+			// Block 180-degree turns (reversing)
+			if (dir === blockedDir) continue;
+
 			const nx = current.x + dx;
 			const ny = current.y + dy;
-			const key = `${nx},${ny}`;
+			const posKey = `${nx},${ny}`;
 
 			// Skip if out of bounds or not walkable
 			if (nx < 0 || nx >= gridWidth || ny < 0 || ny >= gridHeight) continue;
-			if (!walkable.has(key)) continue;
+			if (!walkable.has(posKey)) continue;
 
-			// Skip if already in closed set
-			if (closedSet.has(key)) continue;
+			// Skip if already in closed set with this direction
+			const neighborClosedKey = `${nx},${ny},${dir}`;
+			if (closedSet.has(neighborClosedKey)) continue;
 
 			// Calculate movement cost
 			let moveCost = 1;
 
-			// Add turn penalty if direction changes
-			if (current.direction !== null && current.direction !== dir) {
+			// Add turn penalty if direction changes (90-degree turn)
+			if (current.direction !== dir) {
 				moveCost += TURN_PENALTY;
 			}
 
 			const tentativeG = current.g + moveCost;
 
 			// Check if this path to neighbor is better
-			const existingIdx = openSet.findIndex(n => n.x === nx && n.y === ny);
+			const existingIdx = openSet.findIndex(n => n.x === nx && n.y === ny && n.direction === dir);
 			if (existingIdx !== -1) {
 				if (tentativeG < openSet[existingIdx].g) {
 					// Better path found
 					openSet[existingIdx].g = tentativeG;
 					openSet[existingIdx].f = tentativeG + openSet[existingIdx].h;
 					openSet[existingIdx].parent = current;
-					openSet[existingIdx].direction = dir;
 				}
 			} else {
 				// New node
