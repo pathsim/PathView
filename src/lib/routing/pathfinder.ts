@@ -178,8 +178,15 @@ export function findPathWithTurnPenalty(
 		}
 	}
 
-	// No path found, return direct line
-	return [start, end];
+	// No path found, return L-shaped fallback (never diagonal)
+	// Go in initial direction first, then turn
+	if (initialDir === 'right' || initialDir === 'left') {
+		// Horizontal first, then vertical
+		return [start, { x: end.x, y: start.y }, end];
+	} else {
+		// Vertical first, then horizontal
+		return [start, { x: start.x, y: end.y }, end];
+	}
 }
 
 /**
@@ -244,9 +251,9 @@ export function findPath(
 	// Find path
 	const rawPath = finder.findPath(startGx, startGy, endGx, endGy, gridClone);
 
-	// If no path found, return direct line (fallback)
+	// If no path found, return L-shaped fallback (never diagonal)
 	if (rawPath.length === 0) {
-		return [start, end];
+		return [start, { x: end.x, y: start.y }, end];
 	}
 
 	// Convert back to world coordinates

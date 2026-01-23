@@ -102,41 +102,46 @@
 		const tgt = adjustedTarget();
 
 		if (routeResult?.path && routeResult.path.length >= 2) {
-			// Use calculated route with orthogonal stubs at ends
-			// Stubs ensure grid alignment: handle tip -> stub end (grid) -> route -> stub end (grid) -> handle tip
+			// Use calculated route - draw only orthogonal segments
 			const points = routeResult.path;
-			const firstPoint = points[0];
-			const lastPoint = points[points.length - 1];
 
 			// Start at handle tip
 			let d = `M ${src.x} ${src.y}`;
 
-			// Source stub: orthogonal segment from handle to first route point
-			// Based on port direction, draw horizontal or vertical first
+			// Source stub: go in port direction to align with first route point
 			if (sourcePosition === 'right' || sourcePosition === 'left') {
-				// Horizontal port: draw horizontal stub, then vertical if needed
-				d += ` L ${firstPoint.x} ${src.y}`;
-				if (src.y !== firstPoint.y) d += ` L ${firstPoint.x} ${firstPoint.y}`;
+				// Horizontal port: horizontal to firstPoint.x, then vertical to firstPoint.y
+				d += ` H ${points[0].x}`;
+				d += ` V ${points[0].y}`;
 			} else {
-				// Vertical port: draw vertical stub, then horizontal if needed
-				d += ` L ${src.x} ${firstPoint.y}`;
-				if (src.x !== firstPoint.x) d += ` L ${firstPoint.x} ${firstPoint.y}`;
+				// Vertical port: vertical to firstPoint.y, then horizontal to firstPoint.x
+				d += ` V ${points[0].y}`;
+				d += ` H ${points[0].x}`;
 			}
 
-			// Draw through intermediate route points (skip first, we already drew to it)
+			// Draw through route points using only H and V commands (never diagonal)
 			for (let i = 1; i < points.length; i++) {
-				d += ` L ${points[i].x} ${points[i].y}`;
+				const prev = points[i - 1];
+				const curr = points[i];
+				// Determine if horizontal or vertical based on which coord changed more
+				if (Math.abs(curr.x - prev.x) > Math.abs(curr.y - prev.y)) {
+					d += ` H ${curr.x}`;
+					if (Math.abs(curr.y - prev.y) > 0.5) d += ` V ${curr.y}`;
+				} else {
+					d += ` V ${curr.y}`;
+					if (Math.abs(curr.x - prev.x) > 0.5) d += ` H ${curr.x}`;
+				}
 			}
 
-			// Target stub: orthogonal segment from last route point to handle
+			// Target stub: from last route point to handle
 			if (targetPosition === 'right' || targetPosition === 'left') {
-				// Horizontal port: align vertically first, then horizontal to handle
-				if (lastPoint.y !== tgt.y) d += ` L ${lastPoint.x} ${tgt.y}`;
-				d += ` L ${tgt.x} ${tgt.y}`;
+				// Horizontal port: vertical first, then horizontal
+				d += ` V ${tgt.y}`;
+				d += ` H ${tgt.x}`;
 			} else {
-				// Vertical port: align horizontally first, then vertical to handle
-				if (lastPoint.x !== tgt.x) d += ` L ${tgt.x} ${lastPoint.y}`;
-				d += ` L ${tgt.x} ${tgt.y}`;
+				// Vertical port: horizontal first, then vertical
+				d += ` H ${tgt.x}`;
+				d += ` V ${tgt.y}`;
 			}
 
 			return d;
