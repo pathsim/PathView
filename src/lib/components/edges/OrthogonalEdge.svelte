@@ -102,44 +102,31 @@
 		const tgt = adjustedTarget();
 
 		if (routeResult?.path && routeResult.path.length >= 2) {
-			// Use calculated route - draw only orthogonal segments
+			// Use calculated route - draw only H/V segments (never diagonal)
 			const points = routeResult.path;
 
-			// Start at handle tip
 			let d = `M ${src.x} ${src.y}`;
 
-			// Source stub: go in port direction to align with first route point
+			// Source stub: go in port direction first
 			if (sourcePosition === 'right' || sourcePosition === 'left') {
-				// Horizontal port: horizontal to firstPoint.x, then vertical to firstPoint.y
 				d += ` H ${points[0].x}`;
 				d += ` V ${points[0].y}`;
 			} else {
-				// Vertical port: vertical to firstPoint.y, then horizontal to firstPoint.x
 				d += ` V ${points[0].y}`;
 				d += ` H ${points[0].x}`;
 			}
 
-			// Draw through route points using only H and V commands (never diagonal)
+			// Draw through route points using H/V only
 			for (let i = 1; i < points.length; i++) {
-				const prev = points[i - 1];
-				const curr = points[i];
-				// Determine if horizontal or vertical based on which coord changed more
-				if (Math.abs(curr.x - prev.x) > Math.abs(curr.y - prev.y)) {
-					d += ` H ${curr.x}`;
-					if (Math.abs(curr.y - prev.y) > 0.5) d += ` V ${curr.y}`;
-				} else {
-					d += ` V ${curr.y}`;
-					if (Math.abs(curr.x - prev.x) > 0.5) d += ` H ${curr.x}`;
-				}
+				d += ` H ${points[i].x}`;
+				d += ` V ${points[i].y}`;
 			}
 
-			// Target stub: from last route point to handle
+			// Target stub: approach in port direction
 			if (targetPosition === 'right' || targetPosition === 'left') {
-				// Horizontal port: vertical first, then horizontal
 				d += ` V ${tgt.y}`;
 				d += ` H ${tgt.x}`;
 			} else {
-				// Vertical port: horizontal first, then vertical
 				d += ` H ${tgt.x}`;
 				d += ` V ${tgt.y}`;
 			}
