@@ -148,62 +148,6 @@ def check_traceback():
 @app.route("/streamData", methods=["POST"])
 def stream_data():
     pass
-# @app.route("/runGraphStreamingSimulation", methods=["POST"])
-# def runGraphStreamingSimulation():
-#     try:
-#         # Not fully implemented yet
-#         data = request.get_json()
-#         nodes, connections, settings_store, code_context, events = data["nodes"], data["connections"], data["settingsStore"], data["codeContext"], data["events"]
-
-#         pass
-#     except KeyError as e:
-#         return jsonify({"success": False, "error": f"Missing key, error: {e}"})
-#     except Exception as e:
-#         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
-
-# @app.route("/validateGraphSimulation", methods=["POST"])
-# def validateGraphSimulation():
-#     print("Received a request at /validateGraphSimulation")
-
-#     try:
-#         # Not fully implemented yet
-#         # - We are going to have to recreate nodeRegistry functionality when given the 
-#         # - The original validation program has extractParams() and validateGraphBridge() run
-#         # - extractParams() uses primarily nodeRegistry functionality
-#         # - validateGraphBridge() uses a bunch of generated Python code to run in Pyodide s.t. we can just run it here
-
-#         data = request.get_json()
-#         nodes, code_context, node_registry_nodes = data.get("nodes"), data.get("codeContext"), data.get("nodeRegistryNodes")
-#         print("Node registry is: ", node_registry_nodes)
-
-#         # Extract Node Params
-
-
-#         # Validate Graph Bridge
-
-
-#         return jsonify({"success": True, "data": {
-#             "valid": False,
-#             "errors": []
-#         }})
-#         pass
-#     except KeyError as e:
-#         return jsonify({"success": False, "error": f"Missing key, error: {e}"})
-#     except Exception as e:
-#         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
-
-
-# # ------------------- STATE DEPENDENT / CHANGING ROUTES ------------------
-
-# @app.route("/continueStreamingSimulation", methods=["POST"])
-# def continueStreamingSimulation():
-#     try:
-#         # Not fully implemented yet
-
-#         data = request.get_json()
-#         duration = data["duration"]
-#     except Exception as e:
-#         return jsonify({"success": False, "error": f"Server-side error: {e}"}), 500
 
 # Global error handler to ensure all errors return JSON
 @app.errorhandler(Exception)

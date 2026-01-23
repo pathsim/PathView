@@ -119,11 +119,6 @@ export class FlaskBackend implements Backend {
 		const id = this.generateId();
 
 		return new Promise<void>((resolve, reject) => {
-			console.log("Timeout set, the request id is: ", id);
-			console.log(
-				`Do we have request ${id}? ${this.pendingRequests.has(id)}`,
-			);
-			console.log("Pending Requests Map: ", this.pendingRequests);
 			const timeoutId = setTimeout(() => {
 				console.log("Timeout triggered");
 				if (this.pendingRequests.has(id)) {
@@ -237,6 +232,13 @@ export class FlaskBackend implements Backend {
             this.streamingActive = true;
         
             this.streamingCodeQueue.length = 0;
+
+            if(this.streamingCodeQueue.length == 0) {
+            console.log("Streaming code queue is empty...")
+            } else {
+            console.log("There is something in the streaming code queue...", this.streamingCodeQueue)
+            }
+
             while (this.streamingActive) {
               // Execute any queued code first (for runtime parameter changes, events, etc.)
               // Errors in queued code are reported but don't stop the simulation

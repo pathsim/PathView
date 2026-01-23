@@ -13,13 +13,9 @@ import { PROGRESS_MESSAGES, ERROR_MESSAGES } from '$lib/constants/messages';
 import type { REPLRequest, REPLResponse } from '../types';
 
 import type { PyodideInterface } from "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.mjs";
-import { getFlaskBackendUrl } from "$lib/utils/flaskRoutes";
-import { backendPreferenceStore, consoleStore } from "$lib/stores";
-import type { BackendPreference } from "$lib/types";
 
 let pyodide: PyodideInterface | null = null;
 let isInitialized = false;
-let backendPreference: null | BackendPreference = null;
 let streamingActive = false;
 const streamingCodeQueue: string[] = [];
 
@@ -33,12 +29,7 @@ function send(response: REPLResponse): void {
 /**
  * Initialize Pyodide and install packages (Needs FLASK Rework)
  */
-async function initialize(eventPreference: BackendPreference): Promise<void> {
-  console.log(
-    `(worker.ts, initialize) Setting the backend preference to: ${eventPreference}`,
-  );
-  backendPreference = eventPreference as BackendPreference;
-  if (!backendPreference || backendPreference == "pyodide") {
+async function initialize(): Promise<void> {
     // Default to pyodide use
     if (isInitialized) {
       send({ type: "ready" });
@@ -103,31 +94,12 @@ print(f"${pkg.import} {${pkg.import}.__version__} loaded successfully")
 
     isInitialized = true;
     send({ type: "ready" });
-  } else {
-    /*	By default the isFlaskInitialized variable is true as we have the backend constantly running on a hosted server
-     */
-    if (isInitialized) {
-      send({ type: "ready" });
-      return;
-    }
-
-    console.log(
-      "We are ready, this is a flask web server so we don't concern with initialization. Our only concern is whether the server is currently running.",
-    );
-
-    isInitialized = true;
-    send({ type: "stdout", value: "Your backend preference has been set to a Flask web server, initialization has already occured"})
-    console.log("Concluded intialziation state change");
-    send({ type: "ready" });
-  }
 }
 
 /**
  * Execute Python code (no return value) (Needs FLASK Rework)
  */
 async function execCode(id: string, code: string): Promise<void> {
-  console.log("(execCode) This backends preference is " + backendPreference);
-  if (!backendPreference || backendPreference == "pyodide") {
     // Default to pyodide use
     if (!pyodide) {
       console.log(`Within execCode() I have an uninitialized worker!`); // Debugging console
@@ -150,33 +122,7 @@ traceback.format_exc()
       }
       send({ type: "error", id, error: errorMsg, traceback });
     }
-  } else {
-    return execCodeWithFlask(id, code);
-  }
-}
-
-async function execCodeWithFlask(id: string, code: string): Promise<void> {
-  try {
-    let data = await fetch(getFlaskBackendUrl() + "/execute-code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code: code }),
-    }).then((res) => res.json());
-    if (data.success && !data.error) {
-      if(data.output) {
-        send({type: "stdout", value: data.output })
-      }
-      send({ type: "ok", id });
-    } else {
-      throw Error(data.error);
-    }
-  } catch (error) { 
-    // This traceback may actually be unnecessary in all Flaskc ases,
-    // unless there is someway that the error output doesn't fully capture all the relevant information
-    return runTracebackWithFlask(id, error);
-  }
+  
 }
 
 /**
@@ -184,7 +130,6 @@ async function execCodeWithFlask(id: string, code: string): Promise<void> {
  * Note: _to_json helper is injected via REPL_SETUP_CODE (Needs FLASK Rework)
  */
 async function evalExpr(id: string, expr: string): Promise<void> {
-  if (!backendPreference || backendPreference == "pyodide") {
     // Default to pyodide use
     if (!pyodide) {
       console.log(`Within evalExpr() I have an uninitialized worker!`); // Debugging console
@@ -215,44 +160,14 @@ traceback.format_exc()
       }
       send({ type: "error", id, error: errorMsg, traceback });
     }
-  } else {
-    return evalExprWithFlask(id, expr);
-  }
 }
 
-async function evalExprWithFlask(id: string, expr: string): Promise<void> {
-  try {
-    let data = await fetch(getFlaskBackendUrl() + "/evaluate-expression", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ expr: expr }),
-    }).then((res) => res.json());
-    if (data.success && !data.error) {
-      if(data.output) {
-        send({type: "stdout", value: data.output })
-      }
-      console.log(
-        "\n\n(Flask) The evaluated result from evaluating the expression: ",
-        JSON.stringify(data.result),
-        "\n\n",
-      );
-      send({ type: "value", id, value: JSON.stringify(data.result) as string });
-    } else {
-      throw Error(data.error);
-    }
-  } catch (error) {
-    return runTracebackWithFlask(id, error);
-  }
-}
 
 /**
  * Run streaming loop - steps generator continuously and posts results
  * Runs autonomously until done or stopped (Needs FLASK Rework)
  */
 async function runStreamingLoop(id: string, expr: string): Promise<void> {
-  if (backendPreference == "pyodide" || !backendPreference) {
     if (!pyodide) {
       console.log(`Within runStreamingLoop() I have an uninitialized worker!`); // Debugging console
       throw new Error(ERROR_MESSAGES.WORKER_NOT_INITIALIZED);
@@ -326,115 +241,6 @@ traceback.format_exc()
       // Always send done when loop ends (whether completed, stopped, or error)
       send({ type: "stream-done", id });
     }
-  } else {
-    return runStreamingLoopWithFlask(id, expr);
-  }
-}
-
-async function runStreamingLoopWithFlask(id: string, expr: string) {
-  try {
-    streamingActive = true;
-
-    streamingCodeQueue.length = 0;
-    while (streamingActive) {
-      // Execute any queued code first (for runtime parameter changes, events, etc.)
-      // Errors in queued code are reported but don't stop the simulation
-      while (streamingCodeQueue.length > 0) {
-        const code = streamingCodeQueue.shift()!;
-        try {
-          // Simply sending requests to the Flask api to execute code, we only really care if errors are produced so we
-          // don't handle any data response
-
-          let data = await fetch(getFlaskBackendUrl() + "/execute-code", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ code: code }),
-          }).then(res => res.json());
-          if(data.success && data.output) {
-            send({ type: "stdout", value: data.output })
-          } else {
-            throw Error(data.error)
-          }
-        } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : String(error);
-          send({ type: "stderr", value: `Stream exec error: ${errorMsg}` });
-        }
-      }
-
-      let data = await fetch(getFlaskBackendUrl() + "/evaluate-expression", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ expr: expr }),
-      }).then((res) => res.json());
-
-      if (data.success && !data.error) {
-        if(data.output) {
-          send({ type: "stdout", value: data.output })
-        }
-        data = data.result;
-      } else {
-        throw Error(data.error);
-      }
-
-      // console.log("Resultant returned is: ", data)
-
-      if (!streamingActive) {
-        if (!data.done && data.result) {
-          // console.log("Still streaming data....")
-          if(data.result) {
-            console.log("(Flask) Still streaming data, but this value was returned: ", data.result)
-          }
-          send({
-            type: "stream-data",
-            id,
-            value: JSON.stringify(data.result) as string,
-          });
-        }
-        break;
-      }
-
-      if (data.done) {
-        break;
-      }
-
-      console.log(
-        "(Flask) Done streaming data, the final value is....",
-        data,
-      );
-
-      send({
-        type: "stream-data",
-        id,
-        value: JSON.stringify(data) as string,
-      });
-    }
-  } catch (error) {
-    return runTracebackWithFlask(id, error);
-  } finally {
-    streamingActive = false;
-    console.log("Have completely finished streaming!");
-    send({ type: "stream-done", id });
-  }
-}
-
-async function runTracebackWithFlask(id: string, error: unknown) {
-  const errorMsg = error instanceof Error ? error.message : String(error);
-  let traceback: string | undefined;
-  try {
-    traceback = (
-      await fetch(getFlaskBackendUrl() + "/traceback")
-        .then((res) => res.json())
-        .then((res) => res.json)
-    ).traceback as string;
-  } catch (error) {
-    // Ignore as in the Pyodide framework
-  }
-  send({ type: "error", id, error: errorMsg, traceback });
 }
 
 /**
@@ -452,16 +258,11 @@ self.onmessage = async (event: MessageEvent<REPLRequest>) => {
   const code = "code" in event.data ? event.data.code : undefined;
   const expr = "expr" in event.data ? event.data.expr : undefined;
 
-  const preference =
-    "backendPreference" in event.data
-      ? event.data.backendPreference
-      : "pyodide";
 
   try {
     switch (type) {
       case "init":
-        console.log("Event Data is: ", event.data);
-        await initialize(preference as BackendPreference);
+        await initialize();
         break;
 
       case "exec":
