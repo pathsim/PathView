@@ -7,6 +7,7 @@ import { get } from 'svelte/store';
 import type { MenuItemType } from './ContextMenu.svelte';
 import type { ContextMenuTarget } from '$lib/stores/contextMenu';
 import { graphStore, ANNOTATION_FONT_SIZE } from '$lib/stores/graph';
+import { routingStore } from '$lib/stores/routing';
 import { eventStore } from '$lib/stores/events';
 import { clipboardStore } from '$lib/stores/clipboard';
 import { codePreviewStore } from '$lib/stores/codePreview';
@@ -296,6 +297,12 @@ function buildEventMenu(eventId: string): MenuItemType[] {
  */
 function buildEdgeMenu(edgeId: string): MenuItemType[] {
 	return [
+		{
+			label: 'Reset Route',
+			icon: 'rotate',
+			action: () => routingStore.resetRoute(edgeId)
+		},
+		DIVIDER,
 		{
 			label: 'Delete',
 			icon: 'trash',

@@ -25,6 +25,7 @@
 	import { routingStore, buildRoutingContext } from '$lib/stores/routing';
 	import { themeStore, type Theme } from '$lib/stores/theme';
 	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection, triggerFitView } from '$lib/stores/viewActions';
+	import { screenToFlow } from '$lib/utils/viewUtils';
 	import { dropTargetBridge } from '$lib/stores/dropTargetBridge';
 	import { contextMenuStore } from '$lib/stores/contextMenu';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
@@ -83,17 +84,14 @@
 		// Handle backslash key - add waypoint to selected edge
 		if (event.key === '\\') {
 			const selectedEdge = edges.find(e => e.selected);
-			if (selectedEdge && canvasEl) {
+			if (selectedEdge) {
 				event.preventDefault();
-				// Convert mouse position to flow coordinates
-				const rect = canvasEl.getBoundingClientRect();
-				const flowX = mousePosition.x - rect.left;
-				const flowY = mousePosition.y - rect.top;
-				// TODO: Convert screen coords to flow coords using useSvelteFlow
-				// For now, use approximate position (this will be improved)
+				// Convert screen position to flow coordinates
+				const flowPos = screenToFlow(mousePosition);
+				// Snap to grid
 				const gridSize = 10;
-				const snappedX = Math.round(flowX / gridSize) * gridSize;
-				const snappedY = Math.round(flowY / gridSize) * gridSize;
+				const snappedX = Math.round(flowPos.x / gridSize) * gridSize;
+				const snappedY = Math.round(flowPos.y / gridSize) * gridSize;
 				routingStore.addUserWaypoint(selectedEdge.id, { x: snappedX, y: snappedY });
 			}
 			return;
