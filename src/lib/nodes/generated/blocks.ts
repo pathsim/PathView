@@ -23,8 +23,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
 {
   "Constant": {
     "blockClass": "Constant",
-    "description": "Produces a constant output signal (SISO).",
-    "docstringHtml": "<p>Produces a constant output signal (SISO).</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = const.\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>constant defining block output</dd>\n</dl>\n</div>\n",
+    "description": "Produces a constant output signal (SISO)",
+    "docstringHtml": "<p>Produces a constant output signal (SISO)</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>constant defining block output</dd>\n</dl>\n</div>\n",
     "params": {
       "value": {
         "type": "integer",
@@ -39,8 +39,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "Source": {
     "blockClass": "Source",
-    "description": "Source that produces an arbitrary time dependent output defined by `func` (callable).",
-    "docstringHtml": "<p>Source that produces an arbitrary time dependent output defined by <cite>func</cite> (callable).</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\mathrm{func}(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its internal function (<cite>func</cite>) will\nbe called multiple times per timestep, each time when <cite>Simulation._update(t)</cite>\nis called in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>For example a ramp:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import Source\n\nsrc = Source(lambda t : t)\n</pre>\n<p>or a simple sinusoid with some frequency:</p>\n<pre class=\"code python literal-block\">\nimport numpy as np\nfrom pathsim.blocks import Source\n\n#some parameter\nomega = 100\n\n#the function that gets evaluated\ndef f(t):\n    return np.sin(omega * t)\n\nsrc = Source(f)\n</pre>\n<p>Because the <cite>Source</cite> block only has a single argument, it can be\nused to decorate a function and make it a <cite>PathSim</cite> block. This might\nbe handy in some cases to keep definitions concise and localized\nin the code:</p>\n<pre class=\"code python literal-block\">\nimport numpy as np\nfrom pathsim.blocks import Source\n\n#does the same as the definition above\n\n&#64;Source\ndef src(t):\n    omega = 100\n    return np.sin(omega * t)\n\n#'src' is now a PathSim block\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>function defining time dependent block output</dd>\n</dl>\n</div>\n",
+    "description": "Source that produces an arbitrary time dependent output,",
+    "docstringHtml": "<p>Source that produces an arbitrary time dependent output,\ndefined by the func (callable).</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\mathrm{func}(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its internal function (<cite>func</cite>) will\nbe called multiple times per timestep, each time when <cite>Simulation._update(t)</cite>\nis called in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>For example a ramp:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Source</span><span class=\"whitespace\">\n\n</span><span class=\"name\">src</span> <span class=\"operator\">=</span> <span class=\"name\">Source</span><span class=\"punctuation\">(</span><span class=\"keyword\">lambda</span> <span class=\"name\">t</span> <span class=\"punctuation\">:</span> <span class=\"name\">t</span><span class=\"punctuation\">)</span>\n</pre>\n<p>or a simple sinusoid with some frequency:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">import</span><span class=\"whitespace\"> </span><span class=\"name namespace\">numpy</span><span class=\"whitespace\"> </span><span class=\"keyword\">as</span><span class=\"whitespace\"> </span><span class=\"name namespace\">np</span><span class=\"whitespace\">\n</span><span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Source</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#some parameter</span><span class=\"whitespace\">\n</span><span class=\"name\">omega</span> <span class=\"operator\">=</span> <span class=\"literal number integer\">100</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#the function that gets evaluated</span><span class=\"whitespace\">\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">f</span><span class=\"punctuation\">(</span><span class=\"name\">t</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">sin</span><span class=\"punctuation\">(</span><span class=\"name\">omega</span> <span class=\"operator\">*</span> <span class=\"name\">t</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"name\">src</span> <span class=\"operator\">=</span> <span class=\"name\">Source</span><span class=\"punctuation\">(</span><span class=\"name\">f</span><span class=\"punctuation\">)</span>\n</pre>\n<p>Because the <cite>Source</cite> block only has a single argument, it can be\nused to decorate a function and make it a <cite>PathSim</cite> block. This might\nbe handy in some cases to keep definitions concise and localized\nin the code:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">import</span><span class=\"whitespace\"> </span><span class=\"name namespace\">numpy</span><span class=\"whitespace\"> </span><span class=\"keyword\">as</span><span class=\"whitespace\"> </span><span class=\"name namespace\">np</span><span class=\"whitespace\">\n</span><span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Source</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#does the same as the definition above</span><span class=\"whitespace\">\n\n</span><span class=\"name decorator\">&#64;Source</span><span class=\"whitespace\">\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">src</span><span class=\"punctuation\">(</span><span class=\"name\">t</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"name\">omega</span> <span class=\"operator\">=</span> <span class=\"literal number integer\">100</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">sin</span><span class=\"punctuation\">(</span><span class=\"name\">omega</span> <span class=\"operator\">*</span> <span class=\"name\">t</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#'src' is now a PathSim block</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>function defining time dependent block output</dd>\n</dl>\n</div>\n",
     "params": {
       "func": {
         "type": "callable",
@@ -81,8 +81,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "StepSource": {
     "blockClass": "StepSource",
-    "description": "Discrete time unit step (or multi step) source block.",
-    "docstringHtml": "<p>Discrete time unit step (or multi step) source block.</p>\n<p>Utilizes a scheduled event to set the block output\nto the specified output levels at the defined event times.</p>\n<p>The arguments can be vectorial and in that case, the output is set to the\namplitude that corresponds to the defined delay like a zero-order-hold stage.\nThis functionality enables adding external or time series measurement data\ninto the system.</p>\n<div class=\"section\" id=\"examples\">\n<h3>Examples</h3>\n<p>This is how to use the source as a unit step source:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import StepSource\n\n#default, starts at 0, jumps to 1\nstp = StepSource()\n</pre>\n<p>And this is how to configure it with multiple consecutive steps:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import StepSource\n\n#starts at 0, jumps to 1 at 1, jumps to -1 at 2 and jumps back to 0 at 3\nstp = StepSource(amplitude=[1, -1, 0], tau=[1, 2, 3])\n</pre>\n<p>Similarly implementing measured time series data via zoh:</p>\n<pre class=\"code python literal-block\">\nimport numpy as np\nfrom pathsim.blocks import StepSource\n\n#some random time series arrays\ntimes, data = np.linspace(0, 100, 1000), np.random.rand(1000)\n\n#pass them to the block\nstp = StepSource(amplitude=data, tau=times)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float | list[float]</span></dt>\n<dd>amplitude of the step signal, or amplitudes / output\nlevels of the multiple steps</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float | list[float]</span></dt>\n<dd>delay of the step, or delays of the different steps</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>Evt <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ScheduleList</span></dt>\n<dd>internal scheduled event directly accessible</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ScheduleList]</span></dt>\n<dd>list of interna events</dd>\n</dl>\n</div>\n",
+    "description": "Discrete time unit step source block.",
+    "docstringHtml": "<p>Discrete time unit step source block.</p>\n<p>Utilizes a scheduled event to set the block output\nto the specified output levels at the defined event times.</p>\n<p>The arguments can be vectorial and in that case, the output is set to the\namplitude that corresponds to the defined delay like a zero-order-hold stage.\nThis functionality enables adding external or time series measurement data\ninto the system.</p>\n<div class=\"section\" id=\"examples\">\n<h3>Examples</h3>\n<p>This is how to use the source as a unit step source:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">StepSource</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#default, starts at 0, jumps to 1</span><span class=\"whitespace\">\n</span><span class=\"name\">stp</span> <span class=\"operator\">=</span> <span class=\"name\">StepSource</span><span class=\"punctuation\">()</span>\n</pre>\n<p>And this is how to configure it with multiple consecutive steps:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">StepSource</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#starts at 0, jumps to 1 at 1, jumps to -1 at 2 and jumps back to 0 at 3</span><span class=\"whitespace\">\n</span><span class=\"name\">stp</span> <span class=\"operator\">=</span> <span class=\"name\">StepSource</span><span class=\"punctuation\">(</span><span class=\"name\">amplitude</span><span class=\"operator\">=</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">,</span> <span class=\"operator\">-</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">0</span><span class=\"punctuation\">],</span> <span class=\"name\">tau</span><span class=\"operator\">=</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">3</span><span class=\"punctuation\">])</span>\n</pre>\n<p>Similarly implementing measured time series data via zoh:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">import</span><span class=\"whitespace\"> </span><span class=\"name namespace\">numpy</span><span class=\"whitespace\"> </span><span class=\"keyword\">as</span><span class=\"whitespace\"> </span><span class=\"name namespace\">np</span><span class=\"whitespace\">\n</span><span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">StepSource</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#some random time series arrays</span><span class=\"whitespace\">\n</span><span class=\"name\">times</span><span class=\"punctuation\">,</span> <span class=\"name\">data</span> <span class=\"operator\">=</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">linspace</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">100</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">1000</span><span class=\"punctuation\">),</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">random</span><span class=\"operator\">.</span><span class=\"name\">rand</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">1000</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#pass them to the block</span><span class=\"whitespace\">\n</span><span class=\"name\">stp</span> <span class=\"operator\">=</span> <span class=\"name\">StepSource</span><span class=\"punctuation\">(</span><span class=\"name\">amplitude</span><span class=\"operator\">=</span><span class=\"name\">data</span><span class=\"punctuation\">,</span> <span class=\"name\">tau</span><span class=\"operator\">=</span><span class=\"name\">times</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float | list[float]</span></dt>\n<dd>amplitude of the step signal, or amplitudes / output\nlevels of the multiple steps</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float | list[float]</span></dt>\n<dd>delay of the step, or delays of the different steps</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>Evt <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ScheduleList</span></dt>\n<dd>internal scheduled event directly accessible</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ScheduleList]</span></dt>\n<dd>list of interna events</dd>\n</dl>\n</div>\n",
     "params": {
       "amplitude": {
         "type": "integer",
@@ -102,8 +102,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "PulseSource": {
     "blockClass": "PulseSource",
-    "description": "Generates a periodic pulse waveform with defined rise and fall times.",
-    "docstringHtml": "<p>Generates a periodic pulse waveform with defined rise and fall times.</p>\n<p>Scheduled events trigger phase changes (low, rising, high, falling),\nand the <cite>update</cite> method calculates the output value based on the\ncurrent phase, performing linear interpolation during rise and fall.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Peak amplitude of the pulse. Default is 1.0.</dd>\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Period of the pulse train. Must be positive. Default is 1.0.</dd>\n<dt>t_rise <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duration of the rising edge. Default is 0.0.</dd>\n<dt>t_fall <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duration of the falling edge. Default is 0.0.</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Initial delay before the first pulse cycle begins. Default is 0.0.</dd>\n<dt>duty <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duty cycle, ratio of the pulse ON duration (plateau time only)\nto the total period T (must be between 0 and 1). Default is 0.5.\nThe high plateau duration is <cite>T * duty</cite>.</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>Internal scheduled events triggering phase transitions.</dd>\n<dt>_phase <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">str</span></dt>\n<dd>Current phase of the pulse ('low', 'rising', 'high', 'falling').</dd>\n<dt>_phase_start_time <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>Simulation time when the current phase began.</dd>\n</dl>\n</div>\n",
+    "description": "Generates a periodic pulse waveform with defined rise and fall times",
+    "docstringHtml": "<p>Generates a periodic pulse waveform with defined rise and fall times\nusing a hybrid approach with scheduled events and continuous updates.</p>\n<p>Scheduled events trigger phase changes (low, rising, high, falling),\nand the <cite>update</cite> method calculates the output value based on the\ncurrent phase, performing linear interpolation during rise and fall.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Peak amplitude of the pulse. Default is 1.0.</dd>\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Period of the pulse train. Must be positive. Default is 1.0.</dd>\n<dt>t_rise <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duration of the rising edge. Default is 0.0.</dd>\n<dt>t_fall <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duration of the falling edge. Default is 0.0.</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Initial delay before the first pulse cycle begins. Default is 0.0.</dd>\n<dt>duty <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>Duty cycle, ratio of the pulse ON duration (plateau time only)\nto the total period T (must be between 0 and 1). Default is 0.5.\nThe high plateau duration is <cite>T * duty</cite>.</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>Internal scheduled events triggering phase transitions.</dd>\n<dt>_phase <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">str</span></dt>\n<dd>Current phase of the pulse ('low', 'rising', 'high', 'falling').</dd>\n<dt>_phase_start_time <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>Simulation time when the current phase began.</dd>\n</dl>\n</div>\n",
     "params": {
       "amplitude": {
         "type": "number",
@@ -222,7 +222,7 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   "ChirpPhaseNoiseSource": {
     "blockClass": "ChirpPhaseNoiseSource",
     "description": "Chirp source, sinusoid with frequency ramp up and ramp down, plus phase noise.",
-    "docstringHtml": "<p>Chirp source, sinusoid with frequency ramp up and ramp down, plus phase noise.</p>\n<p>This works by using a time dependent triangle wave for the frequency\nand integrating it with a numerical integration engine to get a\ncontinuous phase. This phase is then used to evaluate a sinusoid.</p>\n<p>Additionally the chirp source can have white and cumulative phase noise.\nMathematically it looks like this for the contributions to the phase from\nthe triangular wave:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\varphi_t(t) = \\int_0^t \\mathrm{tri}_{f_0, B, T}(\\tau) \\, d\\tau\n\\end{equation*}\n</div>\n<p>And from the white (w) and cumulative (c) noise:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\varphi_n(t) = \\sigma_w \\, n_w(t) + \\sigma_c \\int_0^t n_c(\\tau) \\, d\\tau\n\\end{equation*}\n</div>\n<p>The phase contributions are then used to evaluate a sinusoid to get the final chirp signal:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = A \\sin(\\varphi_t(t) + \\varphi_n(t) + \\varphi_0)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>amplitude of the chirp signal</dd>\n<dt>f0 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>start frequency of the chirp signal</dd>\n<dt>BW <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>bandwidth of the frequency ramp of the chirp signal</dd>\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>period of the frequency ramp of the chirp signal</dd>\n<dt>phase <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>phase of sinusoid (initial, radians)</dd>\n<dt>sig_cum <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>weight for cumulative phase noise contribution</dd>\n<dt>sig_white <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>weight for white phase noise contribution</dd>\n<dt>sampling_period <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>time between phase noise samples. If None,\nnoise is sampled every timestep (default is 0.1)</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>noise_1 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal noise value for white phase noise</dd>\n<dt>noise_2 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal noise value for cumulative phase noise</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>scheduled event for periodic sampling (only if sampling_period is set)</dd>\n</dl>\n</div>\n",
+    "docstringHtml": "<p>Chirp source, sinusoid with frequency ramp up and ramp down, plus phase noise.</p>\n<p>This works by using a time dependent triangle wave for the frequency\nand integrating it with a numerical integration engine to get a\ncontinuous phase. This phase is then used to evaluate a sinusoid.</p>\n<p>Additionally the chirp source can have white and cumulative phase noise.\nMathematically it looks like this for the contributions to the phase from\nthe triangular wave:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\varphi_t(t) = \\int_0^t \\mathrm{tri}_{f_0, B, T}(\\tau) \\, d\\tau\n\\end{equation*}\n</div>\n<p>And from the white (w) and cumulative (c) noise:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\varphi_n(t) = \\sigma_w \\, n_w(t) + \\sigma_c \\int_0^t n_c(\\tau) \\, d\\tau\n\\end{equation*}\n</div>\n<p>The phase contributions are then used to evaluate a sinusoid to get the final chirp signal:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = A \\sin(\\varphi_t(t) + \\varphi_n(t) + \\varphi_0)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>amplitude <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>amplitude of the chirp signal</dd>\n<dt>f0 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>start frequency of the chirp signal</dd>\n<dt>BW <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>bandwidth of the frequency ramp of the chirp signal</dd>\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>period of the frequency ramp of the chirp signal</dd>\n<dt>phase <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>phase of sinusoid (initial, radians)</dd>\n<dt>sig_cum <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>weight for cumulative phase noise contribution</dd>\n<dt>sig_white <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>weight for white phase noise contribution</dd>\n<dt>sampling_rate <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>frequency with which phase noise is sampled (Hz). If None,\nnoise is sampled every timestep (default is 10 Hz)</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>noise_1 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal noise value for white phase noise</dd>\n<dt>noise_2 <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal noise value for cumulative phase noise</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>scheduled event for periodic sampling (only if sampling_rate is set)</dd>\n</dl>\n</div>\n",
     "params": {
       "amplitude": {
         "type": "integer",
@@ -259,10 +259,10 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "default": "0",
         "description": "weight for white phase noise contribution"
       },
-      "sampling_period": {
-        "type": "number",
-        "default": "0.1",
-        "description": "time between phase noise samples. If None, noise is sampled every timestep (default is 0.1)"
+      "sampling_rate": {
+        "type": "integer",
+        "default": "10",
+        "description": "frequency with which phase noise is sampled (Hz). If None, noise is sampled every timestep (default is 10 Hz) Attributes ----------"
       }
     },
     "inputs": [],
@@ -293,28 +293,18 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "WhiteNoise": {
     "blockClass": "WhiteNoise",
-    "description": "White noise source with Gaussian distribution.",
-    "docstringHtml": "<p>White noise source with Gaussian distribution.</p>\n<p>Generates uncorrelated random samples with either constant amplitude\n(<tt class=\"docutils literal\">standard_deviation</tt> mode) or timestep-scaled amplitude for stochastic\nintegration (<tt class=\"docutils literal\">spectral_density</tt> mode).</p>\n<p>In spectral density mode, output is scaled as √(S₀/dt) so that integrating\nthe noise yields correct statistical properties (Wiener process).</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>If <tt class=\"docutils literal\">spectral_density</tt> is provided, it takes precedence over <tt class=\"docutils literal\">standard_deviation</tt>.\nIf <tt class=\"docutils literal\">sampling_period</tt> is set, noise is sampled at fixed intervals (zero-order hold).</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>standard_deviation <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>output standard deviation for constant-amplitude mode (default: 1.0)</dd>\n<dt>spectral_density <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>power spectral density S₀ in [signal²/Hz]</dd>\n<dt>sampling_period <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>time between samples, if None samples every timestep</dd>\n<dt>seed <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int, optional</span></dt>\n<dd>random seed for reproducibility</dd>\n</dl>\n</div>\n",
+    "description": "White noise source with uniform spectral density.",
+    "docstringHtml": "<p>White noise source with uniform spectral density. Samples from\ndistribution with 'sampling_rate' and holds noise values constant\nfor time bins (zero-order-hold).</p>\n<p>If no 'sampling_rate' (None) is specified, every simulation timestep\ngets a new noise value. This is the default setting.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>spectral_density <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>noise spectral density</dd>\n<dt>noise <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal noise value</dd>\n<dt>sampling_rate <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>frequency with which the noise is sampled</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>scheduled event for periodic sampling</dd>\n</dl>\n</div>\n",
     "params": {
-      "standard_deviation": {
-        "type": "number",
-        "default": "1.0",
-        "description": "output standard deviation for constant-amplitude mode (default: 1.0)"
-      },
       "spectral_density": {
-        "type": "any",
-        "default": null,
-        "description": "power spectral density S₀ in [signal²/Hz]"
+        "type": "integer",
+        "default": "1",
+        "description": "noise spectral density"
       },
-      "sampling_period": {
+      "sampling_rate": {
         "type": "any",
         "default": null,
-        "description": "time between samples, if None samples every timestep"
-      },
-      "seed": {
-        "type": "any",
-        "default": null,
-        "description": "random seed for reproducibility"
+        "description": "frequency with which the noise is sampled"
       }
     },
     "inputs": [],
@@ -324,33 +314,23 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "PinkNoise": {
     "blockClass": "PinkNoise",
-    "description": "Pink noise (1/f noise) source using the Voss-McCartney algorithm.",
-    "docstringHtml": "<p>Pink noise (1/f noise) source using the Voss-McCartney algorithm.</p>\n<p>Generates noise with power spectral density proportional to 1/f, where\nlower frequencies have more power than higher frequencies.</p>\n<p>The algorithm maintains <tt class=\"docutils literal\">num_octaves</tt> independent random values representing\ndifferent frequency bands. At each sample, one octave is updated based on the\nbinary representation of the sample counter, creating the characteristic 1/f\nspectrum through the superposition of different update rates.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>If <tt class=\"docutils literal\">spectral_density</tt> is provided, it takes precedence over <tt class=\"docutils literal\">standard_deviation</tt>.\nIf <tt class=\"docutils literal\">sampling_period</tt> is set, noise is sampled at fixed intervals (zero-order hold).</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>standard_deviation <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>approximate output standard deviation (default: 1.0)</dd>\n<dt>spectral_density <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>power spectral density, output scaled as √(S₀/(N·dt))</dd>\n<dt>num_octaves <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>number of frequency bands in algorithm (default: 16)</dd>\n<dt>sampling_period <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, optional</span></dt>\n<dd>time between samples, if None samples every timestep</dd>\n<dt>seed <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int, optional</span></dt>\n<dd>random seed for reproducibility</dd>\n</dl>\n</div>\n",
+    "description": "Pink noise (1/f) source using the Voss-McCartney algorithm.",
+    "docstringHtml": "<p>Pink noise (1/f) source using the Voss-McCartney algorithm.</p>\n<p>Generates noise with power spectral density inversely proportional to\nfrequency. Samples from distribution with 'sampling_rate' and holds\nnoise values constant for time bins (zero-order-hold).</p>\n<p>The Voss-McCartney algorithm maintains <tt class=\"docutils literal\">num_octaves</tt> independent\nrandom values. At each sample n, octaves are selectively updated based\non the binary representation of n:</p>\n<ul class=\"simple\">\n<li>Octave 0: updated every sample (when n &amp; 1 == 1)</li>\n<li>Octave 1: updated every 2nd sample (when n &amp; 2 == 2)</li>\n<li>Octave 2: updated every 4th sample (when n &amp; 4 == 4)</li>\n<li>Octave k: updated every <span class=\"math\">\\(2^k\\)</span> samples</li>\n</ul>\n<p>The pink noise output is the sum of all octaves, scaled to achieve the\ndesired spectral density:</p>\n<div class=\"math\">\n\\begin{equation*}\ny[n] = \\sqrt{\\frac{S_0}{N \\cdot dt}} \\sum_{k=0}^{N-1} x_k[n]\n\\end{equation*}\n</div>\n<p>where <span class=\"math\">\\(S_0\\)</span> is the spectral density, <span class=\"math\">\\(N\\)</span> is <tt class=\"docutils literal\">num_octaves</tt>,\n<span class=\"math\">\\(dt\\)</span> is the sampling timestep, and <span class=\"math\">\\(x_k[n]\\)</span> are the octave\nvalues (each drawn from <span class=\"math\">\\(\\mathcal{N}(0, 1)\\)</span> when updated).</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>If no 'sampling_rate' (None) is specified, every simulation timestep\ngets a new noise value. This is the default setting.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>spectral_density <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>noise spectral density <span class=\"math\">\\(S_0\\)</span></dd>\n<dt>num_octaves <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>number of octaves (levels of randomness), default is 16</dd>\n<dt>sampling_rate <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>frequency with which the noise is sampled</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>n_samples <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>internal sample counter</dd>\n<dt>octave_values <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array[float]</span></dt>\n<dd>internal random numbers for octaves in the Voss-McCartney algorithm</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>scheduled event for periodic sampling</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"references\">\n<h3>References</h3>\n<table class=\"docutils footnote\" frame=\"void\" id=\"footnote-1\" rules=\"none\">\n<colgroup><col class=\"label\" /><col /></colgroup>\n<tbody valign=\"top\">\n<tr><td class=\"label\">[1]</td><td>Voss, R. F., &amp; Clarke, J. (1978). &quot;1/f noise&quot; in music: Music from\n1/f noise. The Journal of the Acoustical Society of America, 63(1),\n258-263.</td></tr>\n</tbody>\n</table>\n</div>\n",
     "params": {
-      "standard_deviation": {
-        "type": "number",
-        "default": "1.0",
-        "description": "approximate output standard deviation (default: 1.0)"
-      },
       "spectral_density": {
-        "type": "any",
-        "default": null,
-        "description": "power spectral density, output scaled as √(S₀/(N·dt))"
+        "type": "integer",
+        "default": "1",
+        "description": "noise spectral density :math:`S_0`"
       },
       "num_octaves": {
         "type": "integer",
         "default": "16",
-        "description": "number of frequency bands in algorithm (default: 16)"
+        "description": "number of octaves (levels of randomness), default is 16"
       },
-      "sampling_period": {
+      "sampling_rate": {
         "type": "any",
         "default": null,
-        "description": "time between samples, if None samples every timestep"
-      },
-      "seed": {
-        "type": "any",
-        "default": null,
-        "description": "random seed for reproducibility"
+        "description": "frequency with which the noise is sampled"
       }
     },
     "inputs": [],
@@ -361,12 +341,12 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   "RandomNumberGenerator": {
     "blockClass": "RandomNumberGenerator",
     "description": "Generates a random output value using `numpy.random.rand`.",
-    "docstringHtml": "<p>Generates a random output value using <cite>numpy.random.rand</cite>.</p>\n<p>If no <cite>sampling_period</cite> (None) is specified, every simulation timestep gets\na random value. Otherwise an internal <cite>Schedule</cite> event is used to periodically\nsample a random value and set the output like a zero-order-hold stage.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>sampling_period <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>time between random samples</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_sample <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal random number state in case that\nno <cite>sampling_period</cite> is provided</dd>\n<dt>Evt <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Schedule</span></dt>\n<dd>internal event that periodically samples a random\nvalue in case <cite>sampling_period</cite> is provided</dd>\n</dl>\n</div>\n",
+    "docstringHtml": "<p>Generates a random output value using <cite>numpy.random.rand</cite>.</p>\n<p>If no <cite>sampling_rate</cite> (None) is specified, every simulation timestep gets\na random value. Otherwise an internal <cite>Schedule</cite> event is used to periodically\nsample a random value and set the output like a sero-order-hold stage.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>sampling_rate <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>number of random samples per time unit</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_sample <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>internal random number state in case that\nno <cite>samplingrate</cite> is provided</dd>\n<dt>Evt <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Schedule</span></dt>\n<dd>internal event that periodically samples a random\nvalue in case <cite>samplingrate</cite> is provided</dd>\n</dl>\n</div>\n",
     "params": {
-      "sampling_period": {
+      "sampling_rate": {
         "type": "any",
         "default": null,
-        "description": "time between random samples"
+        "description": "number of random samples per time unit"
       }
     },
     "inputs": [],
@@ -376,8 +356,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "Integrator": {
     "blockClass": "Integrator",
-    "description": "Integrates the input signal.",
-    "docstringHtml": "<p>Integrates the input signal.</p>\n<p>Uses a numerical integration engine like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\int_0^t u(\\tau) \\ d \\tau\n\\end{equation*}\n</div>\n<p>or in differential form like this:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x}(t) &amp;= u(t) \\\\\n           y(t) &amp;= x(t)\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>The Integrator block is inherently MIMO capable, so <cite>u</cite>\nand <cite>y</cite> can be vectors.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how to initialize the integrator:</p>\n<pre class=\"code python literal-block\">\n#initial value 0.0\ni1 = Integrator()\n\n#initial value 2.5\ni2 = Integrator(2.5)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, array</span></dt>\n<dd>initial value of integrator</dd>\n</dl>\n</div>\n",
+    "description": "Integrates the input signal using a numerical integration engine like this:",
+    "docstringHtml": "<p>Integrates the input signal using a numerical integration engine like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\int_0^t u(\\tau) \\ d \\tau\n\\end{equation*}\n</div>\n<p>or in differential form like this:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x}(t) &amp;= u(t) \\\\\n           y(t) &amp;= x(t)\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>The Integrator block is inherently MIMO capable, so <cite>u</cite> and <cite>y</cite> can be vectors.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how to initialize the integrator:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#initial value 0.0</span><span class=\"whitespace\">\n</span><span class=\"name\">i1</span> <span class=\"operator\">=</span> <span class=\"name\">Integrator</span><span class=\"punctuation\">()</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#initial value 2.5</span><span class=\"whitespace\">\n</span><span class=\"name\">i2</span> <span class=\"operator\">=</span> <span class=\"name\">Integrator</span><span class=\"punctuation\">(</span><span class=\"literal number float\">2.5</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, array</span></dt>\n<dd>initial value of integrator</dd>\n</dl>\n</div>\n",
     "params": {
       "initial_value": {
         "type": "number",
@@ -385,13 +365,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "initial value of integrator"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Differentiator": {
     "blockClass": "Differentiator",
-    "description": "Differentiates the input signal.",
-    "docstringHtml": "<p>Differentiates the input signal.</p>\n<p>Uses a first order transfer function with a pole at the origin which implements\na high pass filter. Supports vector input.</p>\n<div class=\"math\">\n\\begin{equation*}\nH_\\mathrm{diff}(s) = \\frac{s}{1 + s / f_\\mathrm{max}}\n\\end{equation*}\n</div>\n<p>The approximation holds for signals up to a frequency of approximately f_max.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>Since this is an approximation of real differentiation, the approximation will not hold\nif there are high frequency components present in the signal. For example if you have\ndiscontinuities such as steps or squere waves.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#cutoff at 1kHz\nD = Differentiator(f_max=1e3)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
+    "description": "Differentiates the input signal (SISO) using a first order transfer function",
+    "docstringHtml": "<p>Differentiates the input signal (SISO) using a first order transfer function\nwith a pole at the origin which implements a high pass filter.</p>\n<div class=\"math\">\n\\begin{equation*}\nH_\\mathrm{diff}(s) = \\frac{s}{1 + s / f_\\mathrm{max}}\n\\end{equation*}\n</div>\n<p>The approximation holds for signals up to a frequency of approximately f_max.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>Since this is an approximation of real differentiation, the approximation will not hold\nif there are high frequency components present in the signal. For example if you have\ndiscontinuities such as steps or squere waves.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#cutoff at 1kHz</span><span class=\"whitespace\">\n</span><span class=\"name\">D</span> <span class=\"operator\">=</span> <span class=\"name\">Differentiator</span><span class=\"punctuation\">(</span><span class=\"name\">f_max</span><span class=\"operator\">=</span><span class=\"literal number float\">1e3</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {
       "f_max": {
         "type": "number",
@@ -399,13 +379,17 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "highest expected signal frequency"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
   },
   "Delay": {
     "blockClass": "Delay",
-    "description": "Delays the input signal by a time constant 'tau' in seconds.",
-    "docstringHtml": "<p>Delays the input signal by a time constant 'tau' in seconds.</p>\n<p>Mathematically this block creates a time delay of the input signal like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) =\n\\begin{cases}\nx(t - \\tau) &amp; , t \\geq \\tau \\\\\n0            &amp; , t &lt; \\tau\n\\end{cases}\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>The internal adaptive buffer uses interpolation for the evaluation. This is\nrequired to be compatible with variable step solvers. It has a drawback however.\nThe order of the ode solver used will degrade when this block is used, due to\nthe interpolation.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>This block supports vector input, meaning we can have multiple parallel\ndelay paths through this block.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#5 time units delay\nD = Delay(tau=5)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>delay time constant</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_buffer <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">AdaptiveBuffer</span></dt>\n<dd>internal interpolatable adaptive rolling buffer</dd>\n</dl>\n</div>\n",
+    "description": "Delays the input signal by a time constant 'tau' in seconds",
+    "docstringHtml": "<p>Delays the input signal by a time constant 'tau' in seconds\nusing an adaptive rolling buffer.</p>\n<p>Mathematically this block creates a time delay of the input signal like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) =\n\\begin{cases}\nx(t - \\tau) &amp; , t \\geq \\tau \\\\\n0            &amp; , t &lt; \\tau\n\\end{cases}\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>The internal adaptive buffer uses interpolation for the evaluation. This is\nrequired to be compatible with variable step solvers. It has a drawback however.\nThe order of the ode solver used will degrade when this block is used, due to\nthe interpolation.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#5 time units delay</span><span class=\"whitespace\">\n</span><span class=\"name\">D</span> <span class=\"operator\">=</span> <span class=\"name\">Delay</span><span class=\"punctuation\">(</span><span class=\"name\">tau</span><span class=\"operator\">=</span><span class=\"literal number integer\">5</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>delay time constant</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_buffer <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">AdaptiveBuffer</span></dt>\n<dd>internal interpolatable adaptive rolling buffer</dd>\n</dl>\n</div>\n",
     "params": {
       "tau": {
         "type": "number",
@@ -413,13 +397,17 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "delay time constant"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
   },
   "ODE": {
     "blockClass": "ODE",
-    "description": "Ordinary differential equation (ODE) defined by its right hand side function.",
-    "docstringHtml": "<p>Ordinary differential equation (ODE) defined by its right hand side function.</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x}(t) =&amp; \\mathrm{func}(x(t), u(t), t) \\\\\n           y(t) =&amp; x(t)\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>with inhomogenity (input) <cite>u</cite> and state vector <cite>x</cite>. The function can be nonlinear\nand the ODE can be of arbitrary order. The block utilizes the integration engine\nto solve the ODE by integrating the <cite>func</cite>, which is the right hand side function.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>For example a linear 1st order ODE:</p>\n<pre class=\"code python literal-block\">\node = ODE(lambda x, u, t: -x)\n</pre>\n<p>Or something more complex like the <cite>Van der Pol</cite> system, where it makes sense to\nalso specify the jacobian, which improves convergence for implicit solvers but is\nnot needed in most cases:</p>\n<pre class=\"code python literal-block\">\nimport numpy as np\n\n#initial condition\nx0 = np.array([2, 0])\n\n#van der Pol parameter\nmu = 1000\n\ndef func(x, u, t):\n    return np.array([x[1], mu*(1 - x[0]**2)*x[1] - x[0]])\n\n#analytical jacobian (optional)\ndef jac(x, u, t):\n    return np.array(\n        [[0                , 1               ],\n         [-mu*2*x[0]*x[1]-1, mu*(1 - x[0]**2)]]\n         )\n\n#finally the block\nvdp = ODE(func, x0, jac)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>right hand side function of ODE</dd>\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array[float]</span></dt>\n<dd>initial state / initial condition</dd>\n<dt>jac <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable, None</span></dt>\n<dd>jacobian of 'func' or 'None'</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE right hand side 'func'</dd>\n</dl>\n</div>\n",
+    "description": "This block implements an ordinary differential equation (ODE)",
+    "docstringHtml": "<p>This block implements an ordinary differential equation (ODE)\ndefined by its right hand side</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x}(t) =&amp; \\mathrm{func}(x(t), u(t), t) \\\\\n           y(t) =&amp; x(t)\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>with inhomogenity (input) <cite>u</cite> and state vector <cite>x</cite>. The function\ncan be nonlinear and the ODE can be of arbitrary order.\nThe block utilizes the integration engine to solve the ODE\nby integrating the <cite>func</cite>, which is the right hand side function.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>For example a linear 1st order ODE:</p>\n<pre class=\"code python literal-block\">\n<span class=\"name\">ode</span> <span class=\"operator\">=</span> <span class=\"name\">ODE</span><span class=\"punctuation\">(</span><span class=\"keyword\">lambda</span> <span class=\"name\">x</span><span class=\"punctuation\">,</span> <span class=\"name\">u</span><span class=\"punctuation\">,</span> <span class=\"name\">t</span><span class=\"punctuation\">:</span> <span class=\"operator\">-</span><span class=\"name\">x</span><span class=\"punctuation\">)</span>\n</pre>\n<p>Or something more complex like the <cite>Van der Pol</cite> system, where it makes\nsense to also specify the jacobian, which improves convergence for\nimplicit solvers but is not needed in most cases:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">import</span><span class=\"whitespace\"> </span><span class=\"name namespace\">numpy</span><span class=\"whitespace\"> </span><span class=\"keyword\">as</span><span class=\"whitespace\"> </span><span class=\"name namespace\">np</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#initial condition</span><span class=\"whitespace\">\n</span><span class=\"name\">x0</span> <span class=\"operator\">=</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">array</span><span class=\"punctuation\">([</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">0</span><span class=\"punctuation\">])</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#van der Pol parameter</span><span class=\"whitespace\">\n</span><span class=\"name\">mu</span> <span class=\"operator\">=</span> <span class=\"literal number integer\">1000</span><span class=\"whitespace\">\n\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">func</span><span class=\"punctuation\">(</span><span class=\"name\">x</span><span class=\"punctuation\">,</span> <span class=\"name\">u</span><span class=\"punctuation\">,</span> <span class=\"name\">t</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">array</span><span class=\"punctuation\">([</span><span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">],</span> <span class=\"name\">mu</span><span class=\"operator\">*</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">1</span> <span class=\"operator\">-</span> <span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">]</span><span class=\"operator\">**</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">)</span><span class=\"operator\">*</span><span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">]</span> <span class=\"operator\">-</span> <span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">]])</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#analytical jacobian (optional)</span><span class=\"whitespace\">\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">jac</span><span class=\"punctuation\">(</span><span class=\"name\">x</span><span class=\"punctuation\">,</span> <span class=\"name\">u</span><span class=\"punctuation\">,</span> <span class=\"name\">t</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">array</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>        <span class=\"punctuation\">[[</span><span class=\"literal number integer\">0</span>                <span class=\"punctuation\">,</span> <span class=\"literal number integer\">1</span>               <span class=\"punctuation\">],</span><span class=\"whitespace\">\n</span>         <span class=\"punctuation\">[</span><span class=\"operator\">-</span><span class=\"name\">mu</span><span class=\"operator\">*</span><span class=\"literal number integer\">2</span><span class=\"operator\">*</span><span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">]</span><span class=\"operator\">*</span><span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">]</span><span class=\"operator\">-</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">,</span> <span class=\"name\">mu</span><span class=\"operator\">*</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">1</span> <span class=\"operator\">-</span> <span class=\"name\">x</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">]</span><span class=\"operator\">**</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">)]]</span><span class=\"whitespace\">\n</span>         <span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#finally the block</span><span class=\"whitespace\">\n</span><span class=\"name\">vdp</span> <span class=\"operator\">=</span> <span class=\"name\">ODE</span><span class=\"punctuation\">(</span><span class=\"name\">func</span><span class=\"punctuation\">,</span> <span class=\"name\">x0</span><span class=\"punctuation\">,</span> <span class=\"name\">jac</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>right hand side function of ODE</dd>\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array[float]</span></dt>\n<dd>initial state / initial condition</dd>\n<dt>jac <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable, None</span></dt>\n<dd>jacobian of 'func' or 'None'</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE right hand side 'func'</dd>\n</dl>\n</div>\n",
     "params": {
       "func": {
         "type": "callable",
@@ -437,8 +425,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "jacobian of 'func' or 'None'"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "DynamicalSystem": {
     "blockClass": "DynamicalSystem",
@@ -466,13 +454,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "optional jacobian of `func_dyn` to improve convergence for implicit ode solvers"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "StateSpace": {
     "blockClass": "StateSpace",
-    "description": "Linear time invariant (LTI) multi input multi output (MIMO) state space model.",
-    "docstringHtml": "<p>Linear time invariant (LTI) multi input multi output (MIMO) state space model.</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x} &amp;= \\mathbf{A} x + \\mathbf{B} u \\\\\n           y &amp;= \\mathbf{C} x + \\mathbf{D} u\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>where <cite>A</cite>, <cite>B</cite>, <cite>C</cite> and <cite>D</cite> are the state space matrices, <cite>x</cite> is the state,\n<cite>u</cite> the input and <cite>y</cite> the output vector.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>A SISO state space block with two internal states can be initialized\nlike this:</p>\n<pre class=\"code python literal-block\">\nS = StateSpace(\n    A=-np.eye(2),\n    B=np.ones((2, 1)),\n    C=np.ones((1, 2)),\n    D=1.0\n    )\n</pre>\n<p>and a MIMO (2 in, 2 out) state space block with three internal states\ncan be initialized like this:</p>\n<pre class=\"code python literal-block\">\nS = StateSpace(\n    A=-np.eye(3),\n    B=np.ones((3, 2)),\n    C=np.ones((2, 3)),\n    D=np.ones((2, 2))\n    )\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>A, B, C, D <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like</span></dt>\n<dd>real valued state space matrices</dd>\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like, None</span></dt>\n<dd>initial state / initial condition</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for state equation</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator for mapping to outputs</dd>\n</dl>\n</div>\n",
+    "description": "This block defines a linear time invariant (LTI) multi input multi output (MIMO)",
+    "docstringHtml": "<p>This block defines a linear time invariant (LTI) multi input multi output (MIMO)\nstate space model with the structure</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n    \\dot{x} &amp;= \\mathbf{A} x + \\mathbf{B} u \\\\\n           y &amp;= \\mathbf{C} x + \\mathbf{D} u\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>where <cite>A</cite>, <cite>B</cite>, <cite>C</cite> and <cite>D</cite> are the state space matrices, <cite>x</cite> is the state,\n<cite>u</cite> the input and <cite>y</cite> the output vector.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>A SISO state space block with two internal states can be initialized\nlike this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"name\">S</span> <span class=\"operator\">=</span> <span class=\"name\">StateSpace</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">A</span><span class=\"operator\">=-</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">eye</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">B</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">ones</span><span class=\"punctuation\">((</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">1</span><span class=\"punctuation\">)),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">C</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">ones</span><span class=\"punctuation\">((</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">2</span><span class=\"punctuation\">)),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">D</span><span class=\"operator\">=</span><span class=\"literal number float\">1.0</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span>\n</pre>\n<p>and a MIMO (2 in, 2 out) state space block with three internal states\ncan be initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"name\">S</span> <span class=\"operator\">=</span> <span class=\"name\">StateSpace</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">A</span><span class=\"operator\">=-</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">eye</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">3</span><span class=\"punctuation\">),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">B</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">ones</span><span class=\"punctuation\">((</span><span class=\"literal number integer\">3</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">2</span><span class=\"punctuation\">)),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">C</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">ones</span><span class=\"punctuation\">((</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">3</span><span class=\"punctuation\">)),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">D</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">ones</span><span class=\"punctuation\">((</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">2</span><span class=\"punctuation\">))</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>A, B, C, D <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like</span></dt>\n<dd>real valued state space matrices</dd>\n<dt>initial_value <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like, None</span></dt>\n<dd>initial state / initial condition</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for state equation</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator for mapping to outputs</dd>\n</dl>\n</div>\n",
     "params": {
       "A": {
         "type": "number",
@@ -500,13 +488,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "initial state / initial condition"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "PID": {
     "blockClass": "PID",
     "description": "Proportional-Integral-Differntiation (PID) controller.",
-    "docstringHtml": "<p>Proportional-Integral-Differntiation (PID) controller.</p>\n<p>The transfer function is defined as</p>\n<div class=\"math\">\n\\begin{equation*}\nH_\\mathrm{diff}(s) = K_p + K_i \\frac{1}{s} + K_d \\frac{s}{1 + s / f_\\mathrm{max}}\n\\end{equation*}\n</div>\n<p>where the differentiation is approximated by a high pass filter that holds\nfor signals up to a frequency of approximately <cite>f_max</cite>.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.\nSince this block uses an approximation of real differentiation, the approximation will\nnot hold if there are high frequency components present in the signal. For example if\nyou have discontinuities such as steps or square waves.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>This block supports vector input, meaning we can have multiple parallel\nPID paths through this block.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#cutoff at 1kHz\npid = PID(Kp=2, Ki=0.5, Kd=0.1, f_max=1e3)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>Kp <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>poroportional controller coefficient</dd>\n<dt>Ki <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>integral controller coefficient</dd>\n<dt>Kd <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>differentiator controller coefficient</dd>\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
+    "docstringHtml": "<p>Proportional-Integral-Differntiation (PID) controller.</p>\n<p>The transfer function is defined as</p>\n<div class=\"math\">\n\\begin{equation*}\nH_\\mathrm{diff}(s) = K_p + K_i \\frac{1}{s} + K_d \\frac{s}{1 + s / f_\\mathrm{max}}\n\\end{equation*}\n</div>\n<p>where the differentiation is approximated by a high pass filter that holds\nfor signals up to a frequency of approximately <cite>f_max</cite>.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.\nSince this block uses an approximation of real differentiation, the approximation will\nnot hold if there are high frequency components present in the signal. For example if\nyou have discontinuities such as steps or square waves.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#cutoff at 1kHz</span><span class=\"whitespace\">\n</span><span class=\"name\">pid</span> <span class=\"operator\">=</span> <span class=\"name\">PID</span><span class=\"punctuation\">(</span><span class=\"name\">Kp</span><span class=\"operator\">=</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"name\">Ki</span><span class=\"operator\">=</span><span class=\"literal number float\">0.5</span><span class=\"punctuation\">,</span> <span class=\"name\">Kd</span><span class=\"operator\">=</span><span class=\"literal number float\">0.1</span><span class=\"punctuation\">,</span> <span class=\"name\">f_max</span><span class=\"operator\">=</span><span class=\"literal number float\">1e3</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>Kp <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>poroportional controller coefficient</dd>\n<dt>Ki <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>integral controller coefficient</dd>\n<dt>Kd <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>differentiator controller coefficient</dd>\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {
       "Kp": {
         "type": "integer",
@@ -529,13 +517,17 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "highest expected signal frequency"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
   },
   "AntiWindupPID": {
     "blockClass": "AntiWindupPID",
-    "description": "Proportional-Integral-Differntiation (PID) controller with anti-windup mechanism (back-calculation).",
-    "docstringHtml": "<p>Proportional-Integral-Differntiation (PID) controller with anti-windup mechanism (back-calculation).</p>\n<p>Anti-windup mechanisms are needed when the magnitude of the control signal\nfrom the PID controller is limited by some real world saturation. In these cases,\nthe integrator will continue to acumulate the control error and &quot;wind itself up&quot;.\nOnce the setpoint is reached, this can result in significant overshoots. This\nimplementation adds a conditional feedback term to the internal integrator that\n&quot;unwinds&quot; it when the PID output crosses some limits. This is pretty much a\ndeadzone feedback element for the integrator.</p>\n<p>Mathematically, this block implements the following set of ODEs</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n\\dot{x}_1 =&amp; f_\\mathrm{max} (u - x_1) \\\\\n\\dot{x}_2 =&amp; u - w \\\\\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>with the anti-windup feedback (depending on the pid output)</p>\n<div class=\"math\">\n\\begin{equation*}\nw = K_s (y - \\min(\\max(y, y_\\mathrm{min}), y_\\mathrm{max}))\n\\end{equation*}\n</div>\n<p>and the output itself</p>\n<div class=\"math\">\n\\begin{equation*}\ny = K_p u - K_d f_\\mathrm{max} x_1 + K_i x_2\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.\nSince this block uses an approximation of real differentiation, the approximation will\nnot hold if there are high frequency components present in the signal. For example if\nyou have discontinuities such as steps or squere waves.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#cutoff at 1kHz, windup limits at [-5, 5]\npid = AntiWindupPID(Kp=2, Ki=0.5, Kd=0.1, f_max=1e3, limits=[-5, 5])\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>Kp <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>poroportional controller coefficient</dd>\n<dt>Ki <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>integral controller coefficient</dd>\n<dt>Kd <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>differentiator controller coefficient</dd>\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n<dt>Ks <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>feedback term for back calculation for anti-windup control of integrator</dd>\n<dt>limits <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like[float]</span></dt>\n<dd>lower and upper limit for PID output that triggers anti-windup of integrator</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
+    "description": "Proportional-Integral-Differntiation (PID) controller with tracking",
+    "docstringHtml": "<p>Proportional-Integral-Differntiation (PID) controller with tracking\nanti-windup mechanism (back-calculation).</p>\n<p>Anti-windup mechanisms are needed when the magnitude of the control signal\nfrom the PID controller is limited by some real world saturation. In these cases,\nthe integrator will continue to acumulate the control error and &quot;wind itself up&quot;.\nOnce the setpoint is reached, this can result in significant overshoots. This\nimplementation adds a conditional feedback term to the internal integrator that\n&quot;unwinds&quot; it when the PID output crosses some limits. This is pretty much a\ndeadzone feedback element for the integrator.</p>\n<p>Mathematically, this block implements the following set of ODEs</p>\n<div class=\"math\">\n\\begin{equation*}\n\\begin{eqnarray}\n\\dot{x}_1 =&amp; f_\\mathrm{max} (u - x_1) \\\\\n\\dot{x}_2 =&amp; u - w \\\\\n\\end{eqnarray}\n\\end{equation*}\n</div>\n<p>with the anti-windup feedback (depending on the pid output)</p>\n<div class=\"math\">\n\\begin{equation*}\nw = K_s (y - \\min(\\max(y, y_\\mathrm{min}), y_\\mathrm{max}))\n\\end{equation*}\n</div>\n<p>and the output itself</p>\n<div class=\"math\">\n\\begin{equation*}\ny = K_p u - K_d f_\\mathrm{max} x_1 + K_i x_2\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>Depending on <cite>f_max</cite>, the resulting system might become stiff or ill conditioned!\nAs a practical choice set <cite>f_max</cite> to 3x the highest expected signal frequency.\nSince this block uses an approximation of real differentiation, the approximation will\nnot hold if there are high frequency components present in the signal. For example if\nyou have discontinuities such as steps or squere waves.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#cutoff at 1kHz, windup limits at [-5, 5]</span><span class=\"whitespace\">\n</span><span class=\"name\">pid</span> <span class=\"operator\">=</span> <span class=\"name\">AntiWindupPID</span><span class=\"punctuation\">(</span><span class=\"name\">Kp</span><span class=\"operator\">=</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"name\">Ki</span><span class=\"operator\">=</span><span class=\"literal number float\">0.5</span><span class=\"punctuation\">,</span> <span class=\"name\">Kd</span><span class=\"operator\">=</span><span class=\"literal number float\">0.1</span><span class=\"punctuation\">,</span> <span class=\"name\">f_max</span><span class=\"operator\">=</span><span class=\"literal number float\">1e3</span><span class=\"punctuation\">,</span> <span class=\"name\">limits</span><span class=\"operator\">=</span><span class=\"punctuation\">[</span><span class=\"operator\">-</span><span class=\"literal number integer\">5</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">5</span><span class=\"punctuation\">])</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>Kp <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>poroportional controller coefficient</dd>\n<dt>Ki <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>integral controller coefficient</dd>\n<dt>Kd <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>differentiator controller coefficient</dd>\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>highest expected signal frequency</dd>\n<dt>Ks <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>feedback term for back calculation for anti-windup control of integrator</dd>\n<dt>limits <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like[float]</span></dt>\n<dd>lower and upper limit for PID output that triggers anti-windup of integrator</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_dyn <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal dynamic operator for ODE component</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">DynamicOperator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {
       "Kp": {
         "type": "integer",
@@ -568,8 +560,12 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "lower and upper limit for PID output that triggers anti-windup of integrator"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
   },
   "TransferFunctionNumDen": {
     "blockClass": "TransferFunctionNumDen",
@@ -587,12 +583,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "denominator polynomial coefficients"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "TransferFunctionZPG": {
     "blockClass": "TransferFunctionZPG",
@@ -615,12 +607,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "gain term of transfer function"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "ButterworthLowpassFilter": {
     "blockClass": "ButterworthLowpassFilter",
@@ -638,12 +626,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "filter order"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "ButterworthHighpassFilter": {
     "blockClass": "ButterworthHighpassFilter",
@@ -661,12 +645,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "filter order"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "ButterworthBandpassFilter": {
     "blockClass": "ButterworthBandpassFilter",
@@ -684,12 +664,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "filter order"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "ButterworthBandstopFilter": {
     "blockClass": "ButterworthBandstopFilter",
@@ -707,17 +683,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "filter order"
       }
     },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
+    "inputs": [],
+    "outputs": []
   },
   "Adder": {
     "blockClass": "Adder",
     "description": "Summs / adds up all input signals to a single output signal (MISO)",
-    "docstringHtml": "<p>Summs / adds up all input signals to a single output signal (MISO)</p>\n<p>This is how it works in the default case</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\sum_i u_i(t)\n\\end{equation*}\n</div>\n<p>and like this when additional operations are defined</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\sum_i \\mathrm{op}_i \\cdot u_i(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is the default initialization that just adds up all the inputs:</p>\n<pre class=\"code python literal-block\">\nA = Adder()\n</pre>\n<p>and this is the initialization with specific operations that subtracts\nthe second from first input and neglects all others:</p>\n<pre class=\"code python literal-block\">\nA = Adder('+-')\n</pre>\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>operations <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">str, optional</span></dt>\n<dd>optional string of operations to be applied before\nsummation, i.e. '+-' will compute the difference,\n'None' will just perform regular sum</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_ops <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">dict</span></dt>\n<dd>dict that maps string operations to numerical</dd>\n<dt>_ops_array <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like</span></dt>\n<dd>operations converted to array</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
+    "docstringHtml": "<p>Summs / adds up all input signals to a single output signal (MISO)</p>\n<p>This is how it works in the default case</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\sum_i u_i(t)\n\\end{equation*}\n</div>\n<p>and like this when additional operations are defined</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\sum_i \\mathrm{op}_i \\cdot u_i(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is the default initialization that just adds up all the inputs:</p>\n<pre class=\"code python literal-block\">\n<span class=\"name\">A</span> <span class=\"operator\">=</span> <span class=\"name\">Adder</span><span class=\"punctuation\">()</span>\n</pre>\n<p>and this is the initialization with specific operations that subtracts\nthe second from first input and neglects all others:</p>\n<pre class=\"code python literal-block\">\n<span class=\"name\">A</span> <span class=\"operator\">=</span> <span class=\"name\">Adder</span><span class=\"punctuation\">(</span><span class=\"literal string single\">'+-'</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>operations <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">str, optional</span></dt>\n<dd>optional string of operations to be applied before\nsummation, i.e. '+-' will compute the difference,\n'None' will just perform regular sum</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>_ops <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">dict</span></dt>\n<dd>dict that maps string operations to numerical</dd>\n<dt>_ops_array <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array_like</span></dt>\n<dd>operations converted to array</dd>\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {
       "operations": {
         "type": "any",
@@ -725,7 +697,7 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "optional string of operations to be applied before summation, i.e. '+-' will compute the difference, 'None' will just perform regular sum"
       }
     },
-    "inputs": null,
+    "inputs": [],
     "outputs": [
       "out"
     ]
@@ -735,15 +707,15 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
     "description": "Multiplies all signals from all input ports (MISO).",
     "docstringHtml": "<p>Multiplies all signals from all input ports (MISO).</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\prod_i u_i(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator that wraps 'prod'</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
+    "inputs": [],
     "outputs": [
       "out"
     ]
   },
   "Amplifier": {
     "blockClass": "Amplifier",
-    "description": "Amplifies the input signal by multiplication with a constant gain term.",
-    "docstringHtml": "<p>Amplifies the input signal by multiplication with a constant gain term.</p>\n<p>Like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\mathrm{gain} \\cdot u(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#amplification by factor 5\nA = Amplifier(gain=5)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>gain <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>amplifier gain</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
+    "description": "Amplifies the input signal by",
+    "docstringHtml": "<p>Amplifies the input signal by\nmultiplication with a constant gain term like this:</p>\n<div class=\"math\">\n\\begin{equation*}\ny(t) = \\mathrm{gain} \\cdot u(t)\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#amplification by factor 5</span><span class=\"whitespace\">\n</span><span class=\"name\">A</span> <span class=\"operator\">=</span> <span class=\"name\">Amplifier</span><span class=\"punctuation\">(</span><span class=\"name\">gain</span><span class=\"operator\">=</span><span class=\"literal number integer\">5</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>gain <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>amplifier gain</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {
       "gain": {
         "type": "number",
@@ -751,13 +723,17 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "amplifier gain"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
   },
   "Function": {
     "blockClass": "Function",
-    "description": "Arbitrary MIMO function block, defined by a function or `lambda` expression.",
-    "docstringHtml": "<p>Arbitrary MIMO function block, defined by a function or <cite>lambda</cite> expression.</p>\n<p>The function can have multiple arguments that are then provided\nby the input channels of the function block.</p>\n<p>Form multi input, the function has to specify multiple arguments\nand for multi output, the aoutputs have to be provided as a\ntuple or list.</p>\n<p>In the context of the global system, this block implements algebraic\ncomponents of the global system ODE/DAE.</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\mathrm{func}(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.\nTherefore <cite>func</cite> must be purely algebraic and not introduce states,\ndelay, etc. For interfacing with external stateful APIs, use the\n<cite>Wrapper</cite> block.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>If the outputs are provided as a single numpy array, they are\nconsidered a single output. For MIMO, output has to be tuple.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>consider the function:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import Function\n\ndef f(a, b, c):\n    return a**2, a*b, b/c\n\nfn = Function(f)\n</pre>\n<p>then, when the block is uldated, the input channels of the block are\nassigned to the function arguments following this scheme:</p>\n<pre class=\"code literal-block\">\ninputs[0] -&gt; a\ninputs[1] -&gt; b\ninputs[2] -&gt; c\n</pre>\n<p>and the function outputs are assigned to the\noutput channels of the block in the same way:</p>\n<pre class=\"code literal-block\">\na**2 -&gt; outputs[0]\na*b  -&gt; outputs[1]\nb/c  -&gt; outputs[2]\n</pre>\n<p>Because the <cite>Function</cite> block only has a single argument, it can be\nused to decorate a function and make it a <cite>PathSim</cite> block. This might\nbe handy in some cases to keep definitions concise and localized\nin the code:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import Function\n\n#does the same as the definition above\n\n&#64;Function\ndef fn(a, b, c):\n    return a**2, a*b, b/c\n\n#'fn' is now a PathSim block\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>MIMO function that defines algebraic block IO behaviour, signature <cite>func(*tuple)</cite></dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator that wraps <cite>func</cite></dd>\n</dl>\n</div>\n",
+    "description": "Arbitrary MIMO function block, defined by a callable object,",
+    "docstringHtml": "<p>Arbitrary MIMO function block, defined by a callable object,\ni.e. function or <cite>lambda</cite> expression.</p>\n<p>The function can have multiple arguments that are then provided\nby the input channels of the function block.</p>\n<p>Form multi input, the function has to specify multiple arguments\nand for multi output, the aoutputs have to be provided as a\ntuple or list.</p>\n<p>In the context of the global system, this block implements algebraic\ncomponents of the global system ODE/DAE.</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\mathrm{func}(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is purely algebraic and its operation (<cite>op_alg</cite>) will be called\nmultiple times per timestep, each time when <cite>Simulation._update(t)</cite> is\ncalled in the global simulation loop.\nTherefore <cite>func</cite> must be purely algebraic and not introduce states,\ndelay, etc. For interfacing with external stateful APIs, use the\n<cite>Wrapper</cite> block.</p>\n</div>\n<div class=\"section\" id=\"note-1\">\n<h3>Note</h3>\n<p>If the outputs are provided as a single numpy array, they are\nconsidered a single output. For MIMO, output has to be tuple.</p>\n</div>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>consider the function:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Function</span><span class=\"whitespace\">\n\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">f</span><span class=\"punctuation\">(</span><span class=\"name\">a</span><span class=\"punctuation\">,</span> <span class=\"name\">b</span><span class=\"punctuation\">,</span> <span class=\"name\">c</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">a</span><span class=\"operator\">**</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"name\">a</span><span class=\"operator\">*</span><span class=\"name\">b</span><span class=\"punctuation\">,</span> <span class=\"name\">b</span><span class=\"operator\">/</span><span class=\"name\">c</span><span class=\"whitespace\">\n\n</span><span class=\"name\">fn</span> <span class=\"operator\">=</span> <span class=\"name\">Function</span><span class=\"punctuation\">(</span><span class=\"name\">f</span><span class=\"punctuation\">)</span>\n</pre>\n<p>then, when the block is uldated, the input channels of the block are\nassigned to the function arguments following this scheme:</p>\n<pre class=\"code literal-block\">\ninputs[0] -&gt; a\ninputs[1] -&gt; b\ninputs[2] -&gt; c\n</pre>\n<p>and the function outputs are assigned to the\noutput channels of the block in the same way:</p>\n<pre class=\"code literal-block\">\na**2 -&gt; outputs[0]\na*b  -&gt; outputs[1]\nb/c  -&gt; outputs[2]\n</pre>\n<p>Because the <cite>Function</cite> block only has a single argument, it can be\nused to decorate a function and make it a <cite>PathSim</cite> block. This might\nbe handy in some cases to keep definitions concise and localized\nin the code:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Function</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#does the same as the definition above</span><span class=\"whitespace\">\n\n</span><span class=\"name decorator\">&#64;Function</span><span class=\"whitespace\">\n</span><span class=\"keyword\">def</span><span class=\"whitespace\"> </span><span class=\"name function\">fn</span><span class=\"punctuation\">(</span><span class=\"name\">a</span><span class=\"punctuation\">,</span> <span class=\"name\">b</span><span class=\"punctuation\">,</span> <span class=\"name\">c</span><span class=\"punctuation\">):</span><span class=\"whitespace\">\n</span>    <span class=\"keyword\">return</span> <span class=\"name\">a</span><span class=\"operator\">**</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">,</span> <span class=\"name\">a</span><span class=\"operator\">*</span><span class=\"name\">b</span><span class=\"punctuation\">,</span> <span class=\"name\">b</span><span class=\"operator\">/</span><span class=\"name\">c</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#'fn' is now a PathSim block</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>func <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">callable</span></dt>\n<dd>MIMO function that defines algebraic block IO behaviour, signature <cite>func(*tuple)</cite></dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator that wraps <cite>func</cite></dd>\n</dl>\n</div>\n",
     "params": {
       "func": {
         "type": "callable",
@@ -765,80 +741,80 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "MIMO function that defines algebraic block IO behaviour, signature `func(*tuple)`"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Sin": {
     "blockClass": "Sin",
     "description": "Sine operator block.",
     "docstringHtml": "<p>Sine operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\sin(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Cos": {
     "blockClass": "Cos",
     "description": "Cosine operator block.",
     "docstringHtml": "<p>Cosine operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\cos(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Tan": {
     "blockClass": "Tan",
     "description": "Tangent operator block.",
     "docstringHtml": "<p>Tangent operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\tan(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Tanh": {
     "blockClass": "Tanh",
     "description": "Hyperbolic tangent operator block.",
     "docstringHtml": "<p>Hyperbolic tangent operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\tanh(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Abs": {
     "blockClass": "Abs",
     "description": "Absolute value operator block.",
     "docstringHtml": "<p>Absolute value operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\vert| \\vec{u} \\vert|\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Sqrt": {
     "blockClass": "Sqrt",
     "description": "Square root operator block.",
     "docstringHtml": "<p>Square root operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\sqrt{|\\vec{u}|}\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Exp": {
     "blockClass": "Exp",
     "description": "Exponential operator block.",
     "docstringHtml": "<p>Exponential operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = e^{\\vec{u}}\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Log": {
     "blockClass": "Log",
     "description": "Natural logarithm operator block.",
     "docstringHtml": "<p>Natural logarithm operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\ln(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Log10": {
     "blockClass": "Log10",
     "description": "Base-10 logarithm operator block.",
     "docstringHtml": "<p>Base-10 logarithm operator block.</p>\n<p>This block supports vector inputs. This is the operation it does:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\vec{y} = \\log_{10}(\\vec{u})\n\\end{equation*}\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>op_alg <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Operator</span></dt>\n<dd>internal algebraic operator</dd>\n</dl>\n</div>\n",
     "params": {},
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Mod": {
     "blockClass": "Mod",
@@ -851,8 +827,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "modulus value Attributes ----------"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Clip": {
     "blockClass": "Clip",
@@ -870,8 +846,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "maximum clipping value Attributes ----------"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Pow": {
     "blockClass": "Pow",
@@ -884,13 +860,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "exponent to raise the input to the power of Attributes ----------"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "Switch": {
     "blockClass": "Switch",
-    "description": "Switch block that selects between its inputs.",
-    "docstringHtml": "<p>Switch block that selects between its inputs.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n#default None -&gt; no passthrough\ns1 = Switch()\n\n#selecting port 2 as passthrough\ns2 = Switch(2)\n\n#change the state of the switch to port 3\ns2.select(3)\n</pre>\n<p>Sets block output depending on <cite>self.state</cite> like this:</p>\n<pre class=\"code literal-block\">\nstate == None -&gt; outputs[0] = 0\n\nstate == 0 -&gt; outputs[0] = inputs[0]\n\nstate == 1 -&gt; outputs[0] = inputs[1]\n\nstate == 2 -&gt; outputs[0] = inputs[2]\n\n...\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>state <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int, None</span></dt>\n<dd>state of the switch</dd>\n</dl>\n</div>\n",
+    "description": "Switch block that selects between its inputs and copies",
+    "docstringHtml": "<p>Switch block that selects between its inputs and copies\none of them to the output.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#default None -&gt; no passthrough</span><span class=\"whitespace\">\n</span><span class=\"name\">s1</span> <span class=\"operator\">=</span> <span class=\"name\">Switch</span><span class=\"punctuation\">()</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#selecting port 2 as passthrough</span><span class=\"whitespace\">\n</span><span class=\"name\">s2</span> <span class=\"operator\">=</span> <span class=\"name\">Switch</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#change the state of the switch to port 3</span><span class=\"whitespace\">\n</span><span class=\"name\">s2</span><span class=\"operator\">.</span><span class=\"name\">select</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">3</span><span class=\"punctuation\">)</span>\n</pre>\n<p>Sets block output depending on <cite>self.state</cite> like this:</p>\n<pre class=\"code literal-block\">\nstate == None -&gt; outputs[0] = 0\n\nstate == 0 -&gt; outputs[0] = inputs[0]\n\nstate == 1 -&gt; outputs[0] = inputs[1]\n\nstate == 2 -&gt; outputs[0] = inputs[2]\n\n...\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>state <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int, None</span></dt>\n<dd>state of the switch</dd>\n</dl>\n</div>\n",
     "params": {
       "state": {
         "type": "any",
@@ -898,7 +874,7 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "state of the switch"
       }
     },
-    "inputs": null,
+    "inputs": [],
     "outputs": [
       "out"
     ]
@@ -919,8 +895,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "N-D array of data values at the corresponding points. If 1-D, represents scalar values at each point. If 2-D, each column represents a different output dimension (m output values per input point)."
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "LUT1D": {
     "blockClass": "LUT1D",
@@ -943,13 +919,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "The value to use for points outside the interpolation range. If \"extrapolate\", the interpolator will use linear extrapolation. Default is \"extrapolate\". See https://docs.scipy.org/doc/scipy-1.16.1/reference/generated/scipy.interpolate.interp1d.html for more details"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "SampleHold": {
     "blockClass": "SampleHold",
-    "description": "Samples the inputs periodically and produces them at the output.",
-    "docstringHtml": "<p>Samples the inputs periodically and produces them at the output.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>sampling period</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>delay</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>internal scheduled event for periodic sampling</dd>\n</dl>\n</div>\n",
+    "description": "Sample and hold stage that samples the inputs",
+    "docstringHtml": "<p>Sample and hold stage that samples the inputs\nperiodically using scheduled events and produces\nthem at the output.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>T <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>sampling period</dd>\n<dt>tau <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>delay</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>internal scheduled event for periodic sampling</dd>\n</dl>\n</div>\n",
     "params": {
       "T": {
         "type": "integer",
@@ -962,8 +938,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "delay Attributes ----------"
       }
     },
-    "inputs": null,
-    "outputs": null
+    "inputs": [],
+    "outputs": []
   },
   "FIR": {
     "blockClass": "FIR",
@@ -1022,7 +998,12 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
     "inputs": [
       "in"
     ],
-    "outputs": null
+    "outputs": [
+      "b4",
+      "b3",
+      "b2",
+      "b1"
+    ]
   },
   "DAC": {
     "blockClass": "DAC",
@@ -1050,15 +1031,20 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "Initial delay before the first output update. Default is 0."
       }
     },
-    "inputs": null,
+    "inputs": [
+      "b4",
+      "b3",
+      "b2",
+      "b1"
+    ],
     "outputs": [
       "out"
     ]
   },
   "Counter": {
     "blockClass": "Counter",
-    "description": "Counts the number of detected bidirectional threshold crossings.",
-    "docstringHtml": "<p>Counts the number of detected bidirectional threshold crossings.</p>\n<p>Uses zero-crossing events for the detection and and sets the output\naccordingly.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossing</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
+    "description": "Counter block that counts the number of detected bidirectional",
+    "docstringHtml": "<p>Counter block that counts the number of detected bidirectional\nzero-crossing events and sets the output accordingly.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossing</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
     "params": {
       "start": {
         "type": "integer",
@@ -1080,8 +1066,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "CounterUp": {
     "blockClass": "CounterUp",
-    "description": "Counts the number of detected unidirectional (lo->hi) threshold crossings.",
-    "docstringHtml": "<p>Counts the number of detected unidirectional (lo-&gt;hi) threshold crossings.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This is a modification of 'Counter' which only counts\nunidirectional zero-crossings (low -&gt; high)</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossingUp</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
+    "description": "Counter block that counts the number of detected unidirectional",
+    "docstringHtml": "<p>Counter block that counts the number of detected unidirectional\nzero-crossing events and sets the output accordingly.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This is a modification of 'Counter' which only counts\nunidirectional zero-crossings (low -&gt; high)</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossingUp</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
     "params": {
       "start": {
         "type": "integer",
@@ -1103,8 +1089,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
   },
   "CounterDown": {
     "blockClass": "CounterDown",
-    "description": "Counts the number of detected unidirectional (hi->lo) threshold crossings.",
-    "docstringHtml": "<p>Counts the number of detected unidirectional (hi-&gt;lo) threshold crossings.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This is a modification of 'Counter' which only counts\nunidirectional zero-crossings (high -&gt; low)</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossingDown</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
+    "description": "Counter block that counts the number of detected unidirectional",
+    "docstringHtml": "<p>Counter block that counts the number of detected unidirectional\nzero-crossing events and sets the output accordingly.</p>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This is a modification of 'Counter' which only counts\nunidirectional zero-crossings (high -&gt; low)</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>start <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>counter start (initial condition)</dd>\n<dt>threshold <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for zero crossing</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>E <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">ZeroCrossingDown</span></dt>\n<dd>internal event manager</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossing]</span></dt>\n<dd>internal zero crossing event</dd>\n</dl>\n</div>\n",
     "params": {
       "start": {
         "type": "integer",
@@ -1124,48 +1110,15 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
       "out"
     ]
   },
-  "Relay": {
-    "blockClass": "Relay",
-    "description": "Relay block with hysteresis (Schmitt trigger).",
-    "docstringHtml": "<p>Relay block with hysteresis (Schmitt trigger).</p>\n<p>Switches output between two values based on input crossing upper and lower\nthresholds. The hysteresis prevents rapid switching when input is noisy.</p>\n<p>When input rises above <cite>threshold_up</cite>, output switches to <cite>value_up</cite>.\nWhen input falls below <cite>threshold_down</cite>, output switches to <cite>value_down</cite>.</p>\n<div class=\"section\" id=\"examples\">\n<h3>Examples</h3>\n<p>Basic thermostat that turns heater on below 19°C, off above 21°C:</p>\n<pre class=\"code python literal-block\">\nfrom pathsim.blocks import Relay\n\nthermostat = Relay(\n    threshold_up=21.0,\n    threshold_down=19.0,\n    value_up=0.0,\n    value_down=1.0\n    )\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>threshold_up <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for transitioning to upper relay state <cite>value_up</cite> (default: 1.0)</dd>\n<dt>threshold_down <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>threshold for transitioning to lower relay state <cite>value_down</cite> (default: 0.0)</dd>\n<dt>value_up <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>value for upper relay state (default: 1.0)</dd>\n<dt>value_down <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>value for lower relay state (default: 0.0)</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[ZeroCrossingUp, ZeroCrossingDown]</span></dt>\n<dd>internal zero crossing events for relay state transitions</dd>\n</dl>\n</div>\n",
-    "params": {
-      "threshold_up": {
-        "type": "number",
-        "default": "1.0",
-        "description": "threshold for transitioning to upper relay state `value_up` (default: 1.0)"
-      },
-      "threshold_down": {
-        "type": "number",
-        "default": "0.0",
-        "description": "threshold for transitioning to lower relay state `value_down` (default: 0.0)"
-      },
-      "value_up": {
-        "type": "number",
-        "default": "1.0",
-        "description": "value for upper relay state (default: 1.0)"
-      },
-      "value_down": {
-        "type": "number",
-        "default": "0.0",
-        "description": "value for lower relay state (default: 0.0)"
-      }
-    },
-    "inputs": [
-      "in"
-    ],
-    "outputs": [
-      "out"
-    ]
-  },
   "Scope": {
     "blockClass": "Scope",
-    "description": "Block for recording time domain data with variable sampling period.",
-    "docstringHtml": "<p>Block for recording time domain data with variable sampling period.</p>\n<p>A time threshold can be set by <cite>t_wait</cite> to start recording data after the simulation\ntime is larger then the specified waiting time, i.e. <cite>t - t_wait &gt; 0</cite>.\nThis is useful for recording data only after all the transients have settled.</p>\n<p>The block uses an internal <cite>Schedule</cite> event, when <cite>sampling_period</cite> is provided,\notherwise it just samples at every simulation timestep.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>sampling_period <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float, None</span></dt>\n<dd>time between samples, default is every timestep</dd>\n<dt>t_wait <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>wait time before starting recording, optional</dd>\n<dt>labels <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[str]</span></dt>\n<dd>labels for the scope traces, and for the csv, optional</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>recording_time <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[float]</span></dt>\n<dd>recorded time points</dd>\n<dt>recording_data <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[float]</span></dt>\n<dd>recorded data points</dd>\n<dt>_incremental_idx <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>index for incremental reading of accumulated data since last\ncall of incremental read</dd>\n<dt>_sample_next_timestep <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">bool</span></dt>\n<dd>flag to indicate this is a timestep to sample, only used for\nevent based sampling when <cite>sampling_period</cite> is provided as an arg</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>internal scheduled event for periodic input sampling when\n<cite>sampling_period</cite> is provided</dd>\n</dl>\n</div>\n",
+    "description": "Block for recording time domain data with variable sampling rate.",
+    "docstringHtml": "<p>Block for recording time domain data with variable sampling rate.</p>\n<p>A time threshold can be set by <cite>t_wait</cite> to start recording data after the simulation\ntime is larger then the specified waiting time, i.e. <cite>t - t_wait &gt; 0</cite>.\nThis is useful for recording data only after all the transients have settled.</p>\n<p>The block uses an interal <cite>Schedule</cite> event, when <cite>sampling_rate</cite> is provided,\notherwise it just samples at every simulation timestep.</p>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>sampling_rate <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int, None</span></dt>\n<dd>number of samples per time unit, default is every timestep</dd>\n<dt>t_wait <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>wait time before starting recording, optional</dd>\n<dt>labels <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[str]</span></dt>\n<dd>labels for the scope traces, and for the csv, optional</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>recording <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">dict</span></dt>\n<dd>recording, where key is time, and value the recorded values</dd>\n<dt>events <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Schedule]</span></dt>\n<dd>internal scheduled event for periodic input sampling when <cite>sampling_rate</cite> is provided</dd>\n</dl>\n</div>\n",
     "params": {
-      "sampling_period": {
+      "sampling_rate": {
         "type": "any",
         "default": null,
-        "description": "time between samples, default is every timestep"
+        "description": "number of samples per time unit, default is every timestep"
       },
       "t_wait": {
         "type": "number",
@@ -1178,13 +1131,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "labels for the scope traces, and for the csv, optional"
       }
     },
-    "inputs": null,
+    "inputs": [],
     "outputs": []
   },
   "Spectrum": {
     "blockClass": "Spectrum",
-    "description": "Block for fourier spectrum analysis (spectrum analyzer).",
-    "docstringHtml": "<p>Block for fourier spectrum analysis (spectrum analyzer).</p>\n<p>Computes continuous time running fourier transform (RFT) of the incoming signal.</p>\n<p>A time threshold can be set by 't_wait' to start recording data only after the\nsimulation time is larger then the specified waiting time, i.e. 't - t_wait &gt; dt'.\nThis is useful for recording the steady state after all the transients have settled.</p>\n<p>An exponential forgetting factor 'alpha' can be specified for realtime spectral\nanalysis. It biases the spectral components exponentially to the most recent signal\nvalues by applying a single sided exponential window like this:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\int_0^t u(\\tau) \\exp(\\alpha (t-\\tau))  \\exp(-j \\omega \\tau)\\ d \\tau\n\\end{equation*}\n</div>\n<p>It is also known as the 'exponentially forgetting transform' (EFT) and a form of\nshort time fourier transform (STFT). It is implemented as a 1st order statespace model</p>\n<div class=\"math\">\n\\begin{equation*}\n\\dot{x} = - \\alpha  x +  \\exp(-j \\omega t) u\n\\end{equation*}\n</div>\n<p>where 'u' is the input signal and 'x' is the state variable that represents the\ncomplex fourier coefficient to the frequency 'omega'. The ODE is integrated using the\nnumerical integration engine of the block.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how to initialize it:</p>\n<pre class=\"code python literal-block\">\nimport numpy as np\n\n#linear frequencies (0Hz, DC -&gt; 1kHz)\nsp1 = Spectrum(\n    freq=np.linspace(0, 1e3, 100),\n    labels=['x1', 'x2'] #labels for two inputs\n    )\n\n#log frequencies (1Hz -&gt; 1kHz)\nsp2 = Spectrum(\n    freq=np.logspace(0, 3, 100)\n    )\n\n#log frequencies including DC (0Hz, DC + 1Hz -&gt; 1kHz)\nsp3 = Spectrum(\n    freq=np.hstack([0.0, np.logspace(0, 3, 100)])\n    )\n\n#arbitrary frequencies\nsp4 = Spectrum(\n    freq=np.array([0, 0.5, 20, 1e3])\n    )\n</pre>\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is relatively slow! But it is valuable for long running simulations\nwith few evaluation frequencies, where just FFT'ing the time series data\nwouldnt be efficient OR if only the evaluation at weirdly spaced frequencies\nis required. Otherwise its more efficient to just do an FFT on the time\nseries recording after the simulation has finished.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>freq <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array[float]</span></dt>\n<dd>list of evaluation frequencies for RFT, can be arbitrarily spaced</dd>\n<dt>t_wait <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>wait time before starting RFT</dd>\n<dt>alpha <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>exponential forgetting factor for realtime spectrum</dd>\n<dt>labels <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[str]</span></dt>\n<dd>labels for the inputs</dd>\n</dl>\n</div>\n",
+    "description": "Block for fourier spectrum analysis (basically a spectrum analyzer), computes",
+    "docstringHtml": "<p>Block for fourier spectrum analysis (basically a spectrum analyzer), computes\ncontinuous time running fourier transform (RFT) of the incoming signal.</p>\n<p>A time threshold can be set by 't_wait' to start recording data only after the\nsimulation time is larger then the specified waiting time, i.e. 't - t_wait &gt; dt'.\nThis is useful for recording the steady state after all the transients have settled.</p>\n<p>An exponential forgetting factor 'alpha' can be specified for realtime spectral\nanalysis. It biases the spectral components exponentially to the most recent signal\nvalues by applying a single sided exponential window like this:</p>\n<div class=\"math\">\n\\begin{equation*}\n\\int_0^t u(\\tau) \\exp(\\alpha (t-\\tau))  \\exp(-j \\omega \\tau)\\ d \\tau\n\\end{equation*}\n</div>\n<p>It is also known as the 'exponentially forgetting transform' (EFT) and a form of\nshort time fourier transform (STFT). It is implemented as a 1st order statespace model</p>\n<div class=\"math\">\n\\begin{equation*}\n\\dot{x} = - \\alpha  x +  \\exp(-j \\omega t) u\n\\end{equation*}\n</div>\n<p>where 'u' is the input signal and 'x' is the state variable that represents the\ncomplex fourier coefficient to the frequency 'omega'. The ODE is integrated using the\nnumerical integration engine of the block.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how to initialize it:</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">import</span><span class=\"whitespace\"> </span><span class=\"name namespace\">numpy</span><span class=\"whitespace\"> </span><span class=\"keyword\">as</span><span class=\"whitespace\"> </span><span class=\"name namespace\">np</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#linear frequencies (0Hz, DC -&gt; 1kHz)</span><span class=\"whitespace\">\n</span><span class=\"name\">sp1</span> <span class=\"operator\">=</span> <span class=\"name\">Spectrum</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">freq</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">linspace</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">,</span> <span class=\"literal number float\">1e3</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">100</span><span class=\"punctuation\">),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">labels</span><span class=\"operator\">=</span><span class=\"punctuation\">[</span><span class=\"literal string single\">'x1'</span><span class=\"punctuation\">,</span> <span class=\"literal string single\">'x2'</span><span class=\"punctuation\">]</span> <span class=\"comment single\">#labels for two inputs</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#log frequencies (1Hz -&gt; 1kHz)</span><span class=\"whitespace\">\n</span><span class=\"name\">sp2</span> <span class=\"operator\">=</span> <span class=\"name\">Spectrum</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">freq</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">logspace</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">3</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">100</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#log frequencies including DC (0Hz, DC + 1Hz -&gt; 1kHz)</span><span class=\"whitespace\">\n</span><span class=\"name\">sp3</span> <span class=\"operator\">=</span> <span class=\"name\">Spectrum</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">freq</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">hstack</span><span class=\"punctuation\">([</span><span class=\"literal number float\">0.0</span><span class=\"punctuation\">,</span> <span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">logspace</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">3</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">100</span><span class=\"punctuation\">)])</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#arbitrary frequencies</span><span class=\"whitespace\">\n</span><span class=\"name\">sp4</span> <span class=\"operator\">=</span> <span class=\"name\">Spectrum</span><span class=\"punctuation\">(</span><span class=\"whitespace\">\n</span>    <span class=\"name\">freq</span><span class=\"operator\">=</span><span class=\"name\">np</span><span class=\"operator\">.</span><span class=\"name\">array</span><span class=\"punctuation\">([</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">,</span> <span class=\"literal number float\">0.5</span><span class=\"punctuation\">,</span> <span class=\"literal number integer\">20</span><span class=\"punctuation\">,</span> <span class=\"literal number float\">1e3</span><span class=\"punctuation\">])</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"note\">\n<h3>Note</h3>\n<p>This block is relatively slow! But it is valuable for long running simulations\nwith few evaluation frequencies, where just FFT'ing the time series data\nwouldnt be efficient OR if only the evaluation at weirdly spaced frequencies\nis required. Otherwise its more efficient to just do an FFT on the time\nseries recording after the simulation has finished.</p>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>freq <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">array[float]</span></dt>\n<dd>list of evaluation frequencies for RFT, can be arbitrarily spaced</dd>\n<dt>t_wait <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>wait time before starting RFT</dd>\n<dt>alpha <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>exponential forgetting factor for realtime spectrum</dd>\n<dt>labels <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[str]</span></dt>\n<dd>labels for the inputs</dd>\n</dl>\n</div>\n",
     "params": {
       "freq": {
         "type": "array",
@@ -1207,13 +1160,13 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "labels for the inputs"
       }
     },
-    "inputs": null,
+    "inputs": [],
     "outputs": []
   },
   "Subsystem": {
     "blockClass": "Subsystem",
     "description": "Subsystem class that holds its own blocks and connecions and",
-    "docstringHtml": "<p>Subsystem class that holds its own blocks and connecions and\ncan natively interface with the main simulation loop.</p>\n<p>IO interface is realized by a special 'Interface' block, that has extra\nmethods for setting and getting inputs and outputs and serves\nas the interface of the internal blocks to the outside.</p>\n<p>The subsystem doesnt use its 'inputs' and 'outputs' dicts directly.\nIt exclusively handles data transfer via the 'Interface' block.</p>\n<p>This class can be used just like any other block during the simulation,\nsince it implements the required methods 'update' for the fixed-point\niteration (resolving algebraic loops with instant time blocks),\nthe 'step' method that performs timestepping (especially for dynamic\nblocks with internal states) and the 'solve' method for solving the\nimplicit update equation for implicit solvers.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how we can wrap up multiple blocks within a subsystem.\nIn this case vanderpol system built from discrete components\ninstead of using an ODE block (in practice you should use\na monolithic ODE whenever possible due to performance).</p>\n<pre class=\"code python literal-block\">\nfrom pathsim import Subsystem, Interface, Connection\nfrom pathsim.blocks import Integrator, Function\n\n#van der Pol parameter\nmu = 1000\n\n#blocks in the subsystem\nIf = Interface() # this is the interface to the outside\nI1 = Integrator(2)\nI2 = Integrator(0)\nFn = Function(lambda x1, x2: mu*(1 - x1**2)*x2 - x1)\n\nsub_blocks = [If, I1, I2, Fn]\n\n#connections in the subsystem\nsub_connections = [\n    Connection(I2, I1, Fn[1], If[1]),\n    Connection(I1, Fn, If),\n    Connection(Fn, I2)\n    ]\n\n#the subsystem acts just like a normal block\nvdp = Subsystem(sub_blocks, sub_connections)\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>blocks <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Block] | None</span></dt>\n<dd>internal blocks of the subsystem</dd>\n<dt>connections <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Connection] | None</span></dt>\n<dd>internal connections of the subsystem</dd>\n</dl>\n<p>events : list[Event] | None\ntolerance_fpi : float</p>\n<blockquote>\nabsolute tolerance for convergence of algebraic loops\ndefault see ´SIM_TOLERANCE_FPI´ in ´_constants.py´</blockquote>\n<dl class=\"docutils\">\n<dt>iterations_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>maximum allowed number of iterations for algebraic loop\nsolver, default see ´SIM_ITERATIONS_MAX´ in ´_constants.py´</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>interface <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Interface</span></dt>\n<dd>internal interface block for data transfer to the outside</dd>\n<dt>graph <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Graph</span></dt>\n<dd>internal graph representation for fast system funcion\nevluations using DAG with algebraic depths</dd>\n<dt>boosters <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">None | list[ConnectionBooster]</span></dt>\n<dd>list of boosters (fixed point accelerators) that wrap\nalgebraic loop closing connections assembled from the\nsystem graph</dd>\n</dl>\n</div>\n",
+    "docstringHtml": "<p>Subsystem class that holds its own blocks and connecions and\ncan natively interface with the main simulation loop.</p>\n<p>IO interface is realized by a special 'Interface' block, that has extra\nmethods for setting and getting inputs and outputs and serves\nas the interface of the internal blocks to the outside.</p>\n<p>The subsystem doesnt use its 'inputs' and 'outputs' dicts directly.\nIt exclusively handles data transfer via the 'Interface' block.</p>\n<p>This class can be used just like any other block during the simulation,\nsince it implements the required methods 'update' for the fixed-point\niteration (resolving algebraic loops with instant time blocks),\nthe 'step' method that performs timestepping (especially for dynamic\nblocks with internal states) and the 'solve' method for solving the\nimplicit update equation for implicit solvers.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>This is how we can wrap up multiple blocks within a subsystem.\nIn this case vanderpol system built from discrete components\ninstead of using an ODE block (in practice you should use\na monolithic ODE whenever possible due to performance).</p>\n<pre class=\"code python literal-block\">\n<span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Subsystem</span><span class=\"punctuation\">,</span> <span class=\"name\">Interface</span><span class=\"punctuation\">,</span> <span class=\"name\">Connection</span><span class=\"whitespace\">\n</span><span class=\"keyword namespace\">from</span><span class=\"whitespace\"> </span><span class=\"name namespace\">pathsim.blocks</span><span class=\"whitespace\"> </span><span class=\"keyword namespace\">import</span> <span class=\"name\">Integrator</span><span class=\"punctuation\">,</span> <span class=\"name\">Function</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#van der Pol parameter</span><span class=\"whitespace\">\n</span><span class=\"name\">mu</span> <span class=\"operator\">=</span> <span class=\"literal number integer\">1000</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#blocks in the subsystem</span><span class=\"whitespace\">\n</span><span class=\"name\">If</span> <span class=\"operator\">=</span> <span class=\"name\">Interface</span><span class=\"punctuation\">()</span> <span class=\"comment single\"># this is the interface to the outside</span><span class=\"whitespace\">\n</span><span class=\"name\">I1</span> <span class=\"operator\">=</span> <span class=\"name\">Integrator</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n</span><span class=\"name\">I2</span> <span class=\"operator\">=</span> <span class=\"name\">Integrator</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">0</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n</span><span class=\"name\">Fn</span> <span class=\"operator\">=</span> <span class=\"name\">Function</span><span class=\"punctuation\">(</span><span class=\"keyword\">lambda</span> <span class=\"name\">x1</span><span class=\"punctuation\">,</span> <span class=\"name\">x2</span><span class=\"punctuation\">:</span> <span class=\"name\">mu</span><span class=\"operator\">*</span><span class=\"punctuation\">(</span><span class=\"literal number integer\">1</span> <span class=\"operator\">-</span> <span class=\"name\">x1</span><span class=\"operator\">**</span><span class=\"literal number integer\">2</span><span class=\"punctuation\">)</span><span class=\"operator\">*</span><span class=\"name\">x2</span> <span class=\"operator\">-</span> <span class=\"name\">x1</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n\n</span><span class=\"name\">sub_blocks</span> <span class=\"operator\">=</span> <span class=\"punctuation\">[</span><span class=\"name\">If</span><span class=\"punctuation\">,</span> <span class=\"name\">I1</span><span class=\"punctuation\">,</span> <span class=\"name\">I2</span><span class=\"punctuation\">,</span> <span class=\"name\">Fn</span><span class=\"punctuation\">]</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#connections in the subsystem</span><span class=\"whitespace\">\n</span><span class=\"name\">sub_connections</span> <span class=\"operator\">=</span> <span class=\"punctuation\">[</span><span class=\"whitespace\">\n</span>    <span class=\"name\">Connection</span><span class=\"punctuation\">(</span><span class=\"name\">I2</span><span class=\"punctuation\">,</span> <span class=\"name\">I1</span><span class=\"punctuation\">,</span> <span class=\"name\">Fn</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">],</span> <span class=\"name\">If</span><span class=\"punctuation\">[</span><span class=\"literal number integer\">1</span><span class=\"punctuation\">]),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">Connection</span><span class=\"punctuation\">(</span><span class=\"name\">I1</span><span class=\"punctuation\">,</span> <span class=\"name\">Fn</span><span class=\"punctuation\">,</span> <span class=\"name\">If</span><span class=\"punctuation\">),</span><span class=\"whitespace\">\n</span>    <span class=\"name\">Connection</span><span class=\"punctuation\">(</span><span class=\"name\">Fn</span><span class=\"punctuation\">,</span> <span class=\"name\">I2</span><span class=\"punctuation\">)</span><span class=\"whitespace\">\n</span>    <span class=\"punctuation\">]</span><span class=\"whitespace\">\n\n</span><span class=\"comment single\">#the subsystem acts just like a normal block</span><span class=\"whitespace\">\n</span><span class=\"name\">vdp</span> <span class=\"operator\">=</span> <span class=\"name\">Subsystem</span><span class=\"punctuation\">(</span><span class=\"name\">sub_blocks</span><span class=\"punctuation\">,</span> <span class=\"name\">sub_connections</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>blocks <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Block]</span></dt>\n<dd>internal blocks of the subsystem</dd>\n<dt>connections <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">list[Connection]</span></dt>\n<dd>internal connections of the subsystem</dd>\n<dt>tolerance_fpi <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>absolute tolerance for convergence of algebraic loops\ndefault see ´SIM_TOLERANCE_FPI´ in ´_constants.py´</dd>\n<dt>iterations_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">int</span></dt>\n<dd>maximum allowed number of iterations for algebraic loop\nsolver, default see ´SIM_ITERATIONS_MAX´ in ´_constants.py´</dd>\n</dl>\n</div>\n<div class=\"section\" id=\"attributes\">\n<h3>Attributes</h3>\n<dl class=\"docutils\">\n<dt>interface <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Interface</span></dt>\n<dd>internal interface block for data transfer to the outside</dd>\n<dt>graph <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">Graph</span></dt>\n<dd>internal graph representation for fast system funcion\nevluations using DAG with algebraic depths</dd>\n<dt>boosters <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">None | list[ConnectionBooster]</span></dt>\n<dd>list of boosters (fixed point accelerators) that wrap\nalgebraic loop closing connections assembled from the\nsystem graph</dd>\n</dl>\n</div>\n",
     "params": {},
     "inputs": [],
     "outputs": []
@@ -1247,7 +1200,7 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "constant source term / generation term of the process"
       }
     },
-    "inputs": null,
+    "inputs": [],
     "outputs": [
       "x",
       "x/tau"
@@ -1300,7 +1253,9 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
     "inputs": [
       "in"
     ],
-    "outputs": null
+    "outputs": [
+      "out 1.0"
+    ]
   },
   "GLC": {
     "blockClass": "GLC",
@@ -1343,22 +1298,8 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
         "description": "BCs: Boundary conditions type, \"C-C\" (Closed-Closed) or \"O-C\" (Open-Closed), default is \"C-C\""
       }
     },
-    "inputs": [
-      "c_T_in",
-      "flow_l",
-      "y_T2_inlet",
-      "flow_g"
-    ],
-    "outputs": [
-      "c_T_out",
-      "y_T2_out",
-      "eff",
-      "P_out",
-      "Q_l",
-      "Q_g_out",
-      "n_T_out_liquid",
-      "n_T_out_gas"
-    ]
+    "inputs": [],
+    "outputs": []
   }
 };
 
@@ -1366,7 +1307,7 @@ export const blockConfig: Record<string, string[]> = {
   Sources: ["Constant", "Source", "SinusoidalSource", "StepSource", "PulseSource", "TriangleWaveSource", "SquareWaveSource", "GaussianPulseSource", "ChirpPhaseNoiseSource", "ClockSource", "WhiteNoise", "PinkNoise", "RandomNumberGenerator"],
   Dynamic: ["Integrator", "Differentiator", "Delay", "ODE", "DynamicalSystem", "StateSpace", "PID", "AntiWindupPID", "TransferFunctionNumDen", "TransferFunctionZPG", "ButterworthLowpassFilter", "ButterworthHighpassFilter", "ButterworthBandpassFilter", "ButterworthBandstopFilter"],
   Algebraic: ["Adder", "Multiplier", "Amplifier", "Function", "Sin", "Cos", "Tan", "Tanh", "Abs", "Sqrt", "Exp", "Log", "Log10", "Mod", "Clip", "Pow", "Switch", "LUT", "LUT1D"],
-  Mixed: ["SampleHold", "FIR", "ADC", "DAC", "Counter", "CounterUp", "CounterDown", "Relay"],
+  Mixed: ["SampleHold", "FIR", "ADC", "DAC", "Counter", "CounterUp", "CounterDown"],
   Recording: ["Scope", "Spectrum"],
   Chemical: ["Process", "Bubbler4", "Splitter", "GLC"],
 };

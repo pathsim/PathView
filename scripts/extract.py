@@ -50,9 +50,12 @@ def rst_to_html(rst_text: str) -> str:
     if not rst_text or not HAS_DOCUTILS:
         return ""
 
+    # Clean the docstring - removes common leading whitespace from indented docstrings
+    cleaned = inspect.cleandoc(rst_text)
+
     try:
         parts = publish_parts(
-            rst_text,
+            cleaned,
             writer_name="html",
             settings_overrides={
                 "report_level": 5,
