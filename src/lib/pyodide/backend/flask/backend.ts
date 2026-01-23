@@ -279,6 +279,7 @@ export class FlaskBackend implements Backend {
               }).then((res) => res.json());
         
               if (data.success && !data.error) {
+                console.log("Data: ", data)
                 if(data.output) {
                   this.handleResponse({ type: "stdout", value: data.output })
                 }

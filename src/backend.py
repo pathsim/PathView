@@ -2,7 +2,7 @@ import os
 import json
 import traceback
 import requests as req
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 
 import io
@@ -15,7 +15,9 @@ import gc
 import pathsim, pathsim_chem
 
 print(f"PathSim {pathsim.__version__} loaded successfully")
-    
+
+STREAMING_STEP_EXPR = "_step_streaming_gen()"
+
 _clean_globals = set(globals().keys())
 namespace = {}
 
@@ -147,35 +149,53 @@ def check_traceback():
 
 @app.route("/streamData", methods=["POST"])
 def stream_data():
-    try:
-        data = request.json
-        expr = data.get("expr")
-
+    def generate(expr):
         # Capture stdout and stderror
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
-        try:
+        isDone = False
+        count = 0
+        
+        while not isDone:
+            print("(Generator) Count: ", count)
+            # print("Generator expression is: ", expr)
+            # yield json.dumps({"name": "Ayo", "age": 18})
+
             result = " "
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
                 result = eval(expr, namespace)
-            
-            print("The result was: ", result)
+        
+            print("Is the result done? ", result["done"])
 
             # Capture any output
             output = stdout_capture.getvalue()
             error_output = stderr_capture.getvalue()
 
             if error_output:
+                print("Oh no there was an error ;-;")
                 return jsonify({"success": False, "error": error_output})
             
-            return jsonify(
+            yield json.dumps(
                 {
                     "success": True,
                     "result": result,
                     "output": output
                 }
             )
+
+            count += 1
+
+            if result["done"]:
+                print("Concluding the while loop!")
+                isDone = True
+    
+    try:
+        data = request.json
+        expr = data.get("expr")
+
+        try:
+            return Response(stream_with_context(generate(expr)))
         
         except SyntaxError as e:
             return jsonify({"success": False, "error": f"Syntax Error: {str(e)}"}), 400
