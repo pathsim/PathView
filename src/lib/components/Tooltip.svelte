@@ -36,29 +36,68 @@
 
 		showTimeout = setTimeout(() => {
 			const rect = element.getBoundingClientRect();
+			const tooltipMaxWidth = maxWidth ?? 240;
+			const tooltipHeight = 28; // Estimated height for single-line tooltip
+			const margin = 8; // Gap between element and tooltip
+			const padding = 8; // Minimum distance from viewport edge
+
+			// Calculate position and check viewport bounds
+			let finalPosition = position;
 			let x: number, y: number;
 
-			switch (position) {
+			// Check if preferred position would overflow, flip if needed
+			if (position === 'bottom' && rect.bottom + margin + tooltipHeight > window.innerHeight - padding) {
+				finalPosition = 'top';
+			} else if (position === 'top' && rect.top - margin - tooltipHeight < padding) {
+				finalPosition = 'bottom';
+			} else if (position === 'right' && rect.right + margin + tooltipMaxWidth > window.innerWidth - padding) {
+				finalPosition = 'left';
+			} else if (position === 'left' && rect.left - margin - tooltipMaxWidth < padding) {
+				finalPosition = 'right';
+			}
+
+			// Calculate coordinates based on final position
+			switch (finalPosition) {
 				case 'left':
-					x = rect.left - 8;
+					x = rect.left - margin;
 					y = rect.top + rect.height / 2;
 					break;
 				case 'right':
-					x = rect.right + 8;
+					x = rect.right + margin;
 					y = rect.top + rect.height / 2;
 					break;
 				case 'top':
 					x = rect.left + rect.width / 2;
-					y = rect.top - 8;
+					y = rect.top - margin;
 					break;
 				case 'bottom':
 				default:
 					x = rect.left + rect.width / 2;
-					y = rect.bottom + 8;
+					y = rect.bottom + margin;
 					break;
 			}
 
-			tooltipStore.set({ text, shortcut, maxWidth, x, y, visible: true, position });
+			// Clamp horizontal position to keep tooltip within viewport
+			if (finalPosition === 'bottom' || finalPosition === 'top') {
+				const halfWidth = tooltipMaxWidth / 2;
+				if (x - halfWidth < padding) {
+					x = padding + halfWidth;
+				} else if (x + halfWidth > window.innerWidth - padding) {
+					x = window.innerWidth - padding - halfWidth;
+				}
+			}
+
+			// Clamp vertical position for left/right tooltips
+			if (finalPosition === 'left' || finalPosition === 'right') {
+				const halfHeight = tooltipHeight / 2;
+				if (y - halfHeight < padding) {
+					y = padding + halfHeight;
+				} else if (y + halfHeight > window.innerHeight - padding) {
+					y = window.innerHeight - padding - halfHeight;
+				}
+			}
+
+			tooltipStore.set({ text, shortcut, maxWidth, x, y, visible: true, position: finalPosition });
 		}, 50);
 	}
 
