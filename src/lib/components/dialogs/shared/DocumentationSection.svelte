@@ -411,6 +411,7 @@
 	.docs-content :global(p:has(> strong:only-child) > strong) {
 		font-weight: inherit;
 		color: inherit;
+		text-transform: inherit;
 	}
 
 	/* Math blocks from docutils */
