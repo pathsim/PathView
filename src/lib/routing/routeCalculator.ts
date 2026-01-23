@@ -9,7 +9,7 @@ import { DIRECTION_VECTORS } from './types';
 import { buildGrid, getGridOffset } from './gridBuilder';
 import { findPathWithTurnPenalty } from './pathfinder';
 import { simplifyPath, snapPathToGrid, deduplicatePath } from './pathOptimizer';
-import { PORT_CLEARANCE } from './constants';
+import { SOURCE_CLEARANCE, TARGET_CLEARANCE } from './constants';
 
 let waypointIdCounter = 0;
 
@@ -18,13 +18,14 @@ function generateWaypointId(): string {
 }
 
 /**
- * Calculate clearance point - a point PORT_CLEARANCE away from port in the port's facing direction
+ * Calculate clearance point - a point at given distance from port in the port's facing direction
  */
-function getClearancePoint(portPos: Position, direction: Direction): Position {
+function getClearancePoint(portPos: Position, direction: Direction, clearance: number): Position {
+	if (clearance === 0) return portPos;
 	const vec = DIRECTION_VECTORS[direction];
 	return {
-		x: portPos.x + vec.x * PORT_CLEARANCE,
-		y: portPos.y + vec.y * PORT_CLEARANCE
+		x: portPos.x + vec.x * clearance,
+		y: portPos.y + vec.y * clearance
 	};
 }
 
@@ -62,19 +63,22 @@ export function calculateRoute(
 	const offset = getGridOffset(context);
 
 	// Calculate clearance points to enforce entry/exit directions
-	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
+	const sourceClearance = getClearancePoint(sourcePos, sourceDir, SOURCE_CLEARANCE);
 	// Target clearance: place point outside the block in the direction the port faces
 	// Wire will travel TO this point, then straight INTO the port
-	const targetClearance = getClearancePoint(targetPos, targetDir);
+	const targetClearance = getClearancePoint(targetPos, targetDir, TARGET_CLEARANCE);
 
 	// Build path: source -> sourceClearance -> [waypoints] -> targetClearance -> target
 	const allPoints: Position[] = [];
 	const allWaypoints: Waypoint[] = [];
 
-	// Start with source clearance segment (always straight out from port)
-	allPoints.push(sourceClearance);
+	// Start with source clearance segment (if clearance > 0)
+	if (SOURCE_CLEARANCE > 0) {
+		allPoints.push(sourceClearance);
+	}
 
-	let currentPos = sourceClearance;
+	// Start pathfinding from source clearance (or source if no clearance)
+	let currentPos = SOURCE_CLEARANCE > 0 ? sourceClearance : sourcePos;
 	let currentDir = sourceDir; // Track current direction for turn penalties
 
 	// Route through each user waypoint
@@ -197,17 +201,22 @@ export function calculateSimpleRoute(
 	const path: Position[] = [sourcePos];
 
 	// Calculate clearance points
-	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
-	const targetClearance = getClearancePoint(targetPos, targetDir);
+	const sourceClearance = getClearancePoint(sourcePos, sourceDir, SOURCE_CLEARANCE);
+	const targetClearance = getClearancePoint(targetPos, targetDir, TARGET_CLEARANCE);
 
-	// Add source clearance
-	path.push(sourceClearance);
+	// Add source clearance (if any)
+	if (SOURCE_CLEARANCE > 0) {
+		path.push(sourceClearance);
+	}
+
+	// Use appropriate start point for routing calculations
+	const routeStart = SOURCE_CLEARANCE > 0 ? sourceClearance : sourcePos;
 
 	// Determine if we need additional bends between clearance points
-	const dx = targetClearance.x - sourceClearance.x;
-	const dy = targetClearance.y - sourceClearance.y;
+	const dx = targetClearance.x - routeStart.x;
+	const dy = targetClearance.y - routeStart.y;
 
-	// Check if clearance points are aligned (straight connection possible)
+	// Check if points are aligned (straight connection possible)
 	const isHorizontalAligned = Math.abs(dy) < 1;
 	const isVerticalAligned = Math.abs(dx) < 1;
 
@@ -216,15 +225,17 @@ export function calculateSimpleRoute(
 		// Prefer routing that matches the source exit direction
 		if (sourceDir === 'right' || sourceDir === 'left') {
 			// Exit horizontally, so go horizontal first, then vertical
-			path.push({ x: targetClearance.x, y: sourceClearance.y });
+			path.push({ x: targetClearance.x, y: routeStart.y });
 		} else {
 			// Exit vertically, so go vertical first, then horizontal
-			path.push({ x: sourceClearance.x, y: targetClearance.y });
+			path.push({ x: routeStart.x, y: targetClearance.y });
 		}
 	}
 
 	// Add target clearance and final target
-	path.push(targetClearance);
+	if (TARGET_CLEARANCE > 0) {
+		path.push(targetClearance);
+	}
 	path.push(targetPos);
 
 	// Deduplicate in case clearance points overlap with source/target
