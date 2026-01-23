@@ -9,4 +9,4 @@ export { calculateRoute, calculateSimpleRoute, getPathCells, prepareRoutingGrid,
 export { ROUTING_MARGIN, HANDLE_OFFSET, ARROW_INSET } from './constants';
 
 // Types
-export type { Bounds, RoutingContext, RouteResult, Direction } from './types';
+export type { Bounds, RoutingContext, RouteResult, Direction, PortStub } from './types';

@@ -5,7 +5,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Position } from '$lib/types/common';
 import type { Connection, Waypoint } from '$lib/types/nodes';
-import type { RoutingContext, RouteResult, Bounds, Direction } from '$lib/routing';
+import type { RoutingContext, RouteResult, Bounds, Direction, PortStub } from '$lib/routing';
 import { calculateRoute, calculateSimpleRoute, getPathCells, prepareRoutingGrid, clearRoutingGrid, ROUTING_MARGIN } from '$lib/routing';
 import { generateId } from '$lib/stores/utils';
 import { graphStore } from '$lib/stores/graph';
@@ -39,8 +39,8 @@ export const routingStore = {
 	 * Update routing context from current nodes
 	 * Call this when nodes are added, removed, or moved
 	 */
-	setContext(nodeBounds: Map<string, Bounds>, canvasBounds: Bounds): void {
-		const context: RoutingContext = { nodeBounds, canvasBounds };
+	setContext(nodeBounds: Map<string, Bounds>, canvasBounds: Bounds, portStubs?: PortStub[]): void {
+		const context: RoutingContext = { nodeBounds, canvasBounds, portStubs };
 		state.update((s) => ({ ...s, context }));
 	},
 

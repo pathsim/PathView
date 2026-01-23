@@ -3,7 +3,8 @@
  */
 
 import PF from 'pathfinding';
-import type { Bounds, RoutingContext } from './types';
+import type { RoutingContext } from './types';
+import { DIRECTION_VECTORS } from './types';
 import { GRID_SIZE, ROUTING_MARGIN } from './constants';
 
 /**
@@ -58,6 +59,21 @@ export function buildGrid(context: RoutingContext): PF.Grid {
 				if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight) {
 					grid.setWalkableAt(gx, gy, false);
 				}
+			}
+		}
+	}
+
+	// Mark port stub areas as obstacles (1G extension from port)
+	if (context.portStubs) {
+		for (const stub of context.portStubs) {
+			const vec = DIRECTION_VECTORS[stub.direction];
+			// Mark the cell at port position extending 1G in port direction
+			const stubX = stub.position.x + vec.x * GRID_SIZE;
+			const stubY = stub.position.y + vec.y * GRID_SIZE;
+			const gx = worldToGrid(stubX - offsetX);
+			const gy = worldToGrid(stubY - offsetY);
+			if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight) {
+				grid.setWalkableAt(gx, gy, false);
 			}
 		}
 	}

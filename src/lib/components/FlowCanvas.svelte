@@ -23,7 +23,7 @@
 	import { selectedNodeIds as graphSelectedNodeIds } from '$lib/stores/graph/state';
 	import { historyStore } from '$lib/stores/history';
 	import { routingStore, buildRoutingContext, type PortInfo } from '$lib/stores/routing';
-	import { HANDLE_OFFSET, ARROW_INSET, type Direction } from '$lib/routing';
+	import { HANDLE_OFFSET, ARROW_INSET, type Direction, type PortStub } from '$lib/routing';
 	import { themeStore, type Theme } from '$lib/stores/theme';
 	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection, triggerFitView } from '$lib/stores/viewActions';
 	import { screenToFlow } from '$lib/utils/viewUtils';
@@ -333,7 +333,24 @@
 		}
 
 		const { nodeBounds, canvasBounds } = buildRoutingContext(blockNodesForRouting);
-		routingStore.setContext(nodeBounds, canvasBounds);
+
+		// Collect all port stubs for obstacle marking
+		const portStubs: PortStub[] = [];
+		for (const node of blockNodesForRouting) {
+			const nodeData = node.data as NodeInstance;
+			// Collect input port stubs
+			for (let i = 0; i < nodeData.inputs.length; i++) {
+				const info = getPortInfo(node.id, i, false);
+				if (info) portStubs.push({ position: info.position, direction: info.direction });
+			}
+			// Collect output port stubs
+			for (let i = 0; i < nodeData.outputs.length; i++) {
+				const info = getPortInfo(node.id, i, true);
+				if (info) portStubs.push({ position: info.position, direction: info.direction });
+			}
+		}
+
+		routingStore.setContext(nodeBounds, canvasBounds, portStubs);
 
 		// Recalculate all routes
 		const connections = get(graphStore.connections);
