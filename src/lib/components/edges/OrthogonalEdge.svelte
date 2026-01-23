@@ -102,21 +102,67 @@
 		const tgt = adjustedTarget();
 
 		if (routeResult?.path && routeResult.path.length >= 2) {
-			// Use calculated route but adjust first and last points to handle tips
-			const points = [...routeResult.path];
-			points[0] = src;
-			points[points.length - 1] = tgt;
+			// Use calculated route - start from handle tip, then follow the route
+			// The route already has clearance points, so we draw:
+			// handle tip -> first route point -> ... -> last route point -> handle tip
+			const points = routeResult.path;
 
-			let d = `M ${points[0].x} ${points[0].y}`;
-			for (let i = 1; i < points.length; i++) {
+			// Start at handle tip
+			let d = `M ${src.x} ${src.y}`;
+
+			// Draw through all route points (which include clearance points for proper stubs)
+			for (let i = 0; i < points.length; i++) {
 				d += ` L ${points[i].x} ${points[i].y}`;
 			}
+
+			// End at handle tip
+			d += ` L ${tgt.x} ${tgt.y}`;
+
 			return d;
 		}
 
-		// Fallback: simple L-shape
-		const midX = tgt.x;
-		return `M ${src.x} ${src.y} L ${midX} ${src.y} L ${midX} ${tgt.y} L ${tgt.x} ${tgt.y}`;
+		// Fallback: simple L-shape with stubs
+		const stubLength = 20; // 2G stub
+		let d = `M ${src.x} ${src.y}`;
+
+		// Determine stub directions based on handle positions
+		if (sourcePosition === 'right') {
+			d += ` L ${src.x + stubLength} ${src.y}`;
+		} else if (sourcePosition === 'left') {
+			d += ` L ${src.x - stubLength} ${src.y}`;
+		} else if (sourcePosition === 'bottom') {
+			d += ` L ${src.x} ${src.y + stubLength}`;
+		} else if (sourcePosition === 'top') {
+			d += ` L ${src.x} ${src.y - stubLength}`;
+		}
+
+		// Route to target stub
+		const srcStub = sourcePosition === 'right' ? { x: src.x + stubLength, y: src.y } :
+						sourcePosition === 'left' ? { x: src.x - stubLength, y: src.y } :
+						sourcePosition === 'bottom' ? { x: src.x, y: src.y + stubLength } :
+						{ x: src.x, y: src.y - stubLength };
+
+		const tgtStub = targetPosition === 'right' ? { x: tgt.x + stubLength, y: tgt.y } :
+						targetPosition === 'left' ? { x: tgt.x - stubLength, y: tgt.y } :
+						targetPosition === 'bottom' ? { x: tgt.x, y: tgt.y + stubLength } :
+						{ x: tgt.x, y: tgt.y - stubLength };
+
+		// L-shape between stubs
+		if (Math.abs(srcStub.y - tgtStub.y) < 1) {
+			// Horizontally aligned
+			d += ` L ${tgtStub.x} ${tgtStub.y}`;
+		} else if (Math.abs(srcStub.x - tgtStub.x) < 1) {
+			// Vertically aligned
+			d += ` L ${tgtStub.x} ${tgtStub.y}`;
+		} else {
+			// Need a bend
+			d += ` L ${tgtStub.x} ${srcStub.y} L ${tgtStub.x} ${tgtStub.y}`;
+		}
+
+		// Final segment to target
+		d += ` L ${tgt.x} ${tgt.y}`;
+
+		return d;
 	});
 
 	// Get user waypoints from route result or data
