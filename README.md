@@ -536,7 +536,6 @@ https://view.pathsim.org/?modelgh=pathsim/pathview/static/examples/feedback-syst
 | `npm run extract:simulation` | Simulation params only |
 | `npm run extract:deps` | Dependencies only |
 | `npm run extract:validate` | Validate config files |
-| `npm run examples` | Generate examples manifest |
 
 ---
 
