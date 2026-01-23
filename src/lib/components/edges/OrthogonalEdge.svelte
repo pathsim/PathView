@@ -101,19 +101,15 @@
 		const src = adjustedSource();
 		const tgt = adjustedTarget();
 
-		if (routeResult?.path && routeResult.path.length >= 1) {
-			// Route contains clearance points - connect from actual handles
+		if (routeResult?.path && routeResult.path.length >= 2) {
+			// Route = [sourceStubEnd, ...intermediates, targetStubEnd]
+			// Draw: handle -> route -> handle
 			const points = routeResult.path;
 
-			// Start at source handle
 			let d = `M ${src.x} ${src.y}`;
-
-			// Draw through all route points (clearance + intermediates)
 			for (const pt of points) {
 				d += ` L ${pt.x} ${pt.y}`;
 			}
-
-			// End at target handle
 			d += ` L ${tgt.x} ${tgt.y}`;
 
 			return d;
