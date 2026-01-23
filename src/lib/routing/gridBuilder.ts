@@ -29,10 +29,11 @@ export function buildGrid(context: RoutingContext): PF.Grid {
 	const { nodeBounds, canvasBounds } = context;
 
 	// Calculate grid dimensions from canvas bounds
-	const gridWidth = Math.ceil(canvasBounds.width / GRID_SIZE) + 1;
-	const gridHeight = Math.ceil(canvasBounds.height / GRID_SIZE) + 1;
-	const offsetX = canvasBounds.x;
-	const offsetY = canvasBounds.y;
+	const gridWidth = Math.ceil(canvasBounds.width / GRID_SIZE) + 2;
+	const gridHeight = Math.ceil(canvasBounds.height / GRID_SIZE) + 2;
+	// Snap offset to grid
+	const offsetX = Math.floor(canvasBounds.x / GRID_SIZE) * GRID_SIZE;
+	const offsetY = Math.floor(canvasBounds.y / GRID_SIZE) * GRID_SIZE;
 
 	const grid = new PF.Grid(gridWidth, gridHeight);
 
@@ -66,8 +67,11 @@ export function buildGrid(context: RoutingContext): PF.Grid {
 }
 
 /**
- * Get grid offset (canvas origin in world coordinates)
+ * Get grid offset (canvas origin snapped to grid)
  */
 export function getGridOffset(context: RoutingContext): { x: number; y: number } {
-	return { x: context.canvasBounds.x, y: context.canvasBounds.y };
+	return {
+		x: Math.floor(context.canvasBounds.x / GRID_SIZE) * GRID_SIZE,
+		y: Math.floor(context.canvasBounds.y / GRID_SIZE) * GRID_SIZE
+	};
 }
