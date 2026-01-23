@@ -241,139 +241,158 @@ export class FlaskBackend implements Backend {
 				);
 			}
 
-			while (this.streamingActive) {
-				// Execute any queued code first (for runtime parameter changes, events, etc.)
-				// Errors in queued code are reported but don't stop the simulation
-				while (this.streamingCodeQueue.length > 0) {
-					const code = this.streamingCodeQueue.shift()!;
-					try {
-						// Simply sending requests to the Flask api to execute code,
-						// we only really care if errors are produced so we don't handle any data response.
-						// There is also no need for streaming data here....
+			// Unlike the Pyodide version, we only need a while loop to go through commands that are queued up,
+			// It isn't necessary that we maintain a while loop while streaming as we are reading it with the fetch API
 
-						let data = await fetch(
-							getFlaskBackendUrl() + "/execute-code",
-							{
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ code: code }),
+			while (this.streamingCodeQueue.length > 0) {
+				const code = this.streamingCodeQueue.shift()!;
+				try {
+					// Simply sending requests to the Flask api to execute code,
+					// we only really care if errors are produced so we don't handle any data response.
+					// There is also no need for streaming data here....
+
+					let data = await fetch(
+						getFlaskBackendUrl() + "/execute-code",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
 							},
-						).then((res) => res.json());
-						if (data.success && data.output) {
-							this.handleResponse({
-								type: "stdout",
-								value: data.output,
-							});
-						} else {
-							throw Error(data.error);
-						}
-					} catch (error) {
-						const errorMsg =
-							error instanceof Error
-								? error.message
-								: String(error);
+							body: JSON.stringify({ code: code }),
+						},
+					).then((res) => res.json());
+					if (data.success && data.output) {
 						this.handleResponse({
-							type: "stderr",
-							value: `Stream exec error: ${errorMsg}`,
+							type: "stdout",
+							value: data.output,
 						});
+					} else {
+						throw Error(data.error);
 					}
+				} catch (error) {
+					const errorMsg =
+						error instanceof Error ? error.message : String(error);
+					this.handleResponse({
+						type: "stderr",
+						value: `Stream exec error: ${errorMsg}`,
+					});
 				}
+			}
 
-				console.log("Streaming code expression is: ", expr);
+			console.log("Streaming code expression is: ", expr);
 
-				let data = await fetch(
+			let streaming = true;
+
+			if (streaming) {
+				let stream = await fetch(
 					getFlaskBackendUrl() + "/streamData",
 				).then((res) => {
 					const reader = res.body?.getReader();
 					return new ReadableStream({
 						start(controller) {
-							function pump():any {
-								return reader
-									?.read()
-									.then((chunk) => {
-                                        console.log("Chunk: ", chunk)
+							function pump(): any {
+								return reader?.read().then((chunk) => {
+									console.log("Chunk: ", chunk);
 
-                                        const decoder = new TextDecoder('utf-8')
-                                        const jsonString = decoder.decode(chunk.value)
-                                        
-                                        // console.log("JSON String: ", jsonString)
+									const decoder = new TextDecoder("utf-8");
+									const jsonString = decoder.decode(
+										chunk.value,
+									);
 
-                                        const parsedData = JSON.parse(jsonString)
+									// console.log("JSON String: ", jsonString);
 
-                                        console.log("Parsed Data: ", parsedData)
+									let data = JSON.parse(jsonString);
 
-										// When no more data needs to be consumed, close the stream
-										if (chunk.done) {
-											controller.close();
-											return;
-										}
-										// Enqueue the next data chunk into our target stream
-										controller.enqueue(chunk.value);
-										return pump();
-									});
+									console.log("Parsed Data: ", data);
+
+									// When no more data needs to be consumed, close the stream
+									if (chunk.done) {
+										controller.close();
+										return;
+									}
+									// Enqueue the next data chunk into our target stream
+									controller.enqueue(chunk.value);
+									return pump();
+								});
 							}
 							return pump();
 						},
 					});
-				})
-				//   let data = await fetch(getFlaskBackendUrl() + "/streamData", {
-				//     method: "POST",
-				//     headers: {
-				//       "Content-Type": "application/json",
-				//     },
-				//     body: JSON.stringify({ expr: expr }),
-				//   }).then((res) => res.json());
-
-				if (data.success && !data.error) {
-					console.log("Data: ", data);
-					if (data.output) {
-						this.handleResponse({
-							type: "stdout",
-							value: data.output,
-						});
-					}
-					data = data.result;
-				} else {
-					throw Error(data.error);
-				}
-
-				// console.log("Resultant returned is: ", data)
-
-				if (!this.streamingActive) {
-					if (!data.done && data.result) {
-						// console.log("Still streaming data....")
-						if (data.result) {
-							console.log(
-								"(Flask) Still streaming data, but this value was returned: ",
-								data.result,
-							);
-						}
-						this.handleResponse({
-							type: "stream-data",
-							id,
-							value: JSON.stringify(data.result) as string,
-						});
-					}
-					break;
-				}
-
-				if (data.done) {
-					break;
-				}
-
-				console.log(
-					"(Flask) Done streaming data, the final value is....",
-					data,
-				);
-
-				this.handleResponse({
-					type: "stream-data",
-					id,
-					value: JSON.stringify(data) as string,
 				});
+			} else {
+				// ---------------- OLD WAY OF FETCHING (without streaming) -----------------
+
+				while (this.streamingActive) {
+					let data = await fetch(
+						getFlaskBackendUrl() + "/evaluate-expression",
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ expr: expr }),
+						},
+					).then((res) => res.json());
+					// ---------------------------------------------------------------------------
+
+					// ------- (Need to rework) DATA ERROR and SUCCESS HANDLING ------------------
+					if (data.success && !data.error) {
+						console.log("Data: ", data);
+						if (data.output) {
+							this.handleResponse({
+								type: "stdout",
+								value: data.output,
+							});
+						}
+						data = data.result;
+					} else {
+						throw Error(data.error);
+					}
+					// ---------------------------------------------------------------------------
+
+					// ------- (Need to rework) LOGIC ABOUT INACTIVE STREAMING SO THAT WE STOP ---
+					if (!this.streamingActive) {
+						if (!data.done && data.result) {
+							// console.log("Still streaming data....")
+							if (data.result) {
+								console.log(
+									"(Flask) Still streaming data, but this value was returned: ",
+									data.result,
+								);
+							}
+							this.handleResponse({
+								type: "stream-data",
+								id,
+								value: JSON.stringify(data.result) as string,
+							});
+						}
+						break;
+					}
+					// ---------------------------------------------------------------------------
+
+					/* Subbed by the FLASK functionality ---------------
+					 * The Flask backend already handles the logic for looping until all data is concluded,
+					 * and it provides all the information in chunks */
+
+					if (data.done) {
+						break;
+					}
+
+					console.log(
+						"(Flask) Done streaming data, the final value is....",
+						data,
+					);
+
+					this.handleResponse({
+						type: "stream-data",
+						id,
+						value: JSON.stringify(data) as string,
+					});
+				}
+
+				// --------------------------------------------------
 			}
+
 		} catch (error) {
 			return this.runTracebackWithFlask(id, error);
 		} finally {
