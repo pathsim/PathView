@@ -123,8 +123,9 @@ export function calculateRoute(
 	// Add target clearance point
 	allPoints.push(targetClearance);
 
-	// Build complete path: source -> clearance -> intermediate -> clearance -> target
-	const fullPath = [sourcePos, ...allPoints, targetPos];
+	// Build complete path: just clearance points and intermediates (not port positions)
+	// The rendering will connect from actual handles to these points
+	const fullPath = allPoints;
 
 	// Snap to grid and deduplicate
 	const snappedPath = deduplicatePath(snapPathToGrid(fullPath));
