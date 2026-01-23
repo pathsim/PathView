@@ -63,8 +63,7 @@ export function calculateRoute(
 
 	// Calculate clearance points to enforce entry/exit directions
 	const sourceClearance = getClearancePoint(sourcePos, sourceDir, SOURCE_CLEARANCE);
-	// Target clearance: place point outside the block in the direction the port faces
-	// Wire will travel TO this point, then straight INTO the port
+	// Target clearance: in the direction the port faces (wire enters from that direction)
 	const targetClearance = getClearancePoint(targetPos, targetDir, TARGET_CLEARANCE);
 
 	// Build path: source -> sourceClearance -> [waypoints] -> targetClearance -> target
