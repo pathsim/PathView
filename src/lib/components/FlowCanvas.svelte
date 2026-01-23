@@ -22,7 +22,8 @@
 	import { eventStore, setEventSelection } from '$lib/stores/events';
 	import { selectedNodeIds as graphSelectedNodeIds } from '$lib/stores/graph/state';
 	import { historyStore } from '$lib/stores/history';
-	import { routingStore, buildRoutingContext } from '$lib/stores/routing';
+	import { routingStore, buildRoutingContext, type PortInfo } from '$lib/stores/routing';
+	import type { Direction } from '$lib/routing';
 	import { themeStore, type Theme } from '$lib/stores/theme';
 	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection, triggerFitView } from '$lib/stores/viewActions';
 	import { screenToFlow } from '$lib/utils/viewUtils';
@@ -240,8 +241,8 @@
 		pendingNodeUpdates = [];
 	}
 
-	// Helper to get port position in world coordinates
-	function getPortPosition(nodeId: string, portIndex: number, isOutput: boolean): { x: number; y: number } | null {
+	// Helper to get port position and direction in world coordinates
+	function getPortInfo(nodeId: string, portIndex: number, isOutput: boolean): PortInfo | null {
 		const node = nodes.find(n => n.id === nodeId);
 		if (!node) return null;
 
@@ -261,25 +262,30 @@
 
 		let x = node.position.x;
 		let y = node.position.y;
+		let direction: Direction;
 
-		// Position based on rotation (output = right side for rotation 0)
+		// Position and direction based on rotation (output = right side for rotation 0)
 		if (isOutput) {
 			switch (rotation) {
 				case 1: // outputs at bottom
 					x += offsetFromCenter;
 					y += height / 2;
+					direction = 'down';
 					break;
 				case 2: // outputs at left
 					x -= width / 2;
 					y += offsetFromCenter;
+					direction = 'left';
 					break;
 				case 3: // outputs at top
 					x += offsetFromCenter;
 					y -= height / 2;
+					direction = 'up';
 					break;
 				default: // rotation 0 - outputs at right
 					x += width / 2;
 					y += offsetFromCenter;
+					direction = 'right';
 					break;
 			}
 		} else {
@@ -288,23 +294,27 @@
 				case 1: // inputs at top
 					x += offsetFromCenter;
 					y -= height / 2;
+					direction = 'up';
 					break;
 				case 2: // inputs at right
 					x += width / 2;
 					y += offsetFromCenter;
+					direction = 'right';
 					break;
 				case 3: // inputs at bottom
 					x += offsetFromCenter;
 					y += height / 2;
+					direction = 'down';
 					break;
 				default: // rotation 0 - inputs at left
 					x -= width / 2;
 					y += offsetFromCenter;
+					direction = 'left';
 					break;
 			}
 		}
 
-		return { x, y };
+		return { position: { x, y }, direction };
 	}
 
 	// Update routing context and recalculate all routes
@@ -321,7 +331,7 @@
 
 		// Recalculate all routes
 		const connections = get(graphStore.connections);
-		routingStore.recalculateAllRoutes(connections, getPortPosition);
+		routingStore.recalculateAllRoutes(connections, getPortInfo);
 	}
 
 	// Custom node types - will add more for different shapes

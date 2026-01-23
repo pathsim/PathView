@@ -5,11 +5,17 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Position } from '$lib/types/common';
 import type { Connection, Waypoint } from '$lib/types/nodes';
-import type { RoutingContext, RouteResult, Bounds } from '$lib/routing';
+import type { RoutingContext, RouteResult, Bounds, Direction } from '$lib/routing';
 import { calculateRoute, calculateSimpleRoute, ROUTING_MARGIN } from '$lib/routing';
 import { generateId } from '$lib/stores/utils';
 import { graphStore } from '$lib/stores/graph';
 import { historyStore } from '$lib/stores/history';
+
+/** Port info returned from getPortInfo callback */
+export interface PortInfo {
+	position: Position;
+	direction: Direction;
+}
 
 interface RoutingState {
 	/** Cached routes by connection ID */
@@ -58,16 +64,18 @@ export const routingStore = {
 	calculateRoute(
 		connection: Connection,
 		sourcePos: Position,
-		targetPos: Position
+		targetPos: Position,
+		sourceDir: Direction = 'right',
+		targetDir: Direction = 'left'
 	): RouteResult | null {
 		const $state = get(state);
 
 		let result: RouteResult;
 		if ($state.context && $state.context.nodeBounds.size > 0) {
-			result = calculateRoute(connection, sourcePos, targetPos, $state.context);
+			result = calculateRoute(connection, sourcePos, targetPos, sourceDir, targetDir, $state.context);
 		} else {
 			// No context or empty - use simple routing
-			result = calculateSimpleRoute(sourcePos, targetPos);
+			result = calculateSimpleRoute(sourcePos, targetPos, sourceDir, targetDir);
 		}
 
 		state.update((s) => {
@@ -82,27 +90,39 @@ export const routingStore = {
 	/**
 	 * Recalculate all routes
 	 * @param connections - All connections to route
-	 * @param getPortPosition - Function to get port world position
+	 * @param getPortInfo - Function to get port world position and direction
 	 */
 	recalculateAllRoutes(
 		connections: Connection[],
-		getPortPosition: (nodeId: string, portIndex: number, isOutput: boolean) => Position | null
+		getPortInfo: (nodeId: string, portIndex: number, isOutput: boolean) => PortInfo | null
 	): void {
 		const $state = get(state);
 
 		const routes = new Map<string, RouteResult>();
 
 		for (const conn of connections) {
-			const sourcePos = getPortPosition(conn.sourceNodeId, conn.sourcePortIndex, true);
-			const targetPos = getPortPosition(conn.targetNodeId, conn.targetPortIndex, false);
+			const sourceInfo = getPortInfo(conn.sourceNodeId, conn.sourcePortIndex, true);
+			const targetInfo = getPortInfo(conn.targetNodeId, conn.targetPortIndex, false);
 
-			if (!sourcePos || !targetPos) continue;
+			if (!sourceInfo || !targetInfo) continue;
 
 			let result: RouteResult;
 			if ($state.context && $state.context.nodeBounds.size > 0) {
-				result = calculateRoute(conn, sourcePos, targetPos, $state.context);
+				result = calculateRoute(
+					conn,
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction,
+					$state.context
+				);
 			} else {
-				result = calculateSimpleRoute(sourcePos, targetPos);
+				result = calculateSimpleRoute(
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction
+				);
 			}
 			routes.set(conn.id, result);
 		}

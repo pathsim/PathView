@@ -4,10 +4,12 @@
 
 import type { Position } from '$lib/types/common';
 import type { Connection, Waypoint } from '$lib/types/nodes';
-import type { RoutingContext, RouteResult, RouteSegment } from './types';
+import type { RoutingContext, RouteResult, RouteSegment, Direction } from './types';
+import { DIRECTION_VECTORS } from './types';
 import { buildGrid, getGridOffset } from './gridBuilder';
-import { findPath } from './pathfinder';
+import { findPathWithTurnPenalty } from './pathfinder';
 import { simplifyPath, snapPathToGrid, deduplicatePath } from './pathOptimizer';
+import { PORT_CLEARANCE } from './constants';
 
 let waypointIdCounter = 0;
 
@@ -16,10 +18,23 @@ function generateWaypointId(): string {
 }
 
 /**
- * Calculate route for a connection, respecting user waypoints
+ * Calculate clearance point - a point PORT_CLEARANCE away from port in the port's facing direction
+ */
+function getClearancePoint(portPos: Position, direction: Direction): Position {
+	const vec = DIRECTION_VECTORS[direction];
+	return {
+		x: portPos.x + vec.x * PORT_CLEARANCE,
+		y: portPos.y + vec.y * PORT_CLEARANCE
+	};
+}
+
+/**
+ * Calculate route for a connection, respecting user waypoints and enforcing port directions
  * @param connection - Connection with optional user waypoints
  * @param sourcePos - Source port world position
  * @param targetPos - Target port world position
+ * @param sourceDir - Direction the source port faces (wire exits in this direction)
+ * @param targetDir - Direction the target port faces (wire enters from opposite direction)
  * @param context - Routing context with node bounds
  * @returns Route result with path, waypoints, and segments
  */
@@ -27,6 +42,8 @@ export function calculateRoute(
 	connection: Connection,
 	sourcePos: Position,
 	targetPos: Position,
+	sourceDir: Direction,
+	targetDir: Direction,
 	context: RoutingContext
 ): RouteResult {
 	// Get user waypoints, sorted by proximity to source
@@ -44,15 +61,25 @@ export function calculateRoute(
 	const grid = buildGrid(context, excludeNodes);
 	const offset = getGridOffset(context);
 
-	// Build path segments between waypoints
+	// Calculate clearance points to enforce entry/exit directions
+	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
+	// Target clearance: approach from the OPPOSITE direction (wire enters into port)
+	const targetApproachDir = getOppositeDirection(targetDir);
+	const targetClearance = getClearancePoint(targetPos, targetApproachDir);
+
+	// Build path: source -> sourceClearance -> [waypoints] -> targetClearance -> target
 	const allPoints: Position[] = [];
 	const allWaypoints: Waypoint[] = [];
 
-	let currentPos = sourcePos;
+	// Start with source clearance segment (always straight out from port)
+	allPoints.push(sourceClearance);
+
+	let currentPos = sourceClearance;
+	let currentDir = sourceDir; // Track current direction for turn penalties
 
 	// Route through each user waypoint
 	for (const userWp of userWaypoints) {
-		const segmentPath = findPath(currentPos, userWp.position, grid, offset);
+		const segmentPath = findPathWithTurnPenalty(currentPos, userWp.position, grid, offset, currentDir);
 		const simplified = simplifyPath(segmentPath);
 
 		// Add intermediate points (skip first which is currentPos)
@@ -70,10 +97,15 @@ export function calculateRoute(
 		allPoints.push(userWp.position);
 		allWaypoints.push(userWp);
 		currentPos = userWp.position;
+
+		// Update current direction based on last segment
+		if (simplified.length >= 2) {
+			currentDir = getDirectionFromSegment(simplified[simplified.length - 2], simplified[simplified.length - 1]);
+		}
 	}
 
-	// Final segment to target
-	const finalPath = findPath(currentPos, targetPos, grid, offset);
+	// Route to target clearance point
+	const finalPath = findPathWithTurnPenalty(currentPos, targetClearance, grid, offset, currentDir);
 	const simplified = simplifyPath(finalPath);
 
 	// Add intermediate points from final segment
@@ -86,7 +118,10 @@ export function calculateRoute(
 		});
 	}
 
-	// Build complete path: source -> all intermediate points -> target
+	// Add target clearance point
+	allPoints.push(targetClearance);
+
+	// Build complete path: source -> clearance -> intermediate -> clearance -> target
 	const fullPath = [sourcePos, ...allPoints, targetPos];
 
 	// Snap to grid and deduplicate
@@ -100,6 +135,32 @@ export function calculateRoute(
 		waypoints: allWaypoints,
 		segments
 	};
+}
+
+/**
+ * Get the opposite direction
+ */
+function getOppositeDirection(dir: Direction): Direction {
+	switch (dir) {
+		case 'up': return 'down';
+		case 'down': return 'up';
+		case 'left': return 'right';
+		case 'right': return 'left';
+	}
+}
+
+/**
+ * Get direction from a path segment
+ */
+function getDirectionFromSegment(from: Position, to: Position): Direction {
+	const dx = to.x - from.x;
+	const dy = to.y - from.y;
+
+	if (Math.abs(dx) > Math.abs(dy)) {
+		return dx > 0 ? 'right' : 'left';
+	} else {
+		return dy > 0 ? 'down' : 'up';
+	}
 }
 
 /**
@@ -137,27 +198,54 @@ function buildSegments(path: Position[], waypoints: Waypoint[]): RouteSegment[] 
 
 /**
  * Calculate simple L-shaped or Z-shaped route without pathfinding
- * Used as fallback when no obstacles or for performance
+ * Enforces exit direction from source
  */
-export function calculateSimpleRoute(sourcePos: Position, targetPos: Position): RouteResult {
+export function calculateSimpleRoute(
+	sourcePos: Position,
+	targetPos: Position,
+	sourceDir: Direction = 'right',
+	targetDir: Direction = 'left'
+): RouteResult {
 	const path: Position[] = [sourcePos];
 
-	// Determine if we need an L-shape or Z-shape
-	const dx = targetPos.x - sourcePos.x;
-	const dy = targetPos.y - sourcePos.y;
+	// Calculate clearance points
+	const sourceClearance = getClearancePoint(sourcePos, sourceDir);
+	const targetApproachDir = getOppositeDirection(targetDir);
+	const targetClearance = getClearancePoint(targetPos, targetApproachDir);
 
-	if (dx !== 0 && dy !== 0) {
-		// Need a bend - use L-shape (horizontal first, then vertical)
-		const midPoint = { x: targetPos.x, y: sourcePos.y };
-		path.push(midPoint);
+	// Add source clearance
+	path.push(sourceClearance);
+
+	// Determine if we need additional bends between clearance points
+	const dx = targetClearance.x - sourceClearance.x;
+	const dy = targetClearance.y - sourceClearance.y;
+
+	// Check if clearance points are aligned (straight connection possible)
+	const isHorizontalAligned = Math.abs(dy) < 1;
+	const isVerticalAligned = Math.abs(dx) < 1;
+
+	if (!isHorizontalAligned && !isVerticalAligned) {
+		// Need intermediate point(s) for orthogonal routing
+		// Prefer routing that matches the source exit direction
+		if (sourceDir === 'right' || sourceDir === 'left') {
+			// Exit horizontally, so go horizontal first, then vertical
+			path.push({ x: targetClearance.x, y: sourceClearance.y });
+		} else {
+			// Exit vertically, so go vertical first, then horizontal
+			path.push({ x: sourceClearance.x, y: targetClearance.y });
+		}
 	}
 
+	// Add target clearance and final target
+	path.push(targetClearance);
 	path.push(targetPos);
 
-	const segments = buildSegments(path, []);
+	// Deduplicate in case clearance points overlap with source/target
+	const finalPath = deduplicatePath(path);
+	const segments = buildSegments(finalPath, []);
 
 	return {
-		path,
+		path: finalPath,
 		waypoints: [],
 		segments
 	};
