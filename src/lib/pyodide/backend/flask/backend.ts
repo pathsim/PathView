@@ -245,8 +245,9 @@ export class FlaskBackend implements Backend {
               while (this.streamingCodeQueue.length > 0) {
                 const code = this.streamingCodeQueue.shift()!;
                 try {
-                  // Simply sending requests to the Flask api to execute code, we only really care if errors are produced so we
-                  // don't handle any data response
+                  // Simply sending requests to the Flask api to execute code, 
+                  // we only really care if errors are produced so we don't handle any data response.
+                  // There is also no need for streaming data here....
         
                   let data = await fetch(getFlaskBackendUrl() + "/execute-code", {
                     method: "POST",
@@ -266,8 +267,10 @@ export class FlaskBackend implements Backend {
                   this.handleResponse({ type: "stderr", value: `Stream exec error: ${errorMsg}` });
                 }
               }
+
+              console.log("Streaming code expression is: ", expr)
         
-              let data = await fetch(getFlaskBackendUrl() + "/evaluate-expression", {
+              let data = await fetch(getFlaskBackendUrl() + "/streamData", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",

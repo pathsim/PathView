@@ -147,7 +147,45 @@ def check_traceback():
 
 @app.route("/streamData", methods=["POST"])
 def stream_data():
-    pass
+    try:
+        data = request.json
+        expr = data.get("expr")
+
+        # Capture stdout and stderror
+        stdout_capture = io.StringIO()
+        stderr_capture = io.StringIO()
+
+        try:
+            result = " "
+            with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+                result = eval(expr, namespace)
+            
+            print("The result was: ", result)
+
+            # Capture any output
+            output = stdout_capture.getvalue()
+            error_output = stderr_capture.getvalue()
+
+            if error_output:
+                return jsonify({"success": False, "error": error_output})
+            
+            return jsonify(
+                {
+                    "success": True,
+                    "result": result,
+                    "output": output
+                }
+            )
+        
+        except SyntaxError as e:
+            return jsonify({"success": False, "error": f"Syntax Error: {str(e)}"}), 400
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Runtime Error: {str(e)}"}), 400   
+
+
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
+
 
 # Global error handler to ensure all errors return JSON
 @app.errorhandler(Exception)
