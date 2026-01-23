@@ -1,0 +1,10 @@
+/**
+ * Routing module public API
+ */
+
+export { calculateRoute, calculateSimpleRoute } from './routeCalculator';
+export { buildGrid, worldToGrid, gridToWorld, getGridOffset } from './gridBuilder';
+export { findPath } from './pathfinder';
+export { simplifyPath, snapToGrid, snapPathToGrid, deduplicatePath } from './pathOptimizer';
+export { ROUTING_MARGIN, PORT_CLEARANCE, GRID_SIZE } from './constants';
+export type { Bounds, RoutingContext, RouteSegment, RouteResult } from './types';

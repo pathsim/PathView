@@ -16,12 +16,13 @@
 	import BaseNode from './nodes/BaseNode.svelte';
 	import EventNode from './nodes/EventNode.svelte';
 	import AnnotationNode from './nodes/AnnotationNode.svelte';
-	import ArrowEdge from './edges/ArrowEdge.svelte';
+	import OrthogonalEdge from './edges/OrthogonalEdge.svelte';
 	import FlowUpdater from './FlowUpdater.svelte';
 	import { graphStore } from '$lib/stores/graph';
 	import { eventStore, setEventSelection } from '$lib/stores/events';
 	import { selectedNodeIds as graphSelectedNodeIds } from '$lib/stores/graph/state';
 	import { historyStore } from '$lib/stores/history';
+	import { routingStore, buildRoutingContext } from '$lib/stores/routing';
 	import { themeStore, type Theme } from '$lib/stores/theme';
 	import { clearSelectionTrigger, nudgeTrigger, selectNodeTrigger, registerHasSelection, triggerFitView } from '$lib/stores/viewActions';
 	import { dropTargetBridge } from '$lib/stores/dropTargetBridge';
@@ -215,6 +216,90 @@
 		pendingNodeUpdates = [];
 	}
 
+	// Helper to get port position in world coordinates
+	function getPortPosition(nodeId: string, portIndex: number, isOutput: boolean): { x: number; y: number } | null {
+		const node = nodes.find(n => n.id === nodeId);
+		if (!node) return null;
+
+		const nodeData = node.data as NodeInstance;
+		const ports = isOutput ? nodeData.outputs : nodeData.inputs;
+		if (portIndex >= ports.length) return null;
+
+		const rotation = (nodeData.params?.['_rotation'] as number) || 0;
+		const width = node.measured?.width ?? node.width ?? 80;
+		const height = node.measured?.height ?? node.height ?? 40;
+
+		// Calculate port offset from center based on rotation
+		const portCount = ports.length;
+		const portSpacing = 20; // G.x2
+		const span = (portCount - 1) * portSpacing;
+		const offsetFromCenter = -span / 2 + portIndex * portSpacing;
+
+		let x = node.position.x;
+		let y = node.position.y;
+
+		// Position based on rotation (output = right side for rotation 0)
+		if (isOutput) {
+			switch (rotation) {
+				case 1: // outputs at bottom
+					x += offsetFromCenter;
+					y += height / 2;
+					break;
+				case 2: // outputs at left
+					x -= width / 2;
+					y += offsetFromCenter;
+					break;
+				case 3: // outputs at top
+					x += offsetFromCenter;
+					y -= height / 2;
+					break;
+				default: // rotation 0 - outputs at right
+					x += width / 2;
+					y += offsetFromCenter;
+					break;
+			}
+		} else {
+			// Inputs are opposite to outputs
+			switch (rotation) {
+				case 1: // inputs at top
+					x += offsetFromCenter;
+					y -= height / 2;
+					break;
+				case 2: // inputs at right
+					x += width / 2;
+					y += offsetFromCenter;
+					break;
+				case 3: // inputs at bottom
+					x += offsetFromCenter;
+					y += height / 2;
+					break;
+				default: // rotation 0 - inputs at left
+					x -= width / 2;
+					y += offsetFromCenter;
+					break;
+			}
+		}
+
+		return { x, y };
+	}
+
+	// Update routing context and recalculate all routes
+	function updateRoutingContext() {
+		// Only include block nodes (not events or annotations) for routing
+		const blockNodesForRouting = nodes.filter(n => n.type === 'pathview');
+		if (blockNodesForRouting.length === 0) {
+			routingStore.clearRoutes();
+			return;
+		}
+
+		const { nodeBounds, canvasBounds } = buildRoutingContext(blockNodesForRouting);
+		routingStore.setContext(nodeBounds, canvasBounds);
+
+		// Recalculate all routes
+		const connections = get(graphStore.connections);
+		routingStore.recalculateAllRoutes(connections, getPortPosition);
+	}
+
 	// Custom node types - will add more for different shapes
 	const nodeTypes: NodeTypes = {
 		pathview: BaseNode,
@@ -222,9 +307,9 @@
 		annotation: AnnotationNode
 	};
 
-	// Custom edge types with arrow in middle
+	// Custom edge types - orthogonal routing with arrow
 	const edgeTypes: EdgeTypes = {
-		arrow: ArrowEdge
+		orthogonal: OrthogonalEdge
 	};
 
 	// SvelteFlow state - this is the source of truth for visual state
@@ -493,6 +578,9 @@
 	cleanups.push(graphStore.connections.subscribe((connections: Connection[]) => {
 		if (isSyncing) return;
 		edges = connections.map(toFlowEdge);
+		// Recalculate routes when connections change
+		// Use setTimeout to ensure nodes are updated first
+		setTimeout(() => updateRoutingContext(), 0);
 	}));
 
 	// Handle node drag start - capture state for undo
@@ -519,6 +607,9 @@
 			isSyncing = false;
 		}
 		historyStore.endDrag();
+
+		// Update routing context and recalculate routes
+		updateRoutingContext();
 	}
 
 	// Handle node and edge delete

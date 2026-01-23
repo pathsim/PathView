@@ -75,6 +75,7 @@ export const graphStore = {
 	addConnection: connections.addConnection,
 	removeConnection: connections.removeConnection,
 	getAllConnections: connections.getAllConnections,
+	updateConnectionWaypoints: connections.updateConnectionWaypoints,
 
 	// ==================== PORT OPERATIONS ====================
 	addInputPort: ports.addInputPort,

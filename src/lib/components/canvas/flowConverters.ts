@@ -55,7 +55,8 @@ export function toFlowEdge(conn: Connection): Edge {
 		sourceHandle: HANDLE_ID.output(conn.sourceNodeId, conn.sourcePortIndex),
 		target: conn.targetNodeId,
 		targetHandle: HANDLE_ID.input(conn.targetNodeId, conn.targetPortIndex),
-		type: 'arrow',
+		type: 'orthogonal',
+		data: { waypoints: conn.waypoints },
 		selectable: true,
 		deletable: true,
 		animated: false

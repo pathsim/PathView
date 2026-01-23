@@ -3,7 +3,7 @@
  */
 
 import { get } from 'svelte/store';
-import type { Connection } from '$lib/nodes/types';
+import type { Connection, Waypoint } from '$lib/types/nodes';
 import {
 	rootNodes,
 	rootConnections,
@@ -92,4 +92,13 @@ export function getAllConnections(): { connection: Connection; subsystemId?: str
 	collectConnections(get(rootNodes));
 
 	return all;
+}
+
+/**
+ * Update waypoints for a connection
+ */
+export function updateConnectionWaypoints(id: string, waypoints: Waypoint[]): void {
+	updateCurrentConnections((connections) =>
+		connections.map((c) => (c.id === id ? { ...c, waypoints } : c))
+	);
 }
