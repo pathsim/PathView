@@ -409,6 +409,8 @@
 				onpointermove={handleWaypointPointerMove}
 				onpointerup={handleWaypointPointerUp}
 				onlostpointercapture={handleLostPointerCapture}
+				onclick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+				onmousedown={(e) => e.stopPropagation()}
 				ondblclick={(e) => handleWaypointDoubleClick(e, waypoint)}
 			/>
 		{/each}
@@ -429,6 +431,8 @@
 				onpointermove={handleSegmentPointerMove}
 				onpointerup={handleSegmentPointerUp}
 				onlostpointercapture={handleSegmentLostPointerCapture}
+				onclick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+				onmousedown={(e) => e.stopPropagation()}
 			/>
 		{/each}
 	{/if}
