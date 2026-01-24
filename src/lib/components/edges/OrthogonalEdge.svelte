@@ -137,9 +137,12 @@
 		unsubscribeRoute = routingStore.getRoute(id).subscribe((r) => (routeResult = r));
 	});
 
-	// Cleanup subscription
+	// Cleanup subscription and any active drag listeners
 	onDestroy(() => {
 		if (unsubscribeRoute) unsubscribeRoute();
+		// Clean up document listeners if drag was in progress
+		document.removeEventListener('pointermove', onDocumentPointerMove);
+		document.removeEventListener('pointerup', onDocumentPointerUp);
 	});
 
 	// Check if this edge is connected to the hovered handle
@@ -324,36 +327,14 @@
 	});
 
 	// Segment drag state (for creating new waypoints by dragging segment midpoints)
+	// Uses document-level listeners because the segment element gets removed when route updates
 	let isSegmentDragging = $state(false);
 
 	// Derived visibility state for waypoints - use function form for consistency
 	const waypointsVisible = $derived(() => selected);
 
-	function handleSegmentPointerDown(event: PointerEvent, segmentIndex: number) {
-		event.stopPropagation();
-		event.preventDefault();
-
-		const target = event.currentTarget as SVGCircleElement;
-		target.setPointerCapture(event.pointerId);
-
-		const flowPos = screenToFlow({ x: event.clientX, y: event.clientY });
-		const snappedPos = {
-			x: Math.round(flowPos.x / GRID_SIZE) * GRID_SIZE,
-			y: Math.round(flowPos.y / GRID_SIZE) * GRID_SIZE
-		};
-
-		historyStore.beginDrag();
-
-		// Create waypoint at drag start position
-		const waypointId = routingStore.addUserWaypoint(id, snappedPos);
-		if (waypointId) {
-			isSegmentDragging = true;
-			draggingWaypointId = waypointId;
-			lastSnappedPos = snappedPos;
-		}
-	}
-
-	function handleSegmentPointerMove(event: PointerEvent) {
+	// Document-level handlers for segment drag (bound versions for cleanup)
+	function onDocumentPointerMove(event: PointerEvent) {
 		if (!isSegmentDragging || !draggingWaypointId) return;
 
 		event.stopPropagation();
@@ -374,19 +355,43 @@
 		routingStore.moveWaypoint(id, draggingWaypointId, snappedPos, getPortInfo);
 	}
 
-	function handleSegmentPointerUp(event: PointerEvent) {
+	function onDocumentPointerUp(event: PointerEvent) {
 		if (!isSegmentDragging) return;
 		event.stopPropagation();
 		endSegmentDrag();
 	}
 
-	function handleSegmentLostPointerCapture() {
-		if (isSegmentDragging) {
-			endSegmentDrag();
+	function handleSegmentPointerDown(event: PointerEvent, _segmentIndex: number) {
+		event.stopPropagation();
+		event.preventDefault();
+
+		const flowPos = screenToFlow({ x: event.clientX, y: event.clientY });
+		const snappedPos = {
+			x: Math.round(flowPos.x / GRID_SIZE) * GRID_SIZE,
+			y: Math.round(flowPos.y / GRID_SIZE) * GRID_SIZE
+		};
+
+		historyStore.beginDrag();
+
+		// Create waypoint at drag start position
+		const waypointId = routingStore.addUserWaypoint(id, snappedPos);
+		if (waypointId) {
+			isSegmentDragging = true;
+			draggingWaypointId = waypointId;
+			lastSnappedPos = snappedPos;
+
+			// Use document-level listeners for drag continuation
+			// (element-level won't work because segment element is removed when route updates)
+			document.addEventListener('pointermove', onDocumentPointerMove);
+			document.addEventListener('pointerup', onDocumentPointerUp);
 		}
 	}
 
 	function endSegmentDrag() {
+		// Remove document listeners
+		document.removeEventListener('pointermove', onDocumentPointerMove);
+		document.removeEventListener('pointerup', onDocumentPointerUp);
+
 		isSegmentDragging = false;
 		draggingWaypointId = null;
 		lastSnappedPos = null;
@@ -446,7 +451,7 @@
 			/>
 		{/each}
 
-		<!-- Segment midpoint indicators -->
+		<!-- Segment midpoint indicators (ghost waypoints) -->
 		{#each segmentMidpoints() as midpoint (midpoint.segmentIndex)}
 			<circle
 				cx={midpoint.x}
@@ -454,9 +459,6 @@
 				r="3"
 				class="segment-midpoint"
 				onpointerdown={(e) => handleSegmentPointerDown(e, midpoint.segmentIndex)}
-				onpointermove={handleSegmentPointerMove}
-				onpointerup={handleSegmentPointerUp}
-				onlostpointercapture={handleSegmentLostPointerCapture}
 			/>
 		{/each}
 	</g>
