@@ -1,9 +1,8 @@
 /**
- * Build pathfinding grid with obstacles marked
+ * Sparse grid for pathfinding - stores only obstacles, computes walkability on demand
  */
 
-import PF from 'pathfinding';
-import type { RoutingContext } from './types';
+import type { RoutingContext, Bounds } from './types';
 import { DIRECTION_VECTORS } from './types';
 import { GRID_SIZE, ROUTING_MARGIN } from './constants';
 
@@ -23,23 +22,58 @@ export function gridToWorld(gx: number): number {
 }
 
 /**
- * Build pathfinding grid with obstacles marked
- * @param context - Routing context with node bounds and canvas bounds
+ * Obstacle in grid coordinates (inclusive bounds)
  */
-export function buildGrid(context: RoutingContext): PF.Grid {
-	const { nodeBounds, canvasBounds } = context;
+interface GridObstacle {
+	minGx: number;
+	minGy: number;
+	maxGx: number;
+	maxGy: number;
+}
 
-	// Calculate grid dimensions from canvas bounds
-	const gridWidth = Math.ceil(canvasBounds.width / GRID_SIZE) + 2;
-	const gridHeight = Math.ceil(canvasBounds.height / GRID_SIZE) + 2;
-	// Snap offset to grid
-	const offsetX = Math.floor(canvasBounds.x / GRID_SIZE) * GRID_SIZE;
-	const offsetY = Math.floor(canvasBounds.y / GRID_SIZE) * GRID_SIZE;
+/**
+ * Sparse grid that computes walkability on-demand from obstacle list
+ * No matrix storage - O(obstacles) memory instead of O(width × height)
+ */
+export class SparseGrid {
+	readonly width: number;
+	readonly height: number;
+	readonly offsetX: number;
+	readonly offsetY: number;
+	private obstacles: GridObstacle[] = [];
 
-	const grid = new PF.Grid(gridWidth, gridHeight);
+	constructor(context: RoutingContext) {
+		const { canvasBounds } = context;
 
-	// Mark obstacles (nodes with uniform margin)
-	for (const [, bounds] of nodeBounds) {
+		// Calculate grid dimensions from canvas bounds
+		this.width = Math.ceil(canvasBounds.width / GRID_SIZE) + 2;
+		this.height = Math.ceil(canvasBounds.height / GRID_SIZE) + 2;
+
+		// Snap offset to grid
+		this.offsetX = Math.floor(canvasBounds.x / GRID_SIZE) * GRID_SIZE;
+		this.offsetY = Math.floor(canvasBounds.y / GRID_SIZE) * GRID_SIZE;
+
+		// Build obstacle list from node bounds
+		for (const [, bounds] of context.nodeBounds) {
+			this.addNodeObstacle(bounds);
+		}
+
+		// Add port stub obstacles
+		if (context.portStubs) {
+			for (const stub of context.portStubs) {
+				const vec = DIRECTION_VECTORS[stub.direction];
+				const stubX = stub.position.x + vec.x * GRID_SIZE;
+				const stubY = stub.position.y + vec.y * GRID_SIZE;
+				const gx = worldToGrid(stubX - this.offsetX);
+				const gy = worldToGrid(stubY - this.offsetY);
+				// Single cell obstacle
+				this.obstacles.push({ minGx: gx, minGy: gy, maxGx: gx, maxGy: gy });
+			}
+		}
+	}
+
+	private addNodeObstacle(bounds: Bounds): void {
+		// Add margin around node
 		const marginBounds = {
 			x: bounds.x - ROUTING_MARGIN,
 			y: bounds.y - ROUTING_MARGIN,
@@ -48,37 +82,47 @@ export function buildGrid(context: RoutingContext): PF.Grid {
 		};
 
 		// Convert to grid coordinates
-		const startGx = worldToGrid(marginBounds.x - offsetX);
-		const startGy = worldToGrid(marginBounds.y - offsetY);
-		const endGx = worldToGrid(marginBounds.x + marginBounds.width - offsetX);
-		const endGy = worldToGrid(marginBounds.y + marginBounds.height - offsetY);
+		const minGx = worldToGrid(marginBounds.x - this.offsetX);
+		const minGy = worldToGrid(marginBounds.y - this.offsetY);
+		const maxGx = worldToGrid(marginBounds.x + marginBounds.width - this.offsetX);
+		const maxGy = worldToGrid(marginBounds.y + marginBounds.height - this.offsetY);
 
-		// Mark cells as unwalkable
-		for (let gx = startGx; gx <= endGx; gx++) {
-			for (let gy = startGy; gy <= endGy; gy++) {
-				if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight) {
-					grid.setWalkableAt(gx, gy, false);
-				}
-			}
-		}
+		this.obstacles.push({ minGx, minGy, maxGx, maxGy });
 	}
 
-	// Mark port stub areas as obstacles (1G extension from port)
-	if (context.portStubs) {
-		for (const stub of context.portStubs) {
-			const vec = DIRECTION_VECTORS[stub.direction];
-			// Mark the cell at port position extending 1G in port direction
-			const stubX = stub.position.x + vec.x * GRID_SIZE;
-			const stubY = stub.position.y + vec.y * GRID_SIZE;
-			const gx = worldToGrid(stubX - offsetX);
-			const gy = worldToGrid(stubY - offsetY);
-			if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight) {
-				grid.setWalkableAt(gx, gy, false);
+	/**
+	 * Check if a grid cell is walkable (not blocked by any obstacle)
+	 * O(obstacles) per query - fast for small obstacle counts
+	 */
+	isWalkableAt(gx: number, gy: number): boolean {
+		// Bounds check
+		if (gx < 0 || gx >= this.width || gy < 0 || gy >= this.height) {
+			return false;
+		}
+
+		// Check against all obstacles
+		for (const obs of this.obstacles) {
+			if (gx >= obs.minGx && gx <= obs.maxGx && gy >= obs.minGy && gy <= obs.maxGy) {
+				return false;
 			}
 		}
+
+		return true;
 	}
 
-	return grid;
+	/**
+	 * Get offset for converting world to local grid coordinates
+	 */
+	getOffset(): { x: number; y: number } {
+		return { x: this.offsetX, y: this.offsetY };
+	}
+}
+
+/**
+ * Build sparse grid from routing context
+ */
+export function buildGrid(context: RoutingContext): SparseGrid {
+	return new SparseGrid(context);
 }
 
 /**

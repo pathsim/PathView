@@ -2,12 +2,11 @@
  * Simple orthogonal route calculator
  */
 
-import PF from 'pathfinding';
 import type { Position } from '$lib/types/common';
 import type { Waypoint } from '$lib/types/nodes';
 import type { RoutingContext, RouteResult, Direction } from './types';
 import { DIRECTION_VECTORS } from './types';
-import { buildGrid, getGridOffset, worldToGrid } from './gridBuilder';
+import { buildGrid, getGridOffset, worldToGrid, type SparseGrid } from './gridBuilder';
 import { findPathWithTurnPenalty } from './pathfinder';
 import { simplifyPath, snapToGrid } from './pathOptimizer';
 import { SOURCE_CLEARANCE, TARGET_CLEARANCE, GRID_SIZE } from './constants';
@@ -27,27 +26,17 @@ function getStubEnd(portPos: Position, direction: Direction, clearance: number):
 	return snapToGrid(point);
 }
 
-/** Cached grid and offset for batch routing */
-let cachedGrid: { grid: PF.Grid; offset: Position; walkable: Set<string> } | null = null;
+/** Cached sparse grid for batch routing */
+let cachedGrid: { grid: SparseGrid; offset: Position } | null = null;
 
 /**
- * Build and cache grid for batch routing (call before calculateRoute batch)
+ * Build and cache sparse grid for batch routing (call before calculateRoute batch)
+ * With sparse grid, this is lightweight - just caches obstacle list
  */
 export function prepareRoutingGrid(context: RoutingContext): void {
 	const grid = buildGrid(context);
 	const offset = getGridOffset(context);
-
-	// Pre-build walkable set once
-	const walkable = new Set<string>();
-	for (let y = 0; y < grid.height; y++) {
-		for (let x = 0; x < grid.width; x++) {
-			if (grid.isWalkableAt(x, y)) {
-				walkable.add(`${x},${y}`);
-			}
-		}
-	}
-
-	cachedGrid = { grid, offset, walkable };
+	cachedGrid = { grid, offset };
 }
 
 /**
@@ -74,21 +63,19 @@ export function calculateRoute(
 	const targetStubEnd = getStubEnd(targetPos, targetDir, TARGET_CLEARANCE);
 
 	// Use cached grid if available, otherwise build fresh
-	let grid: PF.Grid;
+	let grid: SparseGrid;
 	let offset: Position;
-	let walkable: Set<string> | undefined;
 
 	if (cachedGrid) {
 		grid = cachedGrid.grid;
 		offset = cachedGrid.offset;
-		walkable = cachedGrid.walkable;
 	} else {
 		grid = buildGrid(context);
 		offset = getGridOffset(context);
 	}
 
 	// Find path from source stub end to target stub end
-	const result = findPathWithTurnPenalty(sourceStubEnd, targetStubEnd, grid, offset, sourceDir, usedCells, walkable);
+	const result = findPathWithTurnPenalty(sourceStubEnd, targetStubEnd, grid, offset, sourceDir, usedCells);
 	const simplified = simplifyPath(result.path);
 
 	// Path is: [sourceStubEnd, ...intermediates..., targetStubEnd]
@@ -261,14 +248,12 @@ export function calculateRouteWithWaypoints(
 	const sortedWaypoints = sortWaypointsByPathOrder(sourcePos, targetPos, userWaypoints);
 
 	// Use cached grid if available, otherwise build fresh
-	let grid: PF.Grid;
+	let grid: SparseGrid;
 	let offset: Position;
-	let walkable: Set<string> | undefined;
 
 	if (cachedGrid) {
 		grid = cachedGrid.grid;
 		offset = cachedGrid.offset;
-		walkable = cachedGrid.walkable;
 	} else {
 		grid = buildGrid(context);
 		offset = getGridOffset(context);
@@ -291,8 +276,7 @@ export function calculateRouteWithWaypoints(
 			grid,
 			offset,
 			currentDir,
-			usedCells,
-			walkable
+			usedCells
 		);
 
 		if (segmentResult.isFallback) hasFallback = true;
@@ -326,8 +310,7 @@ export function calculateRouteWithWaypoints(
 		grid,
 		offset,
 		currentDir,
-		usedCells,
-		walkable
+		usedCells
 	);
 
 	if (finalResult.isFallback) hasFallback = true;

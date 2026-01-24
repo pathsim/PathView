@@ -2,9 +2,9 @@
  * A* pathfinding with turn penalty and no 180-degree turns
  */
 
-import PF from 'pathfinding';
 import type { Position } from '$lib/types/common';
 import type { Direction } from './types';
+import type { SparseGrid } from './gridBuilder';
 import { worldToGrid, gridToWorld } from './gridBuilder';
 import { GRID_SIZE } from './constants';
 
@@ -128,21 +128,19 @@ export interface PathResult {
  * Only allows 90-degree turns (no reversing/180-degree turns)
  * @param start - Start position in world coordinates
  * @param end - End position in world coordinates
- * @param grid - Pathfinding grid
+ * @param grid - Sparse grid with obstacles
  * @param offset - Grid offset (canvas origin)
  * @param initialDir - Initial direction of travel
  * @param usedCells - Optional map of cells to directions used by other paths
- * @param prebuiltWalkable - Optional pre-built walkable set for performance
  * @returns PathResult with path and fallback flag
  */
 export function findPathWithTurnPenalty(
 	start: Position,
 	end: Position,
-	grid: PF.Grid,
+	grid: SparseGrid,
 	offset: Position,
 	initialDir: Direction,
-	usedCells?: Map<string, Set<Direction>>,
-	prebuiltWalkable?: Set<string>
+	usedCells?: Map<string, Set<Direction>>
 ): PathResult {
 	// Convert to grid coordinates
 	const startGx = worldToGrid(start.x - offset.x);
@@ -159,33 +157,25 @@ export function findPathWithTurnPenalty(
 		return { path: [start, end], isFallback: true };
 	}
 
-	// Use pre-built walkable set or build fresh
-	let walkable: Set<string>;
-	if (prebuiltWalkable) {
-		// Clone to avoid modifying shared set
-		walkable = new Set(prebuiltWalkable);
-	} else {
-		walkable = new Set<string>();
-		for (let y = 0; y < gridHeight; y++) {
-			for (let x = 0; x < gridWidth; x++) {
-				if (grid.isWalkableAt(x, y)) {
-					walkable.add(`${x},${y}`);
-				}
-			}
-		}
-	}
+	// Cells that are forced walkable (start, end, exit path)
+	const forcedWalkable = new Set<string>();
+	forcedWalkable.add(`${startGx},${startGy}`);
+	forcedWalkable.add(`${endGx},${endGy}`);
 
-	// Ensure start and end are walkable
-	walkable.add(`${startGx},${startGy}`);
-	walkable.add(`${endGx},${endGy}`);
-
-	// Ensure first few cells in initial direction are walkable (exit path from port)
+	// Force first few cells in initial direction walkable (exit path from port)
 	const initVec = NEIGHBORS.find((n) => n.dir === initialDir);
 	if (initVec) {
 		for (let i = 1; i <= EXIT_PATH_LENGTH; i++) {
-			walkable.add(`${startGx + initVec.dx * i},${startGy + initVec.dy * i}`);
+			forcedWalkable.add(`${startGx + initVec.dx * i},${startGy + initVec.dy * i}`);
 		}
 	}
+
+	// Helper to check walkability (sparse grid + forced walkable)
+	const isWalkable = (gx: number, gy: number): boolean => {
+		const key = `${gx},${gy}`;
+		if (forcedWalkable.has(key)) return true;
+		return grid.isWalkableAt(gx, gy);
+	};
 
 	// Initialize open (min-heap) and closed sets
 	const openSet = new MinHeap();
@@ -231,7 +221,7 @@ export function findPathWithTurnPenalty(
 
 			// Skip if out of bounds or not walkable
 			if (nx < 0 || nx >= gridWidth || ny < 0 || ny >= gridHeight) continue;
-			if (!walkable.has(`${nx},${ny}`)) continue;
+			if (!isWalkable(nx, ny)) continue;
 
 			// Skip if already closed with this direction
 			const neighborClosedKey = `${nx},${ny},${dir}`;
