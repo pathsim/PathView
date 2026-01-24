@@ -731,6 +731,14 @@ export const routingStore = {
 	 */
 	clearRoutes(): void {
 		state.update((s) => ({ ...s, routes: new Map() }));
+	},
+
+	/**
+	 * Clear routes and grid context (call when navigating between levels)
+	 * Forces a full grid rebuild on next setContext call
+	 */
+	clearContext(): void {
+		state.update((s) => ({ ...s, routes: new Map(), context: null, grid: null }));
 	}
 };
 

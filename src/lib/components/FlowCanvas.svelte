@@ -613,6 +613,8 @@
 	cleanups.push(graphStore.currentPath.subscribe((path) => {
 		currentPath = path;
 		updateEventNodes();
+		// Clear grid and routes when navigating - forces full rebuild for new context
+		routingStore.clearContext();
 	}));
 
 	// Subscribe to root-level events (eventStore)
