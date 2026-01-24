@@ -562,7 +562,7 @@
 
 	/* Waypoint markers (SVG circles) */
 	.waypoint-marker {
-		fill: var(--surface-raised);
+		fill: var(--surface);
 		stroke: var(--accent);
 		stroke-width: 1.5;
 		cursor: grab;
@@ -578,7 +578,7 @@
 
 	/* Segment midpoint indicators (SVG circles) */
 	.segment-midpoint {
-		fill: var(--surface-raised);
+		fill: var(--surface);
 		stroke: var(--edge);
 		stroke-width: 1;
 		cursor: grab;
