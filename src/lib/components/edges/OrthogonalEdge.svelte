@@ -393,24 +393,26 @@
 <g class:highlighted={isHighlighted()} style="--highlight-color: {highlightColor()}">
 	<BaseEdge {id} path={pathInfo().path} {style} />
 
-	<!-- User waypoint markers -->
-	{#each userWaypoints() as waypoint (waypoint.id)}
-		<circle
-			cx={waypoint.position.x}
-			cy={waypoint.position.y}
-			r="6"
-			class="waypoint-marker"
-			class:selected
-			class:dragging={isDragging && draggingWaypointId === waypoint.id}
-			role="button"
-			tabindex="-1"
-			onpointerdown={(e) => handleWaypointPointerDown(e, waypoint)}
-			onpointermove={handleWaypointPointerMove}
-			onpointerup={handleWaypointPointerUp}
-			onlostpointercapture={handleLostPointerCapture}
-			ondblclick={(e) => handleWaypointDoubleClick(e, waypoint)}
-		/>
-	{/each}
+	<!-- User waypoint markers (shown when edge is selected) -->
+	{#if selected}
+		{#each userWaypoints() as waypoint (waypoint.id)}
+			<circle
+				cx={waypoint.position.x}
+				cy={waypoint.position.y}
+				r="6"
+				class="waypoint-marker"
+				class:dragging={isDragging && draggingWaypointId === waypoint.id}
+				role="button"
+				tabindex="-1"
+				pointer-events="all"
+				onpointerdown={(e) => handleWaypointPointerDown(e, waypoint)}
+				onpointermove={handleWaypointPointerMove}
+				onpointerup={handleWaypointPointerUp}
+				onlostpointercapture={handleLostPointerCapture}
+				ondblclick={(e) => handleWaypointDoubleClick(e, waypoint)}
+			/>
+		{/each}
+	{/if}
 
 	<!-- Segment midpoint indicators (shown when edge is selected) -->
 	{#if selected}
@@ -422,6 +424,7 @@
 				class="segment-midpoint"
 				role="button"
 				tabindex="-1"
+				pointer-events="all"
 				onpointerdown={(e) => handleSegmentPointerDown(e, midpoint.segmentIndex)}
 				onpointermove={handleSegmentPointerMove}
 				onpointerup={handleSegmentPointerUp}
