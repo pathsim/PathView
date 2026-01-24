@@ -16,6 +16,14 @@ export const DIRECTION_VECTORS: Record<Direction, Position> = {
 	right: { x: 1, y: 0 }
 };
 
+/** Opposite direction mapping (for 180-degree turn blocking) */
+export const OPPOSITE_DIRECTION: Record<Direction, Direction> = {
+	up: 'down',
+	down: 'up',
+	left: 'right',
+	right: 'left'
+};
+
 /** Rectangle bounds for obstacle detection */
 export interface Bounds {
 	x: number;

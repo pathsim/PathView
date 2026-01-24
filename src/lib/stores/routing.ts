@@ -18,6 +18,11 @@ export interface PortInfo {
 	direction: Direction;
 }
 
+/** Helper to extract user waypoints from a connection's waypoints array */
+function getUserWaypoints(waypoints?: Waypoint[]): Waypoint[] {
+	return (waypoints || []).filter((w) => w.isUserWaypoint);
+}
+
 interface RoutingState {
 	/** Cached routes by connection ID */
 	routes: Map<string, RouteResult>;
@@ -130,7 +135,7 @@ export const routingStore = {
 
 			if (!sourceInfo || !targetInfo) continue;
 
-			const userWaypoints = (conn.waypoints || []).filter((w) => w.isUserWaypoint);
+			const userWaypoints = getUserWaypoints(conn.waypoints);
 
 			const result = userWaypoints.length > 0
 				? calculateRouteWithWaypoints(
@@ -182,7 +187,7 @@ export const routingStore = {
 		const $state = get(state);
 
 		// Extract user waypoints from connection
-		const userWaypoints = (connection.waypoints || []).filter((w) => w.isUserWaypoint);
+		const userWaypoints = getUserWaypoints(connection.waypoints);
 
 		let result: RouteResult;
 		if ($state.grid) {
@@ -266,7 +271,7 @@ export const routingStore = {
 				if (!sourceInfo || !targetInfo) continue;
 
 				// Extract user waypoints from connection
-				const userWaypoints = (conn.waypoints || []).filter((w) => w.isUserWaypoint);
+				const userWaypoints = getUserWaypoints(conn.waypoints);
 
 				let result: RouteResult;
 				if ($state.grid) {
@@ -372,7 +377,7 @@ export const routingStore = {
 			};
 
 			// Get existing user waypoints (filter out auto waypoints)
-			const existingUserWaypoints = (connection.waypoints || []).filter((w) => w.isUserWaypoint);
+			const existingUserWaypoints = getUserWaypoints(connection.waypoints);
 			const updatedWaypoints = [...existingUserWaypoints, newWaypoint];
 
 			graphStore.updateConnectionWaypoints(connectionId, updatedWaypoints);
@@ -433,7 +438,7 @@ export const routingStore = {
 			};
 
 			// Get existing user waypoints
-			const existingUserWaypoints = (connection.waypoints || []).filter((w) => w.isUserWaypoint);
+			const existingUserWaypoints = getUserWaypoints(connection.waypoints);
 
 			// Insert at the specified index
 			const updatedWaypoints = [
@@ -502,7 +507,7 @@ export const routingStore = {
 				const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
 				if (sourceInfo && targetInfo && $state.grid) {
-					const userWaypoints = updatedWaypoints.filter((w) => w.isUserWaypoint);
+					const userWaypoints = getUserWaypoints(updatedWaypoints);
 					const result = userWaypoints.length > 0
 						? calculateRouteWithWaypoints(
 							sourceInfo.position,
@@ -561,7 +566,7 @@ export const routingStore = {
 			const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
 			if (sourceInfo && targetInfo && $state.grid) {
-				const userWaypoints = updatedWaypoints.filter((w) => w.isUserWaypoint);
+				const userWaypoints = getUserWaypoints(updatedWaypoints);
 				const result = userWaypoints.length > 0
 					? calculateRouteWithWaypoints(
 						sourceInfo.position,
@@ -604,7 +609,7 @@ export const routingStore = {
 		const connection = connections.find((c) => c.id === connectionId);
 		if (!connection?.waypoints) return;
 
-		const userWaypoints = connection.waypoints.filter((w) => w.isUserWaypoint);
+		const userWaypoints = getUserWaypoints(connection.waypoints);
 		if (userWaypoints.length === 0) return;
 
 		// Get source and target positions for collinearity check

@@ -4,6 +4,7 @@
 
 import type { Position } from '$lib/types/common';
 import type { Direction } from './types';
+import { OPPOSITE_DIRECTION } from './types';
 import type { SparseGrid } from './gridBuilder';
 import { worldToGrid, gridToWorld } from './gridBuilder';
 import { GRID_SIZE } from './constants';
@@ -22,14 +23,6 @@ const EXIT_PATH_LENGTH = 3;
 
 /** Maximum iterations before giving up (prevents infinite search) */
 const MAX_ITERATIONS = 10000;
-
-/** Map direction to its opposite (for blocking 180-degree turns) */
-const OPPOSITE_DIR: Record<Direction, Direction> = {
-	up: 'down',
-	down: 'up',
-	left: 'right',
-	right: 'left'
-};
 
 /** Neighbor offsets with their directions */
 const NEIGHBORS: Array<{ dx: number; dy: number; dir: Direction }> = [
@@ -204,7 +197,7 @@ export function findPathWithTurnPenalty(
 		closedSet.add(closedKey);
 
 		// Get the direction we must NOT go (opposite = 180-degree turn)
-		const blockedDir = OPPOSITE_DIR[current.direction];
+		const blockedDir = OPPOSITE_DIRECTION[current.direction];
 		const isStartNode = current.parent === null;
 
 		// Explore neighbors

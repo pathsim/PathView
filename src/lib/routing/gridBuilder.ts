@@ -163,13 +163,3 @@ export class SparseGrid {
 		return { x: this.offsetX, y: this.offsetY };
 	}
 }
-
-/**
- * Get grid offset (canvas origin snapped to grid)
- */
-export function getGridOffset(context: RoutingContext): { x: number; y: number } {
-	return {
-		x: Math.floor(context.canvasBounds.x / GRID_SIZE) * GRID_SIZE,
-		y: Math.floor(context.canvasBounds.y / GRID_SIZE) * GRID_SIZE
-	};
-}

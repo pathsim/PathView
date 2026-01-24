@@ -151,19 +151,6 @@ function inferDirection(from: Position, to: Position): Direction {
 }
 
 /**
- * Get the opposite direction
- */
-function oppositeDirection(dir: Direction): Direction {
-	const opposites: Record<Direction, Direction> = {
-		up: 'down',
-		down: 'up',
-		left: 'right',
-		right: 'left'
-	};
-	return opposites[dir];
-}
-
-/**
  * Infer exit direction from the end of a path segment
  */
 function inferExitDirection(path: Position[]): Direction {

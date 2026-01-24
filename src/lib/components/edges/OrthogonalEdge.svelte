@@ -162,19 +162,20 @@
 		unsubscribeRoute = routingStore.getRoute(id).subscribe((r) => (routeResult = r));
 	});
 
-	// Cleanup subscription on destroy
-	onDestroy(() => {
-		if (unsubscribeRoute) unsubscribeRoute();
-		// Note: drag uses module-level state with its own cleanup, don't interfere here
-	});
-
 	// Check if this edge is connected to the hovered handle
 	let hovered = $state<{ nodeId: string; handleId: string; color?: string } | null>(null);
-	hoveredHandle.subscribe((h) => (hovered = h));
+	const unsubscribeHovered = hoveredHandle.subscribe((h) => (hovered = h));
 
 	// Check if this edge is connected to a selected node
 	let selectedNode = $state<{ nodeId: string; color?: string } | null>(null);
-	selectedNodeHighlight.subscribe((s) => (selectedNode = s));
+	const unsubscribeSelected = selectedNodeHighlight.subscribe((s) => (selectedNode = s));
+
+	// Cleanup all subscriptions on destroy
+	onDestroy(() => {
+		if (unsubscribeRoute) unsubscribeRoute();
+		unsubscribeHovered();
+		unsubscribeSelected();
+	});
 
 	const isHoverHighlighted = $derived(() => {
 		if (!hovered) return false;
