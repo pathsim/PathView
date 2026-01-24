@@ -140,9 +140,9 @@
 	// Cleanup subscription and any active drag listeners
 	onDestroy(() => {
 		if (unsubscribeRoute) unsubscribeRoute();
-		// Clean up document listeners if drag was in progress
-		document.removeEventListener('pointermove', onDocumentPointerMove);
-		document.removeEventListener('pointerup', onDocumentPointerUp);
+		// Clean up document listeners if drag was in progress (must match capture option)
+		document.removeEventListener('pointermove', onDocumentPointerMove, { capture: true });
+		document.removeEventListener('pointerup', onDocumentPointerUp, { capture: true });
 	});
 
 	// Check if this edge is connected to the hovered handle
@@ -330,8 +330,8 @@
 	// Uses document-level listeners because the segment element gets removed when route updates
 	let isSegmentDragging = $state(false);
 
-	// Derived visibility state for waypoints - use function form for consistency
-	const waypointsVisible = $derived(() => selected);
+	// Derived visibility state for waypoints - visible when selected OR during any drag
+	const waypointsVisible = $derived(() => selected || isDragging || isSegmentDragging);
 
 	// Document-level handlers for segment drag (bound versions for cleanup)
 	function onDocumentPointerMove(event: PointerEvent) {
@@ -358,6 +358,7 @@
 	function onDocumentPointerUp(event: PointerEvent) {
 		if (!isSegmentDragging) return;
 		event.stopPropagation();
+		event.preventDefault();
 		endSegmentDrag();
 	}
 
@@ -382,15 +383,16 @@
 
 			// Use document-level listeners for drag continuation
 			// (element-level won't work because segment element is removed when route updates)
-			document.addEventListener('pointermove', onDocumentPointerMove);
-			document.addEventListener('pointerup', onDocumentPointerUp);
+			// Use capture phase to handle events before SvelteFlow
+			document.addEventListener('pointermove', onDocumentPointerMove, { capture: true });
+			document.addEventListener('pointerup', onDocumentPointerUp, { capture: true });
 		}
 	}
 
 	function endSegmentDrag() {
-		// Remove document listeners
-		document.removeEventListener('pointermove', onDocumentPointerMove);
-		document.removeEventListener('pointerup', onDocumentPointerUp);
+		// Remove document listeners (must match capture option)
+		document.removeEventListener('pointermove', onDocumentPointerMove, { capture: true });
+		document.removeEventListener('pointerup', onDocumentPointerUp, { capture: true });
 
 		isSegmentDragging = false;
 		draggingWaypointId = null;
