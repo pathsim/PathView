@@ -394,33 +394,44 @@
 	}
 
 	/**
-	 * Count how many waypoints appear before a given segment in the rendered path.
-	 * Uses proximity matching since waypoint positions may not exactly match path points
-	 * due to path simplification.
+	 * Find the insert index for a new waypoint created on the given segment.
+	 * Uses cumulative path distance to determine which existing waypoints
+	 * are before vs after the segment.
 	 */
 	function countWaypointsBeforeSegment(segmentIndex: number, waypoints: Waypoint[]): number {
-		if (waypoints.length === 0 || !routeResult?.path) return 0;
+		if (waypoints.length === 0) return 0;
+		if (!routeResult?.path) return 0;
 
 		const src = adjustedSource();
 		const tgt = adjustedTarget();
 		const allPoints = [src, ...routeResult.path, tgt];
 
-		// For each waypoint, find which path point it's closest to
-		// Then count how many waypoints' closest points come before the segment
+		// Compute cumulative distances along the path
+		const cumDist: number[] = [0];
+		for (let i = 1; i < allPoints.length; i++) {
+			const prev = allPoints[i - 1];
+			const curr = allPoints[i];
+			cumDist.push(cumDist[i - 1] + Math.hypot(curr.x - prev.x, curr.y - prev.y));
+		}
+
+		// Distance to segment midpoint
+		const segMidDist = (cumDist[segmentIndex] + cumDist[segmentIndex + 1]) / 2;
+
+		// For each waypoint, find its distance along the path (closest point's cumulative distance)
 		let count = 0;
 		for (const wp of waypoints) {
-			let closestIdx = 0;
-			let closestDist = Infinity;
+			let closestPointDist = Infinity;
+			let closestCumDist = 0;
 			for (let i = 0; i < allPoints.length; i++) {
 				const pt = allPoints[i];
 				const dist = Math.hypot(pt.x - wp.position.x, pt.y - wp.position.y);
-				if (dist < closestDist) {
-					closestDist = dist;
-					closestIdx = i;
+				if (dist < closestPointDist) {
+					closestPointDist = dist;
+					closestCumDist = cumDist[i];
 				}
 			}
-			// If this waypoint's closest point is before or at the segment start, count it
-			if (closestIdx <= segmentIndex) {
+			// If waypoint is before segment midpoint along the path, count it
+			if (closestCumDist < segMidDist) {
 				count++;
 			}
 		}
