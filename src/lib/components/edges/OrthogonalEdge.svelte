@@ -362,7 +362,7 @@
 		endSegmentDrag();
 	}
 
-	function handleSegmentPointerDown(event: PointerEvent, _segmentIndex: number) {
+	function handleSegmentPointerDown(event: PointerEvent, segmentIndex: number) {
 		event.stopPropagation();
 		event.preventDefault();
 
@@ -374,9 +374,9 @@
 
 		historyStore.beginDrag();
 
-		// Calculate insert index based on position along source→target vector
+		// Count how many waypoints appear before this segment in the path
 		const waypoints = userWaypoints();
-		const insertIndex = findInsertIndex(snappedPos, waypoints);
+		const insertIndex = countWaypointsBeforeSegment(segmentIndex, waypoints);
 
 		// Create waypoint at correct position in the array
 		const waypointId = routingStore.addUserWaypointAtIndex(id, snappedPos, insertIndex, getPortInfo);
@@ -394,32 +394,33 @@
 	}
 
 	/**
-	 * Find the correct insert index for a new waypoint based on position along the path
+	 * Count how many waypoints appear before a given segment in the rendered path
 	 */
-	function findInsertIndex(newPos: { x: number; y: number }, existingWaypoints: Waypoint[]): number {
-		if (existingWaypoints.length === 0) return 0;
+	function countWaypointsBeforeSegment(segmentIndex: number, waypoints: Waypoint[]): number {
+		if (waypoints.length === 0 || !routeResult?.path) return 0;
 
-		// Project onto source→target vector to determine order
-		const dx = targetX - sourceX;
-		const dy = targetY - sourceY;
-		const len = Math.sqrt(dx * dx + dy * dy);
-		if (len === 0) return existingWaypoints.length;
+		const src = adjustedSource();
+		const tgt = adjustedTarget();
+		const allPoints = [src, ...routeResult.path, tgt];
 
-		const ux = dx / len;
-		const uy = dy / len;
+		// Get the start point of the segment
+		const segmentStart = allPoints[segmentIndex];
+		if (!segmentStart) return 0;
 
-		const newProj = (newPos.x - sourceX) * ux + (newPos.y - sourceY) * uy;
+		// Count waypoints that appear at or before this point in the path
+		let count = 0;
+		const waypointSet = new Set(waypoints.map(w => `${w.position.x},${w.position.y}`));
 
-		// Find where this projection falls among existing waypoints
-		for (let i = 0; i < existingWaypoints.length; i++) {
-			const wp = existingWaypoints[i];
-			const wpProj = (wp.position.x - sourceX) * ux + (wp.position.y - sourceY) * uy;
-			if (newProj < wpProj) {
-				return i;
+		for (let i = 0; i <= segmentIndex; i++) {
+			const pt = allPoints[i];
+			const key = `${pt.x},${pt.y}`;
+			if (waypointSet.has(key)) {
+				count++;
+				waypointSet.delete(key); // Don't count same waypoint twice
 			}
 		}
 
-		return existingWaypoints.length;
+		return count;
 	}
 
 	function endSegmentDrag() {
