@@ -23,6 +23,36 @@ function getUserWaypoints(waypoints?: Waypoint[]): Waypoint[] {
 	return (waypoints || []).filter((w) => w.isUserWaypoint);
 }
 
+/** Compute route with or without waypoints */
+function computeRoute(
+	sourcePos: Position,
+	targetPos: Position,
+	sourceDir: Direction,
+	targetDir: Direction,
+	grid: SparseGrid | null,
+	waypoints: Waypoint[],
+	usedCells?: Map<string, Set<Direction>>
+): RouteResult {
+	if (!grid) {
+		return calculateSimpleRoute(sourcePos, targetPos, sourceDir, targetDir);
+	}
+	return waypoints.length > 0
+		? calculateRouteWithWaypoints(sourcePos, targetPos, sourceDir, targetDir, grid, waypoints, usedCells)
+		: calculateRoute(sourcePos, targetPos, sourceDir, targetDir, grid, usedCells);
+}
+
+/** Generate hash of route inputs for change detection */
+function hashRouteInputs(
+	sourcePos: Position,
+	targetPos: Position,
+	sourceDir: Direction,
+	targetDir: Direction,
+	waypoints: Waypoint[]
+): string {
+	const wpHash = waypoints.map(w => `${w.position.x},${w.position.y}`).join(';');
+	return `${sourcePos.x},${sourcePos.y}|${targetPos.x},${targetPos.y}|${sourceDir}|${targetDir}|${wpHash}`;
+}
+
 interface RoutingState {
 	/** Cached routes by connection ID */
 	routes: Map<string, RouteResult>;
@@ -30,12 +60,15 @@ interface RoutingState {
 	context: RoutingContext | null;
 	/** Sparse grid built from context - O(obstacles) memory */
 	grid: SparseGrid | null;
+	/** Cache of route input hashes for change detection */
+	routeInputHashes: Map<string, string>;
 }
 
 const state = writable<RoutingState>({
 	routes: new Map(),
 	context: null,
-	grid: null
+	grid: null,
+	routeInputHashes: new Map()
 });
 
 /**
@@ -127,37 +160,55 @@ export const routingStore = {
 
 		if (affectedConnections.length === 0) return;
 
+		// Memoize port info lookups for this batch
+		const portInfoCache = new Map<string, PortInfo | null>();
+		const getPortInfoCached = (nodeId: string, portIndex: number, isOutput: boolean): PortInfo | null => {
+			const key = `${nodeId}:${portIndex}:${isOutput}`;
+			if (!portInfoCache.has(key)) {
+				portInfoCache.set(key, getPortInfo(nodeId, portIndex, isOutput));
+			}
+			return portInfoCache.get(key)!;
+		};
+
 		const routes = new Map<string, RouteResult>($state.routes);
+		const routeInputHashes = new Map<string, string>($state.routeInputHashes);
 
 		for (const conn of affectedConnections) {
-			const sourceInfo = getPortInfo(conn.sourceNodeId, conn.sourcePortIndex, true);
-			const targetInfo = getPortInfo(conn.targetNodeId, conn.targetPortIndex, false);
+			const sourceInfo = getPortInfoCached(conn.sourceNodeId, conn.sourcePortIndex, true);
+			const targetInfo = getPortInfoCached(conn.targetNodeId, conn.targetPortIndex, false);
 
 			if (!sourceInfo || !targetInfo) continue;
 
 			const userWaypoints = getUserWaypoints(conn.waypoints);
 
-			const result = userWaypoints.length > 0
-				? calculateRouteWithWaypoints(
-					sourceInfo.position,
-					targetInfo.position,
-					sourceInfo.direction,
-					targetInfo.direction,
-					$state.grid,
-					userWaypoints
-				)
-				: calculateRoute(
-					sourceInfo.position,
-					targetInfo.position,
-					sourceInfo.direction,
-					targetInfo.direction,
-					$state.grid
-				);
+			// Check if inputs have changed using hash
+			const inputHash = hashRouteInputs(
+				sourceInfo.position,
+				targetInfo.position,
+				sourceInfo.direction,
+				targetInfo.direction,
+				userWaypoints
+			);
+
+			if (inputHash === $state.routeInputHashes.get(conn.id) && routes.has(conn.id)) {
+				// Inputs unchanged, skip recalculation
+				continue;
+			}
+
+			const result = computeRoute(
+				sourceInfo.position,
+				targetInfo.position,
+				sourceInfo.direction,
+				targetInfo.direction,
+				$state.grid,
+				userWaypoints
+			);
 
 			routes.set(conn.id, result);
+			routeInputHashes.set(conn.id, inputHash);
 		}
 
-		state.update((s) => ({ ...s, routes }));
+		state.update((s) => ({ ...s, routes, routeInputHashes }));
 	},
 
 	/**
@@ -189,24 +240,14 @@ export const routingStore = {
 		// Extract user waypoints from connection
 		const userWaypoints = getUserWaypoints(connection.waypoints);
 
-		let result: RouteResult;
-		if ($state.grid) {
-			if (userWaypoints.length > 0) {
-				result = calculateRouteWithWaypoints(
-					sourcePos,
-					targetPos,
-					sourceDir,
-					targetDir,
-					$state.grid,
-					userWaypoints
-				);
-			} else {
-				result = calculateRoute(sourcePos, targetPos, sourceDir, targetDir, $state.grid);
-			}
-		} else {
-			// No grid - use simple routing
-			result = calculateSimpleRoute(sourcePos, targetPos, sourceDir, targetDir);
-		}
+		const result = computeRoute(
+			sourcePos,
+			targetPos,
+			sourceDir,
+			targetDir,
+			$state.grid,
+			userWaypoints
+		);
 
 		state.update((s) => {
 			const routes = new Map(s.routes);
@@ -228,17 +269,28 @@ export const routingStore = {
 	): void {
 		const $state = get(state);
 
+		// Memoize port info lookups for this batch (used during sorting and routing)
+		const portInfoCache = new Map<string, PortInfo | null>();
+		const getPortInfoCached = (nodeId: string, portIndex: number, isOutput: boolean): PortInfo | null => {
+			const key = `${nodeId}:${portIndex}:${isOutput}`;
+			if (!portInfoCache.has(key)) {
+				portInfoCache.set(key, getPortInfo(nodeId, portIndex, isOutput));
+			}
+			return portInfoCache.get(key)!;
+		};
+
 		// Start with existing routes to preserve them if recalculation fails
 		const routes = new Map<string, RouteResult>($state.routes);
+		const routeInputHashes = new Map<string, string>();
 		const usedCells = new Map<string, Set<Direction>>();
 
 		// Sort connections by Manhattan distance (longest first)
 		// Longer routes are less likely to block shorter ones
 		const sortedConnections = [...connections].sort((a, b) => {
-			const aSource = getPortInfo(a.sourceNodeId, a.sourcePortIndex, true);
-			const aTarget = getPortInfo(a.targetNodeId, a.targetPortIndex, false);
-			const bSource = getPortInfo(b.sourceNodeId, b.sourcePortIndex, true);
-			const bTarget = getPortInfo(b.targetNodeId, b.targetPortIndex, false);
+			const aSource = getPortInfoCached(a.sourceNodeId, a.sourcePortIndex, true);
+			const aTarget = getPortInfoCached(a.targetNodeId, a.targetPortIndex, false);
+			const bSource = getPortInfoCached(b.sourceNodeId, b.sourcePortIndex, true);
+			const bTarget = getPortInfoCached(b.targetNodeId, b.targetPortIndex, false);
 
 			const aDist = aSource && aTarget
 				? Math.abs(aTarget.position.x - aSource.position.x) + Math.abs(aTarget.position.y - aSource.position.y)
@@ -265,45 +317,33 @@ export const routingStore = {
 
 			// Calculate routes for all connections from this source port
 			for (const conn of groupConns) {
-				const sourceInfo = getPortInfo(conn.sourceNodeId, conn.sourcePortIndex, true);
-				const targetInfo = getPortInfo(conn.targetNodeId, conn.targetPortIndex, false);
+				const sourceInfo = getPortInfoCached(conn.sourceNodeId, conn.sourcePortIndex, true);
+				const targetInfo = getPortInfoCached(conn.targetNodeId, conn.targetPortIndex, false);
 
 				if (!sourceInfo || !targetInfo) continue;
 
 				// Extract user waypoints from connection
 				const userWaypoints = getUserWaypoints(conn.waypoints);
 
-				let result: RouteResult;
-				if ($state.grid) {
-					if (userWaypoints.length > 0) {
-						result = calculateRouteWithWaypoints(
-							sourceInfo.position,
-							targetInfo.position,
-							sourceInfo.direction,
-							targetInfo.direction,
-							$state.grid,
-							userWaypoints,
-							usedCells
-						);
-					} else {
-						result = calculateRoute(
-							sourceInfo.position,
-							targetInfo.position,
-							sourceInfo.direction,
-							targetInfo.direction,
-							$state.grid,
-							usedCells
-						);
-					}
-				} else {
-					result = calculateSimpleRoute(
-						sourceInfo.position,
-						targetInfo.position,
-						sourceInfo.direction,
-						targetInfo.direction
-					);
-				}
+				const result = computeRoute(
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction,
+					$state.grid,
+					userWaypoints,
+					usedCells
+				);
 				routes.set(conn.id, result);
+
+				// Store hash for future change detection
+				routeInputHashes.set(conn.id, hashRouteInputs(
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction,
+					userWaypoints
+				));
 
 				// Collect cells for this path (add to usedCells after processing whole group)
 				if (result.path.length > 0) {
@@ -322,7 +362,7 @@ export const routingStore = {
 			}
 		}
 
-		state.update((s) => ({ ...s, routes }));
+		state.update((s) => ({ ...s, routes, routeInputHashes }));
 	},
 
 	/**
@@ -331,8 +371,10 @@ export const routingStore = {
 	invalidateRoute(connectionId: string): void {
 		state.update((s) => {
 			const routes = new Map(s.routes);
+			const routeInputHashes = new Map(s.routeInputHashes);
 			routes.delete(connectionId);
-			return { ...s, routes };
+			routeInputHashes.delete(connectionId);
+			return { ...s, routes, routeInputHashes };
 		});
 	},
 
@@ -347,10 +389,12 @@ export const routingStore = {
 
 		state.update((s) => {
 			const routes = new Map(s.routes);
+			const routeInputHashes = new Map(s.routeInputHashes);
 			for (const conn of toInvalidate) {
 				routes.delete(conn.id);
+				routeInputHashes.delete(conn.id);
 			}
-			return { ...s, routes };
+			return { ...s, routes, routeInputHashes };
 		});
 	},
 
@@ -388,8 +432,8 @@ export const routingStore = {
 				const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 				const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-				if (sourceInfo && targetInfo && $state.grid) {
-					const result = calculateRouteWithWaypoints(
+				if (sourceInfo && targetInfo) {
+					const result = computeRoute(
 						sourceInfo.position,
 						targetInfo.position,
 						sourceInfo.direction,
@@ -455,8 +499,8 @@ export const routingStore = {
 				const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 				const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-				if (sourceInfo && targetInfo && $state.grid) {
-					const result = calculateRouteWithWaypoints(
+				if (sourceInfo && targetInfo) {
+					const result = computeRoute(
 						sourceInfo.position,
 						targetInfo.position,
 						sourceInfo.direction,
@@ -506,24 +550,16 @@ export const routingStore = {
 				const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 				const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-				if (sourceInfo && targetInfo && $state.grid) {
+				if (sourceInfo && targetInfo) {
 					const userWaypoints = getUserWaypoints(updatedWaypoints);
-					const result = userWaypoints.length > 0
-						? calculateRouteWithWaypoints(
-							sourceInfo.position,
-							targetInfo.position,
-							sourceInfo.direction,
-							targetInfo.direction,
-							$state.grid,
-							userWaypoints
-						)
-						: calculateRoute(
-							sourceInfo.position,
-							targetInfo.position,
-							sourceInfo.direction,
-							targetInfo.direction,
-							$state.grid
-						);
+					const result = computeRoute(
+						sourceInfo.position,
+						targetInfo.position,
+						sourceInfo.direction,
+						targetInfo.direction,
+						$state.grid,
+						userWaypoints
+					);
 
 					state.update((s) => {
 						const routes = new Map(s.routes);
@@ -565,24 +601,16 @@ export const routingStore = {
 			const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 			const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-			if (sourceInfo && targetInfo && $state.grid) {
+			if (sourceInfo && targetInfo) {
 				const userWaypoints = getUserWaypoints(updatedWaypoints);
-				const result = userWaypoints.length > 0
-					? calculateRouteWithWaypoints(
-						sourceInfo.position,
-						targetInfo.position,
-						sourceInfo.direction,
-						targetInfo.direction,
-						$state.grid,
-						userWaypoints
-					)
-					: calculateRoute(
-						sourceInfo.position,
-						targetInfo.position,
-						sourceInfo.direction,
-						targetInfo.direction,
-						$state.grid
-					);
+				const result = computeRoute(
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction,
+					$state.grid,
+					userWaypoints
+				);
 
 				state.update((s) => {
 					const routes = new Map(s.routes);
@@ -694,23 +722,15 @@ export const routingStore = {
 
 			// Immediately recalculate route if we have port info (prevents flicker)
 			const $state = get(state);
-			if (sourceInfo && targetInfo && $state.grid) {
-				const result = cleaned.length > 0
-					? calculateRouteWithWaypoints(
-						sourceInfo.position,
-						targetInfo.position,
-						sourceInfo.direction,
-						targetInfo.direction,
-						$state.grid,
-						cleaned
-					)
-					: calculateRoute(
-						sourceInfo.position,
-						targetInfo.position,
-						sourceInfo.direction,
-						targetInfo.direction,
-						$state.grid
-					);
+			if (sourceInfo && targetInfo) {
+				const result = computeRoute(
+					sourceInfo.position,
+					targetInfo.position,
+					sourceInfo.direction,
+					targetInfo.direction,
+					$state.grid,
+					cleaned
+				);
 
 				state.update((s) => {
 					const routes = new Map(s.routes);
@@ -735,7 +755,7 @@ export const routingStore = {
 	 * Clear all cached routes
 	 */
 	clearRoutes(): void {
-		state.update((s) => ({ ...s, routes: new Map() }));
+		state.update((s) => ({ ...s, routes: new Map(), routeInputHashes: new Map() }));
 	},
 
 	/**
@@ -743,7 +763,7 @@ export const routingStore = {
 	 * Forces a full grid rebuild on next setContext call
 	 */
 	clearContext(): void {
-		state.update((s) => ({ ...s, routes: new Map(), context: null, grid: null }));
+		state.update((s) => ({ ...s, routes: new Map(), routeInputHashes: new Map(), context: null, grid: null }));
 	}
 };
 
