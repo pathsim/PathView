@@ -1,8 +1,9 @@
 /**
  * Sparse grid for pathfinding - stores only obstacles, computes walkability on demand
+ * Supports incremental updates for efficient node dragging
  */
 
-import type { RoutingContext, Bounds } from './types';
+import type { RoutingContext, Bounds, PortStub } from './types';
 import { DIRECTION_VECTORS } from './types';
 import { GRID_SIZE, ROUTING_MARGIN } from './constants';
 
@@ -32,17 +33,52 @@ interface GridObstacle {
 }
 
 /**
+ * Convert world bounds to grid obstacle
+ */
+function boundsToObstacle(bounds: Bounds, offsetX: number, offsetY: number): GridObstacle {
+	// Add margin around node
+	const marginBounds = {
+		x: bounds.x - ROUTING_MARGIN,
+		y: bounds.y - ROUTING_MARGIN,
+		width: bounds.width + 2 * ROUTING_MARGIN,
+		height: bounds.height + 2 * ROUTING_MARGIN
+	};
+
+	return {
+		minGx: worldToGrid(marginBounds.x - offsetX),
+		minGy: worldToGrid(marginBounds.y - offsetY),
+		maxGx: worldToGrid(marginBounds.x + marginBounds.width - offsetX),
+		maxGy: worldToGrid(marginBounds.y + marginBounds.height - offsetY)
+	};
+}
+
+/**
  * Sparse grid that computes walkability on-demand from obstacle list
  * No matrix storage - O(obstacles) memory instead of O(width × height)
+ * Supports incremental updates - O(1) to update a single node
  */
 export class SparseGrid {
-	readonly width: number;
-	readonly height: number;
-	readonly offsetX: number;
-	readonly offsetY: number;
-	private obstacles: GridObstacle[] = [];
+	width: number = 0;
+	height: number = 0;
+	offsetX: number = 0;
+	offsetY: number = 0;
 
-	constructor(context: RoutingContext) {
+	/** Node obstacles keyed by node ID for O(1) updates */
+	private nodeObstacles: Map<string, GridObstacle> = new Map();
+
+	/** Port stub obstacles (rebuilt when stubs change) */
+	private portStubObstacles: GridObstacle[] = [];
+
+	constructor(context?: RoutingContext) {
+		if (context) {
+			this.initFromContext(context);
+		}
+	}
+
+	/**
+	 * Initialize grid from full context (used on first load)
+	 */
+	private initFromContext(context: RoutingContext): void {
 		const { canvasBounds } = context;
 
 		// Calculate grid dimensions from canvas bounds
@@ -53,41 +89,55 @@ export class SparseGrid {
 		this.offsetX = Math.floor(canvasBounds.x / GRID_SIZE) * GRID_SIZE;
 		this.offsetY = Math.floor(canvasBounds.y / GRID_SIZE) * GRID_SIZE;
 
-		// Build obstacle list from node bounds
-		for (const [, bounds] of context.nodeBounds) {
-			this.addNodeObstacle(bounds);
+		// Build obstacle map from node bounds
+		this.nodeObstacles.clear();
+		for (const [nodeId, bounds] of context.nodeBounds) {
+			this.nodeObstacles.set(nodeId, boundsToObstacle(bounds, this.offsetX, this.offsetY));
 		}
 
-		// Add port stub obstacles
-		if (context.portStubs) {
-			for (const stub of context.portStubs) {
+		// Build port stub obstacles
+		this.updatePortStubs(context.portStubs);
+	}
+
+	/**
+	 * Update canvas bounds (call when nodes are added/removed or canvas resizes)
+	 */
+	updateBounds(canvasBounds: Bounds): void {
+		this.width = Math.ceil(canvasBounds.width / GRID_SIZE) + 2;
+		this.height = Math.ceil(canvasBounds.height / GRID_SIZE) + 2;
+		this.offsetX = Math.floor(canvasBounds.x / GRID_SIZE) * GRID_SIZE;
+		this.offsetY = Math.floor(canvasBounds.y / GRID_SIZE) * GRID_SIZE;
+	}
+
+	/**
+	 * Update a single node's obstacle - O(1)
+	 */
+	updateNode(nodeId: string, bounds: Bounds): void {
+		this.nodeObstacles.set(nodeId, boundsToObstacle(bounds, this.offsetX, this.offsetY));
+	}
+
+	/**
+	 * Remove a node's obstacle - O(1)
+	 */
+	removeNode(nodeId: string): void {
+		this.nodeObstacles.delete(nodeId);
+	}
+
+	/**
+	 * Update port stub obstacles (called when connections change)
+	 */
+	updatePortStubs(portStubs?: PortStub[]): void {
+		this.portStubObstacles = [];
+		if (portStubs) {
+			for (const stub of portStubs) {
 				const vec = DIRECTION_VECTORS[stub.direction];
 				const stubX = stub.position.x + vec.x * GRID_SIZE;
 				const stubY = stub.position.y + vec.y * GRID_SIZE;
 				const gx = worldToGrid(stubX - this.offsetX);
 				const gy = worldToGrid(stubY - this.offsetY);
-				// Single cell obstacle
-				this.obstacles.push({ minGx: gx, minGy: gy, maxGx: gx, maxGy: gy });
+				this.portStubObstacles.push({ minGx: gx, minGy: gy, maxGx: gx, maxGy: gy });
 			}
 		}
-	}
-
-	private addNodeObstacle(bounds: Bounds): void {
-		// Add margin around node
-		const marginBounds = {
-			x: bounds.x - ROUTING_MARGIN,
-			y: bounds.y - ROUTING_MARGIN,
-			width: bounds.width + 2 * ROUTING_MARGIN,
-			height: bounds.height + 2 * ROUTING_MARGIN
-		};
-
-		// Convert to grid coordinates
-		const minGx = worldToGrid(marginBounds.x - this.offsetX);
-		const minGy = worldToGrid(marginBounds.y - this.offsetY);
-		const maxGx = worldToGrid(marginBounds.x + marginBounds.width - this.offsetX);
-		const maxGy = worldToGrid(marginBounds.y + marginBounds.height - this.offsetY);
-
-		this.obstacles.push({ minGx, minGy, maxGx, maxGy });
 	}
 
 	/**
@@ -100,8 +150,15 @@ export class SparseGrid {
 			return false;
 		}
 
-		// Check against all obstacles
-		for (const obs of this.obstacles) {
+		// Check against node obstacles
+		for (const obs of this.nodeObstacles.values()) {
+			if (gx >= obs.minGx && gx <= obs.maxGx && gy >= obs.minGy && gy <= obs.maxGy) {
+				return false;
+			}
+		}
+
+		// Check against port stub obstacles
+		for (const obs of this.portStubObstacles) {
 			if (gx >= obs.minGx && gx <= obs.maxGx && gy >= obs.minGy && gy <= obs.maxGy) {
 				return false;
 			}
@@ -116,13 +173,6 @@ export class SparseGrid {
 	getOffset(): { x: number; y: number } {
 		return { x: this.offsetX, y: this.offsetY };
 	}
-}
-
-/**
- * Build sparse grid from routing context
- */
-export function buildGrid(context: RoutingContext): SparseGrid {
-	return new SparseGrid(context);
 }
 
 /**

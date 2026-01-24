@@ -41,14 +41,66 @@ export const routingStore = {
 
 	/**
 	 * Update routing context from current nodes
-	 * Call this when nodes are added, removed, or moved
-	 * Automatically rebuilds the sparse grid
+	 * Uses incremental updates when possible for better performance
 	 */
 	setContext(nodeBounds: Map<string, Bounds>, canvasBounds: Bounds, portStubs?: PortStub[]): void {
 		const context: RoutingContext = { nodeBounds, canvasBounds, portStubs };
-		// Build sparse grid from context - O(obstacles) memory
-		const grid = new SparseGrid(context);
-		state.update((s) => ({ ...s, context, grid }));
+
+		state.update((s) => {
+			let grid = s.grid;
+
+			if (!grid) {
+				// First time - build full grid
+				grid = new SparseGrid(context);
+			} else {
+				// Incremental update
+				grid.updateBounds(canvasBounds);
+
+				// Update changed nodes, add new ones, remove deleted ones
+				const currentNodeIds = new Set(nodeBounds.keys());
+				const existingNodeIds = new Set<string>();
+
+				// Track which nodes exist in the grid (we need to check via context)
+				if (s.context) {
+					for (const nodeId of s.context.nodeBounds.keys()) {
+						existingNodeIds.add(nodeId);
+					}
+				}
+
+				// Update or add nodes
+				for (const [nodeId, bounds] of nodeBounds) {
+					grid.updateNode(nodeId, bounds);
+				}
+
+				// Remove deleted nodes
+				for (const nodeId of existingNodeIds) {
+					if (!currentNodeIds.has(nodeId)) {
+						grid.removeNode(nodeId);
+					}
+				}
+
+				// Update port stubs
+				grid.updatePortStubs(portStubs);
+			}
+
+			return { ...s, context, grid };
+		});
+	},
+
+	/**
+	 * Update a single node's bounds - O(1) incremental update
+	 * Use this during node dragging for best performance
+	 */
+	updateNodeBounds(nodeId: string, bounds: Bounds): void {
+		state.update((s) => {
+			if (s.grid) {
+				s.grid.updateNode(nodeId, bounds);
+			}
+			if (s.context) {
+				s.context.nodeBounds.set(nodeId, bounds);
+			}
+			return s;
+		});
 	},
 
 	/**
