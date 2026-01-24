@@ -374,8 +374,12 @@
 
 		historyStore.beginDrag();
 
-		// Create waypoint at drag start position (pass getPortInfo for immediate single-route recalc)
-		const waypointId = routingStore.addUserWaypoint(id, snappedPos, getPortInfo);
+		// Calculate insert index based on position along source→target vector
+		const waypoints = userWaypoints();
+		const insertIndex = findInsertIndex(snappedPos, waypoints);
+
+		// Create waypoint at correct position in the array
+		const waypointId = routingStore.addUserWaypointAtIndex(id, snappedPos, insertIndex, getPortInfo);
 		if (waypointId) {
 			isSegmentDragging = true;
 			draggingWaypointId = waypointId;
@@ -387,6 +391,35 @@
 			document.addEventListener('pointermove', onDocumentPointerMove, { capture: true });
 			document.addEventListener('pointerup', onDocumentPointerUp, { capture: true });
 		}
+	}
+
+	/**
+	 * Find the correct insert index for a new waypoint based on position along the path
+	 */
+	function findInsertIndex(newPos: { x: number; y: number }, existingWaypoints: Waypoint[]): number {
+		if (existingWaypoints.length === 0) return 0;
+
+		// Project onto source→target vector to determine order
+		const dx = targetX - sourceX;
+		const dy = targetY - sourceY;
+		const len = Math.sqrt(dx * dx + dy * dy);
+		if (len === 0) return existingWaypoints.length;
+
+		const ux = dx / len;
+		const uy = dy / len;
+
+		const newProj = (newPos.x - sourceX) * ux + (newPos.y - sourceY) * uy;
+
+		// Find where this projection falls among existing waypoints
+		for (let i = 0; i < existingWaypoints.length; i++) {
+			const wp = existingWaypoints[i];
+			const wpProj = (wp.position.x - sourceX) * ux + (wp.position.y - sourceY) * uy;
+			if (newProj < wpProj) {
+				return i;
+			}
+		}
+
+		return existingWaypoints.length;
 	}
 
 	function endSegmentDrag() {
