@@ -6,7 +6,8 @@ import { writable, derived, get } from 'svelte/store';
 import type { Position } from '$lib/types/common';
 import type { Connection, Waypoint } from '$lib/types/nodes';
 import type { RoutingContext, RouteResult, Bounds, Direction, PortStub } from '$lib/routing';
-import { calculateRoute, calculateRouteWithWaypoints, calculateSimpleRoute, getPathCells, prepareRoutingGrid, clearRoutingGrid, ROUTING_MARGIN } from '$lib/routing';
+import { calculateRoute, calculateRouteWithWaypoints, calculateSimpleRoute, getPathCells, ROUTING_MARGIN } from '$lib/routing';
+import { SparseGrid } from '$lib/routing/gridBuilder';
 import { generateId } from '$lib/stores/utils';
 import { graphStore } from '$lib/stores/graph';
 import { historyStore } from '$lib/stores/history';
@@ -22,11 +23,14 @@ interface RoutingState {
 	routes: Map<string, RouteResult>;
 	/** Current routing context (node bounds) */
 	context: RoutingContext | null;
+	/** Sparse grid built from context - O(obstacles) memory */
+	grid: SparseGrid | null;
 }
 
 const state = writable<RoutingState>({
 	routes: new Map(),
-	context: null
+	context: null,
+	grid: null
 });
 
 /**
@@ -38,10 +42,13 @@ export const routingStore = {
 	/**
 	 * Update routing context from current nodes
 	 * Call this when nodes are added, removed, or moved
+	 * Automatically rebuilds the sparse grid
 	 */
 	setContext(nodeBounds: Map<string, Bounds>, canvasBounds: Bounds, portStubs?: PortStub[]): void {
 		const context: RoutingContext = { nodeBounds, canvasBounds, portStubs };
-		state.update((s) => ({ ...s, context }));
+		// Build sparse grid from context - O(obstacles) memory
+		const grid = new SparseGrid(context);
+		state.update((s) => ({ ...s, context, grid }));
 	},
 
 	/**
@@ -74,21 +81,21 @@ export const routingStore = {
 		const userWaypoints = (connection.waypoints || []).filter((w) => w.isUserWaypoint);
 
 		let result: RouteResult;
-		if ($state.context && $state.context.nodeBounds.size > 0) {
+		if ($state.grid) {
 			if (userWaypoints.length > 0) {
 				result = calculateRouteWithWaypoints(
 					sourcePos,
 					targetPos,
 					sourceDir,
 					targetDir,
-					$state.context,
+					$state.grid,
 					userWaypoints
 				);
 			} else {
-				result = calculateRoute(sourcePos, targetPos, sourceDir, targetDir, $state.context);
+				result = calculateRoute(sourcePos, targetPos, sourceDir, targetDir, $state.grid);
 			}
 		} else {
-			// No context or empty - use simple routing
+			// No grid - use simple routing
 			result = calculateSimpleRoute(sourcePos, targetPos, sourceDir, targetDir);
 		}
 
@@ -115,11 +122,6 @@ export const routingStore = {
 		// Start with existing routes to preserve them if recalculation fails
 		const routes = new Map<string, RouteResult>($state.routes);
 		const usedCells = new Map<string, Set<Direction>>();
-
-		// Pre-build grid once for all routes (performance optimization)
-		if ($state.context && $state.context.nodeBounds.size > 0) {
-			prepareRoutingGrid($state.context);
-		}
 
 		// Sort connections by Manhattan distance (longest first)
 		// Longer routes are less likely to block shorter ones
@@ -163,14 +165,14 @@ export const routingStore = {
 				const userWaypoints = (conn.waypoints || []).filter((w) => w.isUserWaypoint);
 
 				let result: RouteResult;
-				if ($state.context && $state.context.nodeBounds.size > 0) {
+				if ($state.grid) {
 					if (userWaypoints.length > 0) {
 						result = calculateRouteWithWaypoints(
 							sourceInfo.position,
 							targetInfo.position,
 							sourceInfo.direction,
 							targetInfo.direction,
-							$state.context,
+							$state.grid,
 							userWaypoints,
 							usedCells
 						);
@@ -180,7 +182,7 @@ export const routingStore = {
 							targetInfo.position,
 							sourceInfo.direction,
 							targetInfo.direction,
-							$state.context,
+							$state.grid,
 							usedCells
 						);
 					}
@@ -210,9 +212,6 @@ export const routingStore = {
 				}
 			}
 		}
-
-		// Clear cached grid
-		clearRoutingGrid();
 
 		state.update((s) => ({ ...s, routes }));
 	},
@@ -335,7 +334,7 @@ export const routingStore = {
 				const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 				const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-				if (sourceInfo && targetInfo && $state.context) {
+				if (sourceInfo && targetInfo && $state.grid) {
 					const userWaypoints = updatedWaypoints.filter((w) => w.isUserWaypoint);
 					const result = userWaypoints.length > 0
 						? calculateRouteWithWaypoints(
@@ -343,7 +342,7 @@ export const routingStore = {
 							targetInfo.position,
 							sourceInfo.direction,
 							targetInfo.direction,
-							$state.context,
+							$state.grid,
 							userWaypoints
 						)
 						: calculateRoute(
@@ -351,7 +350,7 @@ export const routingStore = {
 							targetInfo.position,
 							sourceInfo.direction,
 							targetInfo.direction,
-							$state.context
+							$state.grid
 						);
 
 					state.update((s) => {
@@ -394,7 +393,7 @@ export const routingStore = {
 			const sourceInfo = getPortInfo(connection.sourceNodeId, connection.sourcePortIndex, true);
 			const targetInfo = getPortInfo(connection.targetNodeId, connection.targetPortIndex, false);
 
-			if (sourceInfo && targetInfo && $state.context) {
+			if (sourceInfo && targetInfo && $state.grid) {
 				const userWaypoints = updatedWaypoints.filter((w) => w.isUserWaypoint);
 				const result = userWaypoints.length > 0
 					? calculateRouteWithWaypoints(
@@ -402,7 +401,7 @@ export const routingStore = {
 						targetInfo.position,
 						sourceInfo.direction,
 						targetInfo.direction,
-						$state.context,
+						$state.grid,
 						userWaypoints
 					)
 					: calculateRoute(
@@ -410,7 +409,7 @@ export const routingStore = {
 						targetInfo.position,
 						sourceInfo.direction,
 						targetInfo.direction,
-						$state.context
+						$state.grid
 					);
 
 				state.update((s) => {
@@ -523,14 +522,14 @@ export const routingStore = {
 
 			// Immediately recalculate route if we have port info (prevents flicker)
 			const $state = get(state);
-			if (sourceInfo && targetInfo && $state.context) {
+			if (sourceInfo && targetInfo && $state.grid) {
 				const result = cleaned.length > 0
 					? calculateRouteWithWaypoints(
 						sourceInfo.position,
 						targetInfo.position,
 						sourceInfo.direction,
 						targetInfo.direction,
-						$state.context,
+						$state.grid,
 						cleaned
 					)
 					: calculateRoute(
@@ -538,7 +537,7 @@ export const routingStore = {
 						targetInfo.position,
 						sourceInfo.direction,
 						targetInfo.direction,
-						$state.context
+						$state.grid
 					);
 
 				state.update((s) => {

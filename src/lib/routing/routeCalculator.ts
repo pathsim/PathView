@@ -6,7 +6,7 @@ import type { Position } from '$lib/types/common';
 import type { Waypoint } from '$lib/types/nodes';
 import type { RoutingContext, RouteResult, Direction } from './types';
 import { DIRECTION_VECTORS } from './types';
-import { buildGrid, getGridOffset, worldToGrid, type SparseGrid } from './gridBuilder';
+import { worldToGrid, type SparseGrid } from './gridBuilder';
 import { findPathWithTurnPenalty } from './pathfinder';
 import { simplifyPath, snapToGrid } from './pathOptimizer';
 import { SOURCE_CLEARANCE, TARGET_CLEARANCE, GRID_SIZE } from './constants';
@@ -26,28 +26,9 @@ function getStubEnd(portPos: Position, direction: Direction, clearance: number):
 	return snapToGrid(point);
 }
 
-/** Cached sparse grid for batch routing */
-let cachedGrid: { grid: SparseGrid; offset: Position } | null = null;
-
-/**
- * Build and cache sparse grid for batch routing (call before calculateRoute batch)
- * With sparse grid, this is lightweight - just caches obstacle list
- */
-export function prepareRoutingGrid(context: RoutingContext): void {
-	const grid = buildGrid(context);
-	const offset = getGridOffset(context);
-	cachedGrid = { grid, offset };
-}
-
-/**
- * Clear cached grid after batch routing
- */
-export function clearRoutingGrid(): void {
-	cachedGrid = null;
-}
-
 /**
  * Calculate route between two ports
+ * @param grid - Sparse grid with obstacles (from routing store)
  * @param usedCells - Optional map of cells to directions used by other paths
  */
 export function calculateRoute(
@@ -55,24 +36,14 @@ export function calculateRoute(
 	targetPos: Position,
 	sourceDir: Direction,
 	targetDir: Direction,
-	context: RoutingContext,
+	grid: SparseGrid,
 	usedCells?: Map<string, Set<Direction>>
 ): RouteResult {
 	// Calculate stub endpoints (grid-aligned virtual ports for A*)
 	const sourceStubEnd = getStubEnd(sourcePos, sourceDir, SOURCE_CLEARANCE);
 	const targetStubEnd = getStubEnd(targetPos, targetDir, TARGET_CLEARANCE);
 
-	// Use cached grid if available, otherwise build fresh
-	let grid: SparseGrid;
-	let offset: Position;
-
-	if (cachedGrid) {
-		grid = cachedGrid.grid;
-		offset = cachedGrid.offset;
-	} else {
-		grid = buildGrid(context);
-		offset = getGridOffset(context);
-	}
+	const offset = grid.getOffset();
 
 	// Find path from source stub end to target stub end
 	const result = findPathWithTurnPenalty(sourceStubEnd, targetStubEnd, grid, offset, sourceDir, usedCells);
@@ -229,35 +200,25 @@ function sortWaypointsByPathOrder(
 /**
  * Calculate route through user waypoints using sequential A* segments
  * Route: Source -> A* -> W1 -> A* -> W2 -> ... -> A* -> Target
+ * @param grid - Sparse grid with obstacles (from routing store)
  */
 export function calculateRouteWithWaypoints(
 	sourcePos: Position,
 	targetPos: Position,
 	sourceDir: Direction,
 	targetDir: Direction,
-	context: RoutingContext,
+	grid: SparseGrid,
 	userWaypoints: Waypoint[],
 	usedCells?: Map<string, Set<Direction>>
 ): RouteResult {
 	// If no waypoints, use regular routing
 	if (userWaypoints.length === 0) {
-		return calculateRoute(sourcePos, targetPos, sourceDir, targetDir, context, usedCells);
+		return calculateRoute(sourcePos, targetPos, sourceDir, targetDir, grid, usedCells);
 	}
 
 	// Sort waypoints by their order along the path
 	const sortedWaypoints = sortWaypointsByPathOrder(sourcePos, targetPos, userWaypoints);
-
-	// Use cached grid if available, otherwise build fresh
-	let grid: SparseGrid;
-	let offset: Position;
-
-	if (cachedGrid) {
-		grid = cachedGrid.grid;
-		offset = cachedGrid.offset;
-	} else {
-		grid = buildGrid(context);
-		offset = getGridOffset(context);
-	}
+	const offset = grid.getOffset();
 
 	// Build path segments through all waypoints
 	const fullPath: Position[] = [];

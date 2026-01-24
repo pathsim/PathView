@@ -3,7 +3,10 @@
  */
 
 // Route calculation
-export { calculateRoute, calculateRouteWithWaypoints, calculateSimpleRoute, getPathCells, prepareRoutingGrid, clearRoutingGrid } from './routeCalculator';
+export { calculateRoute, calculateRouteWithWaypoints, calculateSimpleRoute, getPathCells } from './routeCalculator';
+
+// Grid
+export { SparseGrid } from './gridBuilder';
 
 // Constants used by FlowCanvas
 export { ROUTING_MARGIN, HANDLE_OFFSET, ARROW_INSET } from './constants';
