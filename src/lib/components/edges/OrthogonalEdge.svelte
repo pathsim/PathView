@@ -395,6 +395,8 @@
 
 	/**
 	 * Count how many waypoints appear before a given segment in the rendered path
+	 * Segment i goes from allPoints[i] to allPoints[i+1], so we check points AFTER
+	 * the segment start (i+1 onwards) to find waypoints that come AFTER this segment.
 	 */
 	function countWaypointsBeforeSegment(segmentIndex: number, waypoints: Waypoint[]): number {
 		if (waypoints.length === 0 || !routeResult?.path) return 0;
@@ -403,24 +405,22 @@
 		const tgt = adjustedTarget();
 		const allPoints = [src, ...routeResult.path, tgt];
 
-		// Get the start point of the segment
-		const segmentStart = allPoints[segmentIndex];
-		if (!segmentStart) return 0;
-
-		// Count waypoints that appear at or before this point in the path
-		let count = 0;
+		// Count waypoints that appear AFTER this segment (from segment end onwards)
+		let countAfter = 0;
 		const waypointSet = new Set(waypoints.map(w => `${w.position.x},${w.position.y}`));
 
-		for (let i = 0; i <= segmentIndex; i++) {
+		// Start from segmentIndex + 1 (the end of the clicked segment) to the end
+		for (let i = segmentIndex + 1; i < allPoints.length; i++) {
 			const pt = allPoints[i];
 			const key = `${pt.x},${pt.y}`;
 			if (waypointSet.has(key)) {
-				count++;
-				waypointSet.delete(key); // Don't count same waypoint twice
+				countAfter++;
+				waypointSet.delete(key);
 			}
 		}
 
-		return count;
+		// Insert index = total waypoints - waypoints after = waypoints before
+		return waypoints.length - countAfter;
 	}
 
 	function endSegmentDrag() {
