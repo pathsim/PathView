@@ -117,6 +117,12 @@ class MinHeap {
 	}
 }
 
+/** Result from pathfinding */
+export interface PathResult {
+	path: Position[];
+	isFallback: boolean;
+}
+
 /**
  * Find orthogonal path between two points using A* with turn penalty
  * Only allows 90-degree turns (no reversing/180-degree turns)
@@ -127,7 +133,7 @@ class MinHeap {
  * @param initialDir - Initial direction of travel
  * @param usedCells - Optional map of cells to directions used by other paths
  * @param prebuiltWalkable - Optional pre-built walkable set for performance
- * @returns Array of positions in world coordinates
+ * @returns PathResult with path and fallback flag
  */
 export function findPathWithTurnPenalty(
 	start: Position,
@@ -137,7 +143,7 @@ export function findPathWithTurnPenalty(
 	initialDir: Direction,
 	usedCells?: Map<string, Set<Direction>>,
 	prebuiltWalkable?: Set<string>
-): Position[] {
+): PathResult {
 	// Convert to grid coordinates
 	const startGx = worldToGrid(start.x - offset.x);
 	const startGy = worldToGrid(start.y - offset.y);
@@ -150,7 +156,7 @@ export function findPathWithTurnPenalty(
 	// Bounds check
 	if (startGx < 0 || startGx >= gridWidth || startGy < 0 || startGy >= gridHeight ||
 		endGx < 0 || endGx >= gridWidth || endGy < 0 || endGy >= gridHeight) {
-		return [start, end];
+		return { path: [start, end], isFallback: true };
 	}
 
 	// Use pre-built walkable set or build fresh
@@ -203,7 +209,7 @@ export function findPathWithTurnPenalty(
 
 		// Check if we reached the end
 		if (current.x === endGx && current.y === endGy) {
-			return reconstructPath(current, offset);
+			return { path: reconstructPath(current, offset), isFallback: false };
 		}
 
 		// Skip if already processed with this direction
@@ -273,10 +279,10 @@ export function findPathWithTurnPenalty(
 	// Go in initial direction first, then turn
 	if (initialDir === 'right' || initialDir === 'left') {
 		// Horizontal first, then vertical
-		return [start, { x: end.x, y: start.y }, end];
+		return { path: [start, { x: end.x, y: start.y }, end], isFallback: true };
 	} else {
 		// Vertical first, then horizontal
-		return [start, { x: start.x, y: end.y }, end];
+		return { path: [start, { x: start.x, y: end.y }, end], isFallback: true };
 	}
 }
 

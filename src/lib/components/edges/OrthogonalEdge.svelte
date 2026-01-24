@@ -254,24 +254,20 @@
 		return d;
 	}
 
-	// Cache last valid path data (src, tgt, route) for smooth transitions
+	// Cache last valid path (non-fallback) for smooth transitions
 	let cachedPath = $state('');
-	let cachedSrc = $state<{ x: number; y: number } | null>(null);
-	let cachedTgt = $state<{ x: number; y: number } | null>(null);
 
-	// Update cached path only when we have a valid new route
+	// Update cached path only when we have a valid (non-fallback) route
 	$effect(() => {
-		if (routeResult?.path && routeResult.path.length >= 1) {
+		if (routeResult?.path && routeResult.path.length >= 1 && !routeResult.isFallback) {
 			const src = adjustedSource();
 			const tgt = adjustedTarget();
 			const allPoints = [src, ...routeResult.path, tgt];
 			cachedPath = buildRoundedPath(allPoints, CORNER_RADIUS);
-			cachedSrc = src;
-			cachedTgt = tgt;
 		}
 	});
 
-	// Always use the cached path
+	// Always use the cached path - never show fallback routes
 	const pathInfo = $derived(() => {
 		return { path: cachedPath, isFallback: !cachedPath };
 	});

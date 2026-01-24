@@ -88,14 +88,12 @@ export function calculateRoute(
 	}
 
 	// Find path from source stub end to target stub end
-	const rawPath = findPathWithTurnPenalty(sourceStubEnd, targetStubEnd, grid, offset, sourceDir, usedCells, walkable);
-	const simplified = simplifyPath(rawPath);
+	const result = findPathWithTurnPenalty(sourceStubEnd, targetStubEnd, grid, offset, sourceDir, usedCells, walkable);
+	const simplified = simplifyPath(result.path);
 
 	// Path is: [sourceStubEnd, ...intermediates..., targetStubEnd]
 	// simplifyPath already includes start and end
-	const path = simplified;
-
-	return { path, waypoints: [] };
+	return { path: simplified, waypoints: [], isFallback: result.isFallback };
 }
 
 /**
@@ -280,13 +278,14 @@ export function calculateRouteWithWaypoints(
 	const fullPath: Position[] = [];
 	let currentPos = getStubEnd(sourcePos, sourceDir, SOURCE_CLEARANCE);
 	let currentDir = sourceDir;
+	let hasFallback = false;
 
 	for (let i = 0; i < sortedWaypoints.length; i++) {
 		const waypoint = sortedWaypoints[i];
 		const waypointPos = snapToGrid(waypoint.position);
 
 		// Route from current position to waypoint
-		const segmentPath = findPathWithTurnPenalty(
+		const segmentResult = findPathWithTurnPenalty(
 			currentPos,
 			waypointPos,
 			grid,
@@ -296,18 +295,20 @@ export function calculateRouteWithWaypoints(
 			walkable
 		);
 
+		if (segmentResult.isFallback) hasFallback = true;
+
 		// Append path (skip first point if not first segment to avoid duplicates)
 		if (fullPath.length === 0) {
-			fullPath.push(...segmentPath);
-		} else if (segmentPath.length > 0) {
-			fullPath.push(...segmentPath.slice(1));
+			fullPath.push(...segmentResult.path);
+		} else if (segmentResult.path.length > 0) {
+			fullPath.push(...segmentResult.path.slice(1));
 		}
 
 		// Update current position and direction for next segment
 		currentPos = waypointPos;
-		if (segmentPath.length >= 2) {
+		if (segmentResult.path.length >= 2) {
 			// Exit direction is opposite of how we approached (continue in same direction)
-			currentDir = inferExitDirection(segmentPath);
+			currentDir = inferExitDirection(segmentResult.path);
 		} else {
 			// Fallback: infer from next waypoint or target
 			const nextTarget = i < sortedWaypoints.length - 1
@@ -319,7 +320,7 @@ export function calculateRouteWithWaypoints(
 
 	// Final segment: last waypoint -> target
 	const targetStubEnd = getStubEnd(targetPos, targetDir, TARGET_CLEARANCE);
-	const finalPath = findPathWithTurnPenalty(
+	const finalResult = findPathWithTurnPenalty(
 		currentPos,
 		targetStubEnd,
 		grid,
@@ -329,14 +330,16 @@ export function calculateRouteWithWaypoints(
 		walkable
 	);
 
+	if (finalResult.isFallback) hasFallback = true;
+
 	if (fullPath.length === 0) {
-		fullPath.push(...finalPath);
-	} else if (finalPath.length > 0) {
-		fullPath.push(...finalPath.slice(1));
+		fullPath.push(...finalResult.path);
+	} else if (finalResult.path.length > 0) {
+		fullPath.push(...finalResult.path.slice(1));
 	}
 
 	// Simplify the combined path
 	const simplified = simplifyPath(fullPath);
 
-	return { path: simplified, waypoints: sortedWaypoints };
+	return { path: simplified, waypoints: sortedWaypoints, isFallback: hasFallback };
 }

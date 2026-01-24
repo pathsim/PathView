@@ -46,4 +46,6 @@ export interface RouteResult {
 	path: Position[];
 	/** User waypoints (for future use) */
 	waypoints: Waypoint[];
+	/** True if this is a fallback path (A* failed) - should not be cached */
+	isFallback?: boolean;
 }
