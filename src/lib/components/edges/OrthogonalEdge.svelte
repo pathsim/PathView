@@ -514,7 +514,7 @@
 	.waypoint-marker {
 		fill: var(--surface-raised);
 		stroke: var(--accent);
-		stroke-width: 1;
+		stroke-width: 1.5;
 		cursor: grab;
 		touch-action: none;
 		transition: fill 0.15s ease;
@@ -522,7 +522,7 @@
 
 	.waypoint-marker.dragging {
 		cursor: grabbing;
-		stroke-width: 1.5;
+		stroke-width: 2;
 		fill: var(--accent);
 	}
 
