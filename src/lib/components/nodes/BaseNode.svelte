@@ -89,6 +89,7 @@
 	// Check if this node allows dynamic ports
 	const allowsDynamicInputs = $derived(typeDef?.ports.maxInputs === null);
 	const allowsDynamicOutputs = $derived(typeDef?.ports.maxOutputs === null);
+	const syncPorts = $derived(typeDef?.ports.syncPorts ?? false);
 
 	// Rotation state (0, 1, 2, 3 = 0°, 90°, 180°, 270°) - stored in node params
 	const rotation = $derived((data.params?.['_rotation'] as number) || 0);
@@ -348,8 +349,8 @@
 		</div>
 	{/if}
 
-	<!-- Port controls for dynamic outputs (only show when selected) -->
-	{#if allowsDynamicOutputs && selected}
+	<!-- Port controls for dynamic outputs (only show when selected, hide for syncPorts blocks) -->
+	{#if allowsDynamicOutputs && selected && !syncPorts}
 		<div class="port-controls port-controls-output" class:port-controls-right={rotation === 0} class:port-controls-bottom={rotation === 1} class:port-controls-left={rotation === 2} class:port-controls-top={rotation === 3}>
 			<button class="port-btn" onclick={handleAddOutput} ondblclick={(e) => e.stopPropagation()} title="Add output">+</button>
 			<button class="port-btn" onclick={handleRemoveOutput} ondblclick={(e) => e.stopPropagation()} disabled={data.outputs.length <= minOutputs} title="Remove output">-</button>
