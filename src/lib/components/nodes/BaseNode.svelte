@@ -206,7 +206,8 @@
 				isVertical ? minPortDimension : 0
 			));
 
-			const measuredMathWidth = snapTo2G(measuredNameWidth);
+			// Add horizontal padding from .node-content (12px each side = 24px)
+			const measuredMathWidth = snapTo2G(measuredNameWidth + 24);
 			return Math.max(minLayoutWidth, measuredMathWidth);
 		}
 		return nodeDimensions.width;
