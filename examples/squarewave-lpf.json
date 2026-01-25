@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T22:09:29.705Z",
-    "modified": "2026-01-19T22:09:29.705Z",
+    "created": "2026-01-25T00:49:57.129Z",
+    "modified": "2026-01-25T00:49:57.130Z",
     "name": "squarewave-lpf"
   },
   "graph": {
@@ -12,7 +12,7 @@
         "type": "SquareWaveSource",
         "name": "Signal",
         "position": {
-          "x": 650,
+          "x": 710,
           "y": 260
         },
         "inputs": [],
@@ -29,9 +29,7 @@
         "params": {
           "frequency": "1"
         },
-        "pinnedParams": [
-          "frequency"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
@@ -65,17 +63,15 @@
           "Fc": "1",
           "n": "2"
         },
-        "pinnedParams": [
-          "Fc"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
         "type": "Scope",
-        "name": "Signal",
+        "name": "Result",
         "position": {
-          "x": 760,
-          "y": 180
+          "x": 1040,
+          "y": 250
         },
         "inputs": [
           {
@@ -85,34 +81,20 @@
             "direction": "input",
             "index": 0,
             "color": "#969696"
-          }
-        ],
-        "outputs": [],
-        "params": {
-          "_rotation": 3
-        }
-      },
-      {
-        "id": "c64e7115-4baa-40d7-b3f7-af5953248b74",
-        "type": "Scope",
-        "name": "Filtered",
-        "position": {
-          "x": 1000,
-          "y": 180
-        },
-        "inputs": [
+          },
           {
-            "id": "c64e7115-4baa-40d7-b3f7-af5953248b74-input-0",
-            "nodeId": "c64e7115-4baa-40d7-b3f7-af5953248b74",
-            "name": "in 0",
+            "id": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde-input-1",
+            "nodeId": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
+            "name": "in 1",
             "direction": "input",
-            "index": 0,
+            "index": 1,
             "color": "#969696"
           }
         ],
         "outputs": [],
         "params": {
-          "_rotation": 3
+          "_rotation": 0,
+          "labels": "[\"squarewave\", \"filtered\"]"
         }
       }
     ],
@@ -125,30 +107,30 @@
         "targetPortIndex": 0
       },
       {
-        "id": "bf3af73f-d3e4-4589-b9fc-56211a98f387",
-        "sourceNodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
-        "sourcePortIndex": 0,
-        "targetNodeId": "c64e7115-4baa-40d7-b3f7-af5953248b74",
-        "targetPortIndex": 0
-      },
-      {
         "id": "f31c2d34-63ab-4405-ae2e-069b385b41b6",
         "sourceNodeId": "41fcc215-6f0e-4e55-b2bf-9ea0190af114",
         "sourcePortIndex": 0,
         "targetNodeId": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
         "targetPortIndex": 0
+      },
+      {
+        "id": "8b9950c1-404e-4583-9a9c-ac97f9ccc7da",
+        "sourceNodeId": "73cba56a-f82c-433c-9230-effc0b0ff2d0",
+        "sourcePortIndex": 0,
+        "targetNodeId": "3a8f34de-d253-47e7-b9d3-a53b3c4e7dde",
+        "targetPortIndex": 1
       }
     ],
     "annotations": [
       {
         "id": "34f0e638-760e-421b-9d4a-6fc606387a87",
         "position": {
-          "x": 1060,
-          "y": 200
+          "x": 650,
+          "y": 110
         },
         "content": "Filtering the high frequency contents out of a square wave with a low pass filter. \n\nParameters can be pinned, see block property dialog (double click).\n\nHover over **Scope** blocks to see plot preview. Or just pin all previews (P).",
-        "width": 250,
-        "height": 140,
+        "width": 440,
+        "height": 90,
         "fontSize": 11
       }
     ]
@@ -167,7 +149,7 @@
     "ftol": "",
     "dt_min": "",
     "dt_max": "",
-    "ghostTraces": 3,
+    "ghostTraces": 0,
     "plotResults": true
   }
 }

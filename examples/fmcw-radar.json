@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T16:06:26.089Z",
-    "modified": "2026-01-19T16:06:26.089Z",
+    "created": "2026-01-25T09:45:23.241Z",
+    "modified": "2026-01-25T09:45:23.241Z",
     "name": "fmcw-radar"
   },
   "graph": {
@@ -52,7 +52,7 @@
         "type": "ButterworthLowpassFilter",
         "name": "LPF",
         "position": {
-          "x": 210,
+          "x": 200,
           "y": 380
         },
         "inputs": [
@@ -86,8 +86,8 @@
         "type": "Spectrum",
         "name": "Mixer",
         "position": {
-          "x": 90,
-          "y": 300
+          "x": 80,
+          "y": 310
         },
         "inputs": [
           {
@@ -110,8 +110,8 @@
         "type": "Delay",
         "name": "Freespace",
         "position": {
-          "x": -220,
-          "y": 440
+          "x": -140,
+          "y": 420
         },
         "inputs": [
           {
@@ -143,8 +143,8 @@
         "type": "ChirpPhaseNoiseSource",
         "name": "Chirp",
         "position": {
-          "x": -360,
-          "y": 300
+          "x": -310,
+          "y": 370
         },
         "inputs": [],
         "outputs": [
@@ -161,7 +161,7 @@
           "f0": "f_min",
           "BW": "B",
           "T": "T",
-          "_rotation": 1
+          "_rotation": 0
         }
       },
       {
@@ -169,8 +169,8 @@
         "type": "Spectrum",
         "name": "Chirp",
         "position": {
-          "x": -150,
-          "y": 300
+          "x": -160,
+          "y": 310
         },
         "inputs": [
           {
@@ -193,8 +193,8 @@
         "type": "Spectrum",
         "name": "LPF",
         "position": {
-          "x": 330,
-          "y": 300
+          "x": 320,
+          "y": 310
         },
         "inputs": [
           {
@@ -217,8 +217,8 @@
         "type": "Scope",
         "name": "Mixer",
         "position": {
-          "x": 90,
-          "y": 460
+          "x": 80,
+          "y": 450
         },
         "inputs": [
           {
@@ -240,8 +240,8 @@
         "type": "Scope",
         "name": "LPF",
         "position": {
-          "x": 330,
-          "y": 460
+          "x": 320,
+          "y": 450
         },
         "inputs": [
           {
@@ -328,11 +328,11 @@
       {
         "id": "97ef0229-ff61-436c-ba9b-ea0ab2ab0c58",
         "position": {
-          "x": 450,
-          "y": 290
+          "x": -380,
+          "y": 440
         },
         "content": "# FMCW\n\nThis is a minimalistic frequency-modulated continuous wave radar system.\n\nThe signal source is a chirp, a frequency modulated sinusoid. The signal is transmitted into free space. The time delayed reflected signal is recieved and multiplied (mixer) with the reference signal. The frequency difference is proportional to the time delay of the target distance. ",
-        "width": 290,
+        "width": 340,
         "height": 190
       }
     ]

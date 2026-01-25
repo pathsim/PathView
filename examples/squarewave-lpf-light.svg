@@ -1,63 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="550" height="220" viewBox="530 120 550 220">
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="130" viewBox="620 190 500 130">
 <g class="edges">
-<g class="edge"><path d="M733.5 260L753.5 260L762.5 260L762.5 260L771.5 260L791.5 260" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(791.5, 260) rotate(0) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M963.5 260L983.5 260L 992,260Q 1000,260 1000,252L1000 228.5L1000 208.5" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(1000, 208.5) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
-<g class="edge"><path d="M733.5 260L753.5 260L 756.75,260Q 760,260 760,256.75L760 228.5L760 208.5" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(760, 208.5) rotate(-90) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M 763.8333257630813 260.00003028100775 L 766.9166628815407 260.0000151405039 Q 770 260 773.0833371184965 260 L 785 260 Q 790 260 794.9999999999816 260.00001355869693 L 801.1666363856589 260.00003028100775" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(801.1666363856589, 260.00003028100775) rotate(0.00015537122224767836) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M 763.8333257630813 260.00003028100775 L 766.9166628815407 260.0000151405039 Q 770 260 773.0833371184965 260 L 785 260 Q 790 260 790 255 L 790 225 Q 790 220 795 220 L 975 220 Q 980 220 980 225 L 980 235 Q 980 240 984.9999999999816 240.00001355860505 L 991.1667120881783 240.00003028100775" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(991.1667120881783, 240.00003028100775) rotate(0.0001553701689391593) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
+<g class="edge"><path d="M 953.8333636143411 260.00003028100775 L 956.9166818071706 260.0000151405039 Q 960 260 963.0833181928666 260 L 975 260 Q 980 260 984.9999999999816 260.000013558605 L 991.1667120881783 260.00003028100775" fill="none" stroke="#7F7F7F" stroke-width="1.5"/><g transform="translate(991.1667120881783, 260.00003028100775) rotate(0.0001553701689391593) translate(5, 0)"><path d="M -5 -2.5 L -1 -0.5 Q 0 0 -1 0.5 L -5 2.5 Q -6 3 -6 2 L -6 -2 Q -6 -3 -5 -2.5 Z" fill="#7F7F7F"/></g></g>
 </g>
 <g class="nodes">
 <g class="node" data-id="41fcc215-6f0e-4e55-b2bf-9ea0190af114">
-<rect x="570" y="220" width="160" height="80" rx="20" fill="#ffffff"/>
-<rect x="570" y="220" width="160" height="80" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="650" y="240.33333333333334" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Signal</text>
-<text x="650" y="252.33333333333334" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">SquareWaveSource</text>
-<line x1="570" y1="268.6666666666667" x2="730" y2="268.6666666666667" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
-<path d="M571,269.6666666666667 h158 v10.666666666666668 a19,19 0 0 1 -19,19 h-120 a19,19 0 0 1 -19,-19 v-10.666666666666668 z" fill="#f0f0f4"/>
-<text x="580.6666666666666" y="283.3333333333333" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">frequency</text>
-<rect x="625.1041666666666" y="273.3333333333333" width="94.22916666666667" height="20" rx="10" fill="#ffffff" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
-<text x="633.1041666666666" y="283.3333333333333" dominant-baseline="middle" fill="#1a1a1f" font-size="9" font-family="ui-monospace, monospace">1</text>
-<g transform="translate(724.33, 256.00)">
+<rect x="660" y="240" width="100" height="40" rx="20" fill="#ffffff"/>
+<rect x="660" y="240" width="100" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="710" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Signal</text>
+<text x="710" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">SquareWaveSource</text>
+<g transform="translate(754.33, 256.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="73cba56a-f82c-433c-9230-effc0b0ff2d0">
-<rect x="800" y="220" width="160" height="80" rx="4" fill="#ffffff"/>
-<rect x="800" y="220" width="160" height="80" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="880" y="240.33333333333334" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">LPF</text>
-<text x="880" y="252.33333333333334" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">ButterworthLowpassFilter</text>
-<line x1="800" y1="268.6666666666667" x2="960" y2="268.6666666666667" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
-<path d="M801,269.6666666666667 h158 v26.666666666666668 a3,3 0 0 1 -3,3 h-152 a3,3 0 0 1 -3,-3 v-26.666666666666668 z" fill="#f0f0f4"/>
-<text x="810.6666666666666" y="283.3333333333333" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Fc</text>
-<rect x="825.6458333333334" y="273.3333333333333" width="123.6875" height="20" rx="10" fill="#ffffff" stroke="rgba(0, 0, 0, 0.10)" stroke-width="1"/>
-<text x="833.6458333333334" y="283.3333333333333" dominant-baseline="middle" fill="#1a1a1f" font-size="9" font-family="ui-monospace, monospace">1</text>
-<g transform="translate(795.67, 256.00)">
+<rect x="810" y="240" width="140" height="40" rx="4" fill="#ffffff"/>
+<rect x="810" y="240" width="140" height="40" rx="4" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="880" y="256" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">LPF</text>
+<text x="880" y="268" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">ButterworthLowpassFilter</text>
+<g transform="translate(805.67, 256.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-<g transform="translate(954.33, 256.00)">
+<g transform="translate(944.33, 256.00)">
 	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
 	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 <g class="node" data-id="3a8f34de-d253-47e7-b9d3-a53b3c4e7dde">
-<rect x="720" y="160" width="80" height="40" rx="20" fill="#ffffff"/>
-<rect x="720" y="160" width="80" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="760" y="176" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Signal</text>
-<text x="760" y="188" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(756.00, 194.33)">
-	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
-	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#ffffff" transform="translate(1, 1)"/>
+<rect x="1000" y="230" width="80" height="40" rx="20" fill="#ffffff"/>
+<rect x="1000" y="230" width="80" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
+<text x="1040" y="246" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Result</text>
+<text x="1040" y="258" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
+<g transform="translate(995.67, 236.00)">
+	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
+	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
-</g>
-<g class="node" data-id="c64e7115-4baa-40d7-b3f7-af5953248b74">
-<rect x="960" y="160" width="80" height="40" rx="20" fill="#ffffff"/>
-<rect x="960" y="160" width="80" height="40" rx="20" fill="none" stroke="#7F7F7F" stroke-width="1"/>
-<text x="1000" y="176" text-anchor="middle" dominant-baseline="middle" fill="#0070C0" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">Filtered</text>
-<text x="1000" y="188" text-anchor="middle" dominant-baseline="middle" fill="#606068" font-size="8" font-family="system-ui, -apple-system, sans-serif">Scope</text>
-<g transform="translate(996.00, 194.33)">
-	<path d="M 4.71 0.71 L 7.29 3.29 Q 8.00 4.00 8.00 5.00 L 8.00 9.00 Q 8.00 10.00 7.00 10.00 L 1.00 10.00 Q 0.00 10.00 0.00 9.00 L 0.00 5.00 Q 0.00 4.00 0.71 3.29 L 3.29 0.71 Q 4.00 0.00 4.71 0.71 Z" fill="#7F7F7F"/>
-	<path d="M 3.57 0.98 L 5.43 2.85 Q 6.00 3.41 6.00 4.21 L 6.00 7.20 Q 6.00 8.00 5.20 8.00 L 0.80 8.00 Q 0.00 8.00 0.00 7.20 L 0.00 4.21 Q 0.00 3.41 0.57 2.85 L 2.43 0.98 Q 3.00 0.41 3.57 0.98 Z" fill="#ffffff" transform="translate(1, 1)"/>
+<g transform="translate(995.67, 256.00)">
+	<path d="M 1.00 0.00 L 5.00 0.00 Q 6.00 0.00 6.71 0.71 L 9.29 3.29 Q 10.00 4.00 9.29 4.71 L 6.71 7.29 Q 6.00 8.00 5.00 8.00 L 1.00 8.00 Q 0.00 8.00 0.00 7.00 L 0.00 1.00 Q 0.00 0.00 1.00 0.00 Z" fill="#7F7F7F"/>
+	<path d="M 0.80 0.00 L 3.79 0.00 Q 4.59 0.00 5.15 0.57 L 7.02 2.43 Q 7.59 3.00 7.02 3.57 L 5.15 5.43 Q 4.59 6.00 3.79 6.00 L 0.80 6.00 Q 0.00 6.00 0.00 5.20 L 0.00 0.80 Q 0.00 0.00 0.80 0.00 Z" fill="#ffffff" transform="translate(1, 1)"/>
 </g>
 </g>
 </g>

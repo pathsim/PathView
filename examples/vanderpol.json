@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T16:15:10.866Z",
-    "modified": "2026-01-19T16:15:10.866Z",
+    "created": "2026-01-25T00:35:40.025Z",
+    "modified": "2026-01-25T00:35:40.025Z",
     "name": "vanderpol"
   },
   "graph": {
@@ -37,14 +37,15 @@
         ],
         "params": {
           "initial_value": "x20"
-        }
+        },
+        "color": "#E57373"
       },
       {
         "id": "440919f7-c63c-40d7-8f78-67871a0f89f6",
         "type": "Integrator",
         "name": "X1",
         "position": {
-          "x": 610,
+          "x": 590,
           "y": 220
         },
         "inputs": [
@@ -69,15 +70,16 @@
         ],
         "params": {
           "initial_value": "x10"
-        }
+        },
+        "color": "#E57373"
       },
       {
         "id": "03d10f15-3f0e-48f4-881b-281485faefd6",
         "type": "Adder",
         "name": "Difference",
         "position": {
-          "x": 660,
-          "y": 400
+          "x": 590,
+          "y": 330
         },
         "inputs": [
           {
@@ -108,17 +110,18 @@
           }
         ],
         "params": {
-          "operations": "\"+-\"",
-          "_rotation": 1
-        }
+          "operations": "\"-+\"",
+          "_rotation": 2
+        },
+        "color": "#E57373"
       },
       {
         "id": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
         "type": "Pow",
         "name": "Square",
         "position": {
-          "x": 720,
-          "y": 290
+          "x": 830,
+          "y": 220
         },
         "inputs": [
           {
@@ -142,16 +145,17 @@
         ],
         "params": {
           "exponent": "2",
-          "_rotation": 1
-        }
+          "_rotation": 0
+        },
+        "color": "#E57373"
       },
       {
         "id": "8db3f239-5418-4068-b92c-18ee1d42c427",
         "type": "Amplifier",
         "name": "Param-Mu",
         "position": {
-          "x": 490,
-          "y": 500
+          "x": 60,
+          "y": 210
         },
         "inputs": [
           {
@@ -175,16 +179,17 @@
         ],
         "params": {
           "gain": "mu",
-          "_rotation": 1
-        }
+          "_rotation": 0
+        },
+        "color": "#E57373"
       },
       {
         "id": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
         "type": "Constant",
         "name": "One",
         "position": {
-          "x": 600,
-          "y": 290
+          "x": 750,
+          "y": 390
         },
         "inputs": [],
         "outputs": [
@@ -199,16 +204,17 @@
         ],
         "params": {
           "value": "1",
-          "_rotation": 1
-        }
+          "_rotation": 2
+        },
+        "color": "#E57373"
       },
       {
         "id": "f94de1eb-7d85-42ab-8af5-69e0bd3cbf7d",
         "type": "Multiplier",
         "name": "Multiplier",
         "position": {
-          "x": 490,
-          "y": 420
+          "x": 220,
+          "y": 320
         },
         "inputs": [
           {
@@ -239,16 +245,17 @@
           }
         ],
         "params": {
-          "_rotation": 1
-        }
+          "_rotation": 2
+        },
+        "color": "#E57373"
       },
       {
         "id": "ee2391d1-5c61-45de-859b-ff98ad13f4a4",
         "type": "Adder",
         "name": "Difference",
         "position": {
-          "x": 780,
-          "y": 520
+          "x": 220,
+          "y": 220
         },
         "inputs": [
           {
@@ -280,8 +287,9 @@
         ],
         "params": {
           "operations": "\"+-\"",
-          "_rotation": 1
-        }
+          "_rotation": 0
+        },
+        "color": "#E57373"
       },
       {
         "id": "34e172de-4aa4-4f33-9844-f78184aa1a19",
@@ -304,7 +312,8 @@
         "outputs": [],
         "params": {
           "_rotation": 3
-        }
+        },
+        "color": "#E57373"
       },
       {
         "id": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
@@ -327,7 +336,8 @@
         "outputs": [],
         "params": {
           "_rotation": 3
-        }
+        },
+        "color": "#E57373"
       }
     ],
     "connections": [
@@ -343,20 +353,6 @@
         "sourceNodeId": "440919f7-c63c-40d7-8f78-67871a0f89f6",
         "sourcePortIndex": 0,
         "targetNodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
-        "targetPortIndex": 0
-      },
-      {
-        "id": "add1302b-0e10-4f52-8063-f00ebd9ffa96",
-        "sourceNodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
-        "sourcePortIndex": 0,
-        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
-        "targetPortIndex": 1
-      },
-      {
-        "id": "47f7860d-96e2-4b70-ac67-0f09bc1ca28c",
-        "sourceNodeId": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
-        "sourcePortIndex": 0,
-        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
         "targetPortIndex": 0
       },
       {
@@ -414,18 +410,34 @@
         "sourcePortIndex": 0,
         "targetNodeId": "b2b48c31-985f-4917-bef9-6dcecdc2e928",
         "targetPortIndex": 0
+      },
+      {
+        "id": "e8023500-2cf8-466c-a54a-92380fa33224",
+        "sourceNodeId": "9e7d89cc-bd31-4615-b34b-1b7a11850be3",
+        "sourcePortIndex": 0,
+        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "5a23be66-2404-415b-81bb-884918b6b88e",
+        "sourceNodeId": "3c9f84cd-ee77-4232-9596-aaf057dd0254",
+        "sourcePortIndex": 0,
+        "targetNodeId": "03d10f15-3f0e-48f4-881b-281485faefd6",
+        "targetPortIndex": 1,
+        "waypoints": []
       }
     ],
     "annotations": [
       {
         "id": "892e58cc-029b-4498-b7b5-f54b301028e4",
         "position": {
-          "x": 70,
-          "y": 200
+          "x": 50,
+          "y": 60
         },
-        "content": "# Van der Pol\n\nThis is the Van der Pol system \n\n$$ \\ddot{x} - \\mu (1 - x^2) \\dot{x} + x = 0$$\n\nmodeled as discrete components.\n\nIt is famous for its stiffness which is controled through the paramter $\\mu$. \nFor small values $\\mu \\approx 10$ its not very stiff and explicit integrators such as **RKCK54** can handle it quite well. \nBut for larger values $\\mu > 100$, the gradients become increasingly steep and explicit integrators become inefficient due to their limited (numerical) stability region. \nThen using implicit integrators such as **GEAR52A** or **ESDIRK43** makes sense. ",
-        "width": 215,
-        "height": 355
+        "content": "# Van der Pol\n\nThis is the Van der Pol system \n\n$$ \\ddot{x} - \\mu (1 - x^2) \\dot{x} + x = 0$$\n\nmodeled as discrete components.\n",
+        "width": 200,
+        "height": 120,
+        "color": "#E57373"
       }
     ]
   },

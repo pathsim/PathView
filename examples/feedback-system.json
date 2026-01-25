@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T15:57:32.963Z",
-    "modified": "2026-01-19T15:57:32.963Z",
+    "created": "2026-01-25T00:44:51.546Z",
+    "modified": "2026-01-25T00:44:51.546Z",
     "name": "feedback-system"
   },
   "graph": {
@@ -52,7 +52,7 @@
         "type": "Amplifier",
         "name": "Feedback",
         "position": {
-          "x": 970,
+          "x": 910,
           "y": 460
         },
         "inputs": [
@@ -118,7 +118,7 @@
         "name": "Unit Step",
         "position": {
           "x": 700,
-          "y": 360
+          "y": 390
         },
         "inputs": [],
         "outputs": [
@@ -142,8 +142,8 @@
         "type": "Scope",
         "name": "Result",
         "position": {
-          "x": 1150,
-          "y": 370
+          "x": 1110,
+          "y": 390
         },
         "inputs": [
           {
@@ -217,11 +217,11 @@
       {
         "id": "a0d9ddea-c4f8-4363-9c0a-5e19e6c52491",
         "position": {
-          "x": 650,
-          "y": 250
+          "x": 660,
+          "y": 260
         },
         "content": "# Linear Feedback System\n\nA linear feedback system with a delayed step excitation and some decaying initial conditions. Check the code editor (E) for the global system parameters.",
-        "width": 550,
+        "width": 500,
         "height": 80
       }
     ]

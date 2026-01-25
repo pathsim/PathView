@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T22:28:52.786Z",
-    "modified": "2026-01-19T22:28:52.786Z",
+    "created": "2026-01-25T00:40:48.165Z",
+    "modified": "2026-01-25T00:40:48.165Z",
     "name": "bouncing-ball"
   },
   "graph": {
@@ -12,7 +12,7 @@
         "type": "Integrator",
         "name": "pos",
         "position": {
-          "x": 750,
+          "x": 740,
           "y": 250
         },
         "inputs": [
@@ -38,16 +38,14 @@
         "params": {
           "initial_value": "x0 "
         },
-        "pinnedParams": [
-          "initial_value"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "d6b8ebf1-173b-4f71-a160-d86545a80cb9",
         "type": "Integrator",
         "name": "vel",
         "position": {
-          "x": 490,
+          "x": 520,
           "y": 250
         },
         "inputs": [
@@ -71,16 +69,14 @@
           }
         ],
         "params": {},
-        "pinnedParams": [
-          "initial_value"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "c76c21f3-21cd-453e-9437-8e8af946d1c7",
         "type": "Scope",
         "name": "x(t)",
         "position": {
-          "x": 880,
+          "x": 860,
           "y": 340
         },
         "inputs": [
@@ -103,8 +99,8 @@
         "type": "Constant",
         "name": "gravity",
         "position": {
-          "x": 360,
-          "y": 150
+          "x": 390,
+          "y": 250
         },
         "inputs": [],
         "outputs": [
@@ -119,11 +115,9 @@
         ],
         "params": {
           "value": "-g",
-          "_rotation": 1
+          "_rotation": 0
         },
-        "pinnedParams": [
-          "value"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "d73713d6-eb61-442e-a69b-c4d168180ef4",
@@ -153,8 +147,8 @@
         "type": "Function",
         "name": "energy",
         "position": {
-          "x": 750,
-          "y": 130
+          "x": 980,
+          "y": 240
         },
         "inputs": [
           {
@@ -195,7 +189,7 @@
         "type": "Scope",
         "name": "E(t)",
         "position": {
-          "x": 1140,
+          "x": 1100,
           "y": 340
         },
         "inputs": [
@@ -248,7 +242,25 @@
         "sourceNodeId": "d6b8ebf1-173b-4f71-a160-d86545a80cb9",
         "sourcePortIndex": 0,
         "targetNodeId": "db488fa8-9004-40f7-a724-bc9846dd2f85",
-        "targetPortIndex": 0
+        "targetPortIndex": 0,
+        "waypoints": [
+          {
+            "id": "1450bbfa-0452-4744-946c-d8b31edfd963",
+            "position": {
+              "x": 620,
+              "y": 220
+            },
+            "isUserWaypoint": true
+          },
+          {
+            "id": "048eee1c-2ca5-4369-aafd-f5842947a24a",
+            "position": {
+              "x": 770,
+              "y": 200
+            },
+            "isUserWaypoint": true
+          }
+        ]
       },
       {
         "id": "b7bb9b2f-06ea-4bfa-a739-1ded869eeef6",
@@ -265,18 +277,7 @@
         "targetPortIndex": 0
       }
     ],
-    "annotations": [
-      {
-        "id": "deeecd86-71ac-4a13-a289-c64c946e667c",
-        "position": {
-          "x": -160,
-          "y": 40
-        },
-        "content": "# Bouncing Ball Physics\n\nThis is an example of a hybrid system with continuous dynamics (free falling ball) and discrete events (bounces).\n\nIntegrating the gravitational acceleration gives the ball velocity in free fall:\n\n$$ v(t) = - \\int_0^t g \\, d\\tau $$\n\nAnd the position is the integrated velocity:\n\n$$ x(t) = \\int_0^t v(\\tau) \\, d\\tau $$\n\nWe use an event node to define the discrete dynamics of the ball hitting the ground. Whenever the position crosses zero\n\n$$ |x(t)| = 0 $$\n\nthe sign of the velocity is flipped and a coefficient of restitution ($b$) is applied to model the energy loss from the deformation of the ball:\n\n$$ y(t) \\leftarrow -b \\, y(t)  $$\n\nWhen the total energy drops below a certain threshold we consider that a Zeno state and stop the simulation.",
-        "width": 425,
-        "height": 370
-      }
-    ]
+    "annotations": []
   },
   "events": [
     {
@@ -284,8 +285,8 @@
       "type": "pathsim.events.ZeroCrossing",
       "name": "Bounce",
       "position": {
-        "x": 1000,
-        "y": 260
+        "x": 1320,
+        "y": 200
       },
       "params": {
         "func_evt": "bounce_detect",
@@ -297,7 +298,7 @@
       "type": "pathsim.events.Condition",
       "name": "Zeno",
       "position": {
-        "x": 1260,
+        "x": 1380,
         "y": 260
       },
       "params": {

@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "created": "2026-01-19T22:45:20.066Z",
-    "modified": "2026-01-19T22:45:20.066Z",
+    "created": "2026-01-25T00:28:34.252Z",
+    "modified": "2026-01-25T00:28:34.252Z",
     "name": "cascade-subsystem"
   },
   "graph": {
@@ -12,8 +12,8 @@
         "type": "StepSource",
         "name": "Setpoint",
         "position": {
-          "x": 740,
-          "y": 470
+          "x": 860,
+          "y": 320
         },
         "inputs": [],
         "outputs": [
@@ -37,7 +37,7 @@
         "type": "PID",
         "name": "PI-1",
         "position": {
-          "x": 1090,
+          "x": 1170,
           "y": 330
         },
         "inputs": [
@@ -66,17 +66,14 @@
           "Kd": "0",
           "f_max": "10"
         },
-        "pinnedParams": [
-          "Ki",
-          "Kp"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "b449fb93-54e1-4cfd-862b-cbb66d919d91",
         "type": "Adder",
         "name": "Error-1",
         "position": {
-          "x": 900,
+          "x": 1030,
           "y": 330
         },
         "inputs": [
@@ -117,7 +114,7 @@
         "type": "Adder",
         "name": "Error-2",
         "position": {
-          "x": 1270,
+          "x": 1330,
           "y": 340
         },
         "inputs": [
@@ -187,18 +184,15 @@
           "Kd": "0",
           "f_max": "10"
         },
-        "pinnedParams": [
-          "Kp",
-          "Ki"
-        ]
+        "pinnedParams": []
       },
       {
         "id": "40ac8e75-a709-4434-9001-63bc1d73106c",
         "type": "Subsystem",
         "name": "Plant",
         "position": {
-          "x": 1330,
-          "y": 450
+          "x": 1400,
+          "y": 410
         },
         "inputs": [
           {
@@ -238,13 +232,13 @@
               "type": "Interface",
               "name": "Subsystem",
               "position": {
-                "x": -250,
-                "y": -320
+                "x": -640,
+                "y": -290
               },
               "inputs": [],
               "outputs": [],
               "params": {
-                "_rotation": 3
+                "_rotation": 0
               }
             },
             {
@@ -252,8 +246,8 @@
               "type": "TransferFunctionZPG",
               "name": "TF-2",
               "position": {
-                "x": -410,
-                "y": -120
+                "x": -190,
+                "y": -290
               },
               "inputs": [
                 {
@@ -279,7 +273,7 @@
                 "Zeros": "[]",
                 "Poles": "[-1, -1, -1]",
                 "Gain": "10",
-                "_rotation": 1
+                "_rotation": 0
               }
             },
             {
@@ -287,8 +281,8 @@
               "type": "TransferFunctionZPG",
               "name": "TF-1",
               "position": {
-                "x": -410,
-                "y": -280
+                "x": -490,
+                "y": -290
               },
               "inputs": [
                 {
@@ -314,7 +308,7 @@
                 "Zeros": "[]",
                 "Poles": "[-2.0]",
                 "Gain": "3",
-                "_rotation": 1
+                "_rotation": 0
               }
             },
             {
@@ -322,8 +316,8 @@
               "type": "Subsystem",
               "name": "Disturbance",
               "position": {
-                "x": -410,
-                "y": -200
+                "x": -340,
+                "y": -290
               },
               "inputs": [
                 {
@@ -355,13 +349,13 @@
                     "type": "Interface",
                     "name": "Subsystem",
                     "position": {
-                      "x": 270,
-                      "y": 0
+                      "x": 430,
+                      "y": 120
                     },
                     "inputs": [],
                     "outputs": [],
                     "params": {
-                      "_rotation": 2
+                      "_rotation": 0
                     }
                   },
                   {
@@ -369,8 +363,8 @@
                     "type": "Adder",
                     "name": "Combiner",
                     "position": {
-                      "x": 270,
-                      "y": 70
+                      "x": 260,
+                      "y": 120
                     },
                     "inputs": [
                       {
@@ -410,7 +404,7 @@
                     "name": "Noise",
                     "position": {
                       "x": 120,
-                      "y": 80
+                      "y": 130
                     },
                     "inputs": [],
                     "outputs": [
@@ -433,8 +427,8 @@
                     "type": "Scope",
                     "name": "Disturbed Signal",
                     "position": {
-                      "x": 450,
-                      "y": 70
+                      "x": 600,
+                      "y": 120
                     },
                     "inputs": [
                       {
@@ -486,12 +480,12 @@
                   {
                     "id": "c3103ad7-22d5-455d-8078-579809c95ad6",
                     "position": {
-                      "x": 360,
-                      "y": -90
+                      "x": 150,
+                      "y": -10
                     },
                     "content": "# Disturbance\n\nThe inline disturbance adds a white noise signal on top of the input signal.",
-                    "width": 155,
-                    "height": 100
+                    "width": 470,
+                    "height": 70
                   }
                 ]
               }
@@ -538,12 +532,12 @@
             {
               "id": "4dc50a79-58b7-4cbd-b049-110bfbbd117e",
               "position": {
-                "x": -180,
-                "y": -280
+                "x": -640,
+                "y": -440
               },
               "content": "# Plant\n\nThe plant contains two transfer functions and an additive inline disturbance...\n\n... which is modeled by a subsystem too.",
-              "width": 140,
-              "height": 160
+              "width": 470,
+              "height": 100
             }
           ]
         }
@@ -553,8 +547,8 @@
         "type": "Scope",
         "name": "Plant vs Setpoint",
         "position": {
-          "x": 1040,
-          "y": 540
+          "x": 1750,
+          "y": 220
         },
         "inputs": [
           {
@@ -577,7 +571,7 @@
         "outputs": [],
         "params": {
           "t_wait": "0.0",
-          "_rotation": 1
+          "_rotation": 3
         }
       },
       {
@@ -585,8 +579,8 @@
         "type": "Scope",
         "name": "Err-1 and PI-1",
         "position": {
-          "x": 990,
-          "y": 200
+          "x": 1170,
+          "y": 220
         },
         "inputs": [
           {
@@ -617,8 +611,8 @@
         "type": "Scope",
         "name": "Err-2 and PI-2",
         "position": {
-          "x": 1360,
-          "y": 200
+          "x": 1460,
+          "y": 220
         },
         "inputs": [
           {
@@ -682,13 +676,6 @@
         "targetPortIndex": 0
       },
       {
-        "id": "1bbb1f23-74cb-4cd2-9891-2f63b627fbbc",
-        "sourceNodeId": "40ac8e75-a709-4434-9001-63bc1d73106c",
-        "sourcePortIndex": 1,
-        "targetNodeId": "e13e27ba-96ec-4b02-a6d6-6cea244e49dc",
-        "targetPortIndex": 1
-      },
-      {
         "id": "e696a0d1-caea-4945-a402-8b7eb0d6863a",
         "sourceNodeId": "40ac8e75-a709-4434-9001-63bc1d73106c",
         "sourcePortIndex": 0,
@@ -731,19 +718,44 @@
         "targetPortIndex": 1
       },
       {
-        "id": "8cdabc5e-4344-45c0-8538-c02917eaffca",
+        "id": "31957e0f-cb52-4d42-9dc8-dc7cbd286419",
+        "sourceNodeId": "40ac8e75-a709-4434-9001-63bc1d73106c",
+        "sourcePortIndex": 1,
+        "targetNodeId": "e13e27ba-96ec-4b02-a6d6-6cea244e49dc",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "8d5acc91-f8f1-410b-abfd-ee6a9e44474d",
         "sourceNodeId": "7c855194-3fcf-4d00-acbd-0e3051f5703c",
         "sourcePortIndex": 0,
         "targetNodeId": "e13e27ba-96ec-4b02-a6d6-6cea244e49dc",
-        "targetPortIndex": 0
+        "targetPortIndex": 1,
+        "waypoints": [
+          {
+            "id": "d33ade65-3130-4fc1-bdb1-62a2fc083902",
+            "position": {
+              "x": 950,
+              "y": 360
+            },
+            "isUserWaypoint": true
+          },
+          {
+            "id": "9c61b814-0af6-458e-9723-f7a321517bfb",
+            "position": {
+              "x": 1370,
+              "y": 470
+            },
+            "isUserWaypoint": true
+          }
+        ]
       }
     ],
     "annotations": [
       {
         "id": "416e7281-7496-4b94-8c9f-ab802029d5e9",
         "position": {
-          "x": 700,
-          "y": 180
+          "x": 810,
+          "y": 170
         },
         "content": "# Cascade PI Controler\n\nThis example is a cascade controler. The plant is modeled as a **Subsystem**. Double click to enter.",
         "width": 220,
