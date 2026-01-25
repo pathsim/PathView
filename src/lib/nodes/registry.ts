@@ -6,6 +6,7 @@
 import type { NodeTypeDefinition, NodeCategory, ParamDefinition, ParamType } from './types';
 import { defineNode } from './defineNode';
 import { extractedBlocks, blockConfig, type ExtractedBlock } from './generated/blocks';
+import { syncPortBlocks } from './uiConfig';
 
 class NodeRegistry {
 	private nodes: Map<string, NodeTypeDefinition> = new Map();
@@ -150,6 +151,7 @@ function createNodeFromExtracted(
 		outputs,
 		maxInputs,
 		maxOutputs,
+		syncPorts: syncPortBlocks.has(name),
 		params
 	});
 

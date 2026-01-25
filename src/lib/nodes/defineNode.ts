@@ -19,6 +19,7 @@ interface DefineNodeOptions {
 	minOutputs?: number;
 	maxInputs?: number | null; // null = unlimited
 	maxOutputs?: number | null;
+	syncPorts?: boolean; // When true, output count always equals input count
 
 	// Shape override (defaults based on category)
 	shape?: NodeShape;
@@ -52,6 +53,7 @@ export function defineNode(options: DefineNodeOptions): NodeTypeDefinition {
 		minOutputs = 1,
 		maxInputs = null,
 		maxOutputs = null,
+		syncPorts,
 		shape,
 		params = {}
 	} = options;
@@ -89,7 +91,8 @@ export function defineNode(options: DefineNodeOptions): NodeTypeDefinition {
 			minInputs,
 			minOutputs,
 			maxInputs,
-			maxOutputs
+			maxOutputs,
+			syncPorts
 		},
 
 		params: paramDefs

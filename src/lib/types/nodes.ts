@@ -67,6 +67,7 @@ export interface NodeTypeDefinition {
 		minOutputs: number; // minimum number of output ports (default 1)
 		maxInputs: number | null; // null = unlimited
 		maxOutputs: number | null;
+		syncPorts?: boolean; // When true, output count always equals input count (parallel paths)
 	};
 
 	// Parameter definitions
