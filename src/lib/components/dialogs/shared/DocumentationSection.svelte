@@ -233,6 +233,13 @@
 	/* CodeMirror overrides for compact display */
 	.docs-content :global(.cm-editor) {
 		background: var(--surface);
+		font-size: 8px !important;
+	}
+
+	.docs-content :global(.cm-scroller),
+	.docs-content :global(.cm-content),
+	.docs-content :global(.cm-line) {
+		font-size: 8px !important;
 	}
 
 	/* Hide line numbers in docs code blocks */
