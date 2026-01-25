@@ -66,8 +66,9 @@ function updateParentSubsystem(
 
 /**
  * Internal: Add a port to a node
+ * @param syncFollowUp - If true, this is a follow-up call from syncPorts logic (prevents recursion)
  */
-function addPort(nodeId: string, direction: PortDirection): boolean {
+function addPort(nodeId: string, direction: PortDirection, syncFollowUp = false): boolean {
 	const currentGraph = getCurrentGraph();
 	const node = currentGraph.nodes.get(nodeId);
 	if (!node) return false;
@@ -128,13 +129,19 @@ function addPort(nodeId: string, direction: PortDirection): boolean {
 		[config.portsKey]: [...(n[config.portsKey] as PortInstance[]), newPort]
 	}));
 
+	// Sync outputs to match inputs for parallel-path blocks
+	if (!syncFollowUp && direction === 'input' && typeDef?.ports.syncPorts) {
+		addPort(nodeId, 'output', true);
+	}
+
 	return true;
 }
 
 /**
  * Internal: Remove the last port from a node
+ * @param syncFollowUp - If true, this is a follow-up call from syncPorts logic (prevents recursion)
  */
-function removePort(nodeId: string, direction: PortDirection): boolean {
+function removePort(nodeId: string, direction: PortDirection, syncFollowUp = false): boolean {
 	const currentGraph = getCurrentGraph();
 	const node = currentGraph.nodes.get(nodeId);
 	if (!node) return false;
@@ -193,6 +200,11 @@ function removePort(nodeId: string, direction: PortDirection): boolean {
 			return !(connNodeId === nodeId && connIndex >= removedIndex);
 		})
 	);
+
+	// Sync outputs to match inputs for parallel-path blocks
+	if (!syncFollowUp && direction === 'input' && typeDef?.ports.syncPorts) {
+		removePort(nodeId, 'output', true);
+	}
 
 	return true;
 }
