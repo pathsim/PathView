@@ -507,6 +507,7 @@
 		style="opacity: {waypointsVisible() ? 1 : 0}; pointer-events: {waypointsVisible() ? 'all' : 'none'};"
 	>
 		{#each userWaypoints() as waypoint (waypoint.id)}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<circle
 				cx={waypoint.position.x}
 				cy={waypoint.position.y}
