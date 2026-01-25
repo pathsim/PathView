@@ -1,6 +1,7 @@
 {
   "files": [
     "feedback-system.json",
+    "harmonic-oscillator.json",
     "squarewave-lpf.json",
     "pid-subsystem.json",
     "thermostat.json",
