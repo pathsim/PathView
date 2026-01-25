@@ -11,7 +11,9 @@
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
 	import { paramInput } from '$lib/actions/paramInput';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
-	import { NODE, getPortPositionCalc, calculateNodeDimensions } from '$lib/constants/dimensions';
+	import { NODE, getPortPositionCalc, calculateNodeDimensions, snapTo2G } from '$lib/constants/dimensions';
+	import { containsMath, renderInlineMath, renderInlineMathSync, measureRenderedMath } from '$lib/utils/inlineMathRenderer';
+	import { getKatexCssUrl } from '$lib/utils/katexLoader';
 	import PlotPreview from './PlotPreview.svelte';
 
 	interface Props {
@@ -86,6 +88,36 @@
 		}
 	}
 
+	// Math rendering for node names with $...$ LaTeX
+	const nameHasMath = $derived(containsMath(data.name));
+	let renderedNameHtml = $state<string | null>(null);
+	let measuredNameWidth = $state<number | null>(null);
+
+	// Render math when name contains $...$
+	$effect(() => {
+		if (nameHasMath) {
+			// Try sync first (cached)
+			const cached = renderInlineMathSync(data.name);
+			if (cached) {
+				renderedNameHtml = cached.html;
+				// Measure using unconstrained hidden element
+				const dims = measureRenderedMath(cached.html);
+				measuredNameWidth = dims.width;
+			} else {
+				// Render async
+				renderInlineMath(data.name).then((result) => {
+					renderedNameHtml = result.html;
+					// Measure using unconstrained hidden element
+					const dims = measureRenderedMath(result.html);
+					measuredNameWidth = dims.width;
+				});
+			}
+		} else {
+			renderedNameHtml = null;
+			measuredNameWidth = null;
+		}
+	});
+
 	// Check if this node allows dynamic ports
 	const allowsDynamicInputs = $derived(typeDef?.ports.maxInputs === null);
 	const allowsDynamicOutputs = $derived(typeDef?.ports.maxOutputs === null);
@@ -146,7 +178,16 @@
 		rotation,
 		typeDef?.name
 	));
-	const nodeWidth = $derived(nodeDimensions.width);
+	// Use measured width if math is rendered and measured, otherwise use calculated
+	const nodeWidth = $derived(() => {
+		if (measuredNameWidth !== null && nameHasMath) {
+			// For math names, use measured width instead of string-length estimate
+			// Only keep minimum base width, not the string-based calculation
+			const measuredTotal = snapTo2G(measuredNameWidth);
+			return Math.max(NODE.baseWidth, measuredTotal);
+		}
+		return nodeDimensions.width;
+	});
 	const nodeHeight = $derived(nodeDimensions.height);
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
@@ -277,6 +318,11 @@
 	});
 </script>
 
+<!-- Load KaTeX CSS for math rendering in node names -->
+<svelte:head>
+	<link rel="stylesheet" href={getKatexCssUrl()} />
+</svelte:head>
+
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="node {shapeClass()}"
@@ -285,7 +331,7 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	data-rotation={rotation}
-	style="width: {nodeWidth}px; height: {nodeHeight}px; --node-color: {nodeColor};"
+	style="width: {nodeWidth()}px; height: {nodeHeight}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -309,7 +355,11 @@
 	<div class="node-inner">
 		<!-- Node content -->
 		<div class="node-content">
-			<span class="node-name">{data.name}</span>
+			{#if renderedNameHtml}
+				<span class="node-name">{@html renderedNameHtml}</span>
+			{:else}
+				<span class="node-name">{data.name}</span>
+			{/if}
 			{#if typeDef}
 				<span class="node-type">{typeDef.name}</span>
 			{/if}
@@ -483,6 +533,23 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		letter-spacing: -0.2px;
+	}
+
+	/* KaTeX math rendering in node names */
+	.node-name :global(.katex) {
+		font-size: 1em;
+		font-weight: 600;
+		color: inherit;
+	}
+
+	.node-name :global(.katex-html) {
+		white-space: nowrap;
+	}
+
+	.node-name :global(.math-error) {
+		color: var(--error);
+		font-family: var(--font-mono);
+		font-size: 0.9em;
 	}
 
 	.node-type {

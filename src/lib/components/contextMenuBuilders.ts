@@ -353,7 +353,14 @@ function buildCanvasMenu(
 		{
 			label: 'Export SVG',
 			icon: 'image',
-			action: () => downloadSvg(exportToSVG(), 'pathview-graph.svg')
+			action: async () => {
+				try {
+					const svg = await exportToSVG();
+					downloadSvg(svg, 'pathview-graph.svg');
+				} catch (e) {
+					console.error('SVG export failed:', e);
+				}
+			}
 		}
 	];
 

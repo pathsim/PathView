@@ -14,6 +14,12 @@ import { eventStore } from '$lib/stores/events';
 import { getThemeColors } from '$lib/constants/theme';
 import { NODE, EVENT } from '$lib/constants/dimensions';
 import { getHandlePath } from '$lib/constants/handlePaths';
+import { latexToSvg, getSvgDimensions, preloadMathJax } from '$lib/utils/mathjaxSvg';
+
+// Preload MathJax when module loads
+if (typeof window !== 'undefined') {
+	preloadMathJax();
+}
 import type { ExportOptions, RenderContext, Bounds } from './types';
 import { DEFAULT_OPTIONS } from './types';
 import type { NodeInstance } from '$lib/types/nodes';
@@ -39,12 +45,72 @@ function escapeXml(str: string): string {
 		.replace(/'/g, '&apos;');
 }
 
-function getNodeDimensions(nodeId: string): { width: number; height: number } | null {
-	const wrapper = document.querySelector(`[data-id="${nodeId}"]`) as HTMLElement;
-	if (!wrapper) return null;
-	const rect = wrapper.getBoundingClientRect();
-	const zoom = getZoom();
-	return { width: rect.width / zoom, height: rect.height / zoom };
+/**
+ * Extract LaTeX from a string with $...$ delimiters
+ */
+function extractLatex(text: string): { before: string; latex: string; after: string } | null {
+	const match = text.match(/^(.*?)\$([^$]+)\$(.*)$/);
+	if (!match) return null;
+	return { before: match[1], latex: match[2], after: match[3] };
+}
+
+/**
+ * Render a plain text label as SVG
+ */
+function renderPlainTextLabel(
+	text: string,
+	centerX: number,
+	centerY: number,
+	color: string,
+	fontSize: number,
+	fontWeight: string
+): string {
+	return `<text x="${centerX}" y="${centerY}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="${fontSize}" font-weight="${fontWeight}" font-family="system-ui, -apple-system, sans-serif">${escapeXml(text)}</text>`;
+}
+
+/**
+ * Render a label that may contain math as native SVG using MathJax
+ * @param originalText - The original text with $...$ LaTeX delimiters (NOT the rendered DOM content)
+ */
+async function renderMathLabel(
+	originalText: string,
+	centerX: number,
+	centerY: number,
+	color: string,
+	fontSize: number,
+	fontWeight: string,
+	ctx: RenderContext
+): Promise<string> {
+	const mathParts = extractLatex(originalText);
+
+	if (!mathParts) {
+		// Plain text - use regular SVG text
+		return renderPlainTextLabel(originalText, centerX, centerY, color, fontSize, fontWeight);
+	}
+
+	try {
+		// Render the LaTeX to SVG using MathJax
+		let svg = await latexToSvg(mathParts.latex, false);
+		const dims = getSvgDimensions(svg);
+
+		// Apply color to the SVG
+		svg = svg.replace(/currentColor/g, color);
+
+		// Scale factor: MathJax uses ex units, we need to scale to match our font size
+		// Base assumption: 1ex ≈ 8px, scale to match desired font size
+		const scale = fontSize / 10;
+
+		// Calculate position (center the SVG)
+		const x = centerX - (dims.width * scale) / 2;
+		const y = centerY - (dims.height * scale) / 2;
+
+		// Wrap in a group with transform for positioning and scaling
+		return `<g transform="translate(${x.toFixed(2)}, ${y.toFixed(2)}) scale(${scale.toFixed(3)})">${svg}</g>`;
+	} catch (e) {
+		console.error('MathJax SVG rendering error:', e);
+		// Fall back to plain text showing the raw LaTeX
+		return renderPlainTextLabel(originalText, centerX, centerY, color, fontSize, fontWeight);
+	}
 }
 
 // ============================================================================
@@ -131,20 +197,23 @@ function renderHandles(nodeId: string, nodeX: number, nodeY: number, ctx: Render
 // NODE RENDERING - Pure SVG with DOM-read styles
 // ============================================================================
 
-function renderNode(node: NodeInstance, ctx: RenderContext): string {
+async function renderNode(node: NodeInstance, ctx: RenderContext): Promise<string> {
 	const wrapper = document.querySelector(`[data-id="${node.id}"]`) as HTMLElement;
 	if (!wrapper) return '';
 
-	const dims = getNodeDimensions(node.id);
-	if (!dims) return '';
-	const { width, height } = dims;
+	const nodeEl = wrapper.querySelector('.node') as HTMLElement;
+	if (!nodeEl) return '';
+
+	// Get dimensions from the actual .node element (not SvelteFlow wrapper)
+	// This ensures we use our dynamic width calculation for math names
+	const zoom = getZoom();
+	const nodeRect = nodeEl.getBoundingClientRect();
+	const width = nodeRect.width / zoom;
+	const height = nodeRect.height / zoom;
 
 	// Position is center-origin, convert to top-left for SVG
 	const x = node.position.x - width / 2;
 	const y = node.position.y - height / 2;
-
-	const nodeEl = wrapper.querySelector('.node') as HTMLElement;
-	if (!nodeEl) return '';
 
 	// Read styles from DOM
 	const computed = getComputedStyle(nodeEl);
@@ -173,8 +242,6 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 
 	// Check for pinned params section in DOM
 	const pinnedParamsEl = nodeEl.querySelector('.pinned-params') as HTMLElement;
-	const zoom = getZoom();
-	const nodeRect = wrapper.getBoundingClientRect();
 
 	// Calculate content center (above pinned params if present)
 	let contentCenterY = y + height / 2;
@@ -189,19 +256,15 @@ function renderNode(node: NodeInstance, ctx: RenderContext): string {
 		const centerX = x + width / 2;
 
 		if (ctx.options.showTypeLabels && nodeType) {
-			// Name above center
-			parts.push(
-				`<text x="${centerX}" y="${contentCenterY - 4}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
-			);
+			// Name above center (may contain math) - use original node.name for LaTeX source
+			parts.push(await renderMathLabel(node.name, centerX, contentCenterY - 4, color, 10, '600', ctx));
 			// Type below center
 			parts.push(
 				`<text x="${centerX}" y="${contentCenterY + 8}" text-anchor="middle" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeType)}</text>`
 			);
 		} else {
-			// Just name, centered
-			parts.push(
-				`<text x="${centerX}" y="${contentCenterY}" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="10" font-weight="600" font-family="system-ui, -apple-system, sans-serif">${escapeXml(nodeName)}</text>`
-			);
+			// Just name, centered (may contain math) - use original node.name for LaTeX source
+			parts.push(await renderMathLabel(node.name, centerX, contentCenterY, color, 10, '600', ctx));
 		}
 	}
 
@@ -341,11 +404,19 @@ function renderEvent(event: EventInstance, ctx: RenderContext): string {
 
 function calculateBounds(nodes: NodeInstance[], events: EventInstance[]): Bounds {
 	const bounds: Bounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+	const zoom = getZoom();
 
 	for (const node of nodes) {
-		const dims = getNodeDimensions(node.id);
-		const width = dims?.width ?? NODE.baseWidth;
-		const height = dims?.height ?? NODE.baseHeight;
+		// Get dimensions from the actual .node element (not SvelteFlow wrapper)
+		const wrapper = document.querySelector(`[data-id="${node.id}"]`) as HTMLElement;
+		const nodeEl = wrapper?.querySelector('.node') as HTMLElement;
+		let width = NODE.baseWidth;
+		let height = NODE.baseHeight;
+		if (nodeEl) {
+			const rect = nodeEl.getBoundingClientRect();
+			width = rect.width / zoom;
+			height = rect.height / zoom;
+		}
 		// Position is center-origin, calculate corners
 		const left = node.position.x - width / 2;
 		const top = node.position.y - height / 2;
@@ -381,7 +452,7 @@ function calculateBounds(nodes: NodeInstance[], events: EventInstance[]): Bounds
 	return isFinite(bounds.minX) ? bounds : { minX: 0, minY: 0, maxX: 200, maxY: 200 };
 }
 
-export function exportToSVG(options: ExportOptions = {}): string {
+export async function exportToSVG(options: ExportOptions = {}): Promise<string> {
 	const opts: Required<ExportOptions> = { ...DEFAULT_OPTIONS, ...options };
 	const themeColors = getThemeColors(opts.theme);
 	const ctx: RenderContext = { theme: themeColors, options: opts };
@@ -419,11 +490,11 @@ export function exportToSVG(options: ExportOptions = {}): string {
 		parts.push('</g>');
 	}
 
-	// Nodes
+	// Nodes (render in parallel for performance)
 	if (nodes.length > 0) {
 		parts.push('<g class="nodes">');
-		for (const node of nodes) {
-			const rendered = renderNode(node, ctx);
+		const renderedNodes = await Promise.all(nodes.map((node) => renderNode(node, ctx)));
+		for (const rendered of renderedNodes) {
 			if (rendered) parts.push(rendered);
 		}
 		parts.push('</g>');

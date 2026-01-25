@@ -7,7 +7,7 @@
 		label: string;
 		icon?: string;
 		shortcut?: string;
-		action: () => void;
+		action: () => unknown;
 		disabled?: boolean;
 		divider?: boolean;
 	};
