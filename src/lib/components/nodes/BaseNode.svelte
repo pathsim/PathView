@@ -187,9 +187,23 @@
 	const nodeWidth = $derived(() => {
 		if (measuredNameWidth !== null && nameHasMath) {
 			// For math names, use measured width instead of string-length estimate
-			// Only keep minimum base width, not the string-based calculation
-			const measuredTotal = snapTo2G(measuredNameWidth);
-			return Math.max(NODE.baseWidth, measuredTotal);
+			// But still respect minimum width needed for ports, pinned params, type label
+			const isVertical = rotation === 1 || rotation === 3;
+			const maxPortsOnSide = Math.max(data.inputs.length, data.outputs.length);
+			const minPortDimension = Math.max(1, maxPortsOnSide) * NODE.portSpacing;
+			const typeWidth = typeDef ? typeDef.name.length * 5 + 20 : 0;
+			const pinnedParamsWidth = pinnedCount > 0 ? 160 : 0;
+
+			// Minimum width for layout (without name string-length estimate)
+			const minLayoutWidth = snapTo2G(Math.max(
+				NODE.baseWidth,
+				typeWidth,
+				pinnedParamsWidth,
+				isVertical ? minPortDimension : 0
+			));
+
+			const measuredMathWidth = snapTo2G(measuredNameWidth);
+			return Math.max(minLayoutWidth, measuredMathWidth);
 		}
 		return nodeDimensions.width;
 	});
