@@ -242,3 +242,67 @@ export function removeInputPort(nodeId: string): boolean {
 export function removeOutputPort(nodeId: string): boolean {
 	return removePort(nodeId, 'output');
 }
+
+/**
+ * Parse a Python list string into an array of strings
+ * Handles: ["a", "b"], ['a', 'b'], None, empty string
+ */
+function parsePythonList(value: unknown): string[] | null {
+	if (value === null || value === undefined || value === 'None' || value === '') {
+		return null;
+	}
+
+	const str = String(value).trim();
+	if (!str.startsWith('[') || !str.endsWith(']')) {
+		return null;
+	}
+
+	try {
+		// Replace Python single quotes with double quotes for JSON parsing
+		const jsonStr = str.replace(/'/g, '"');
+		const parsed = JSON.parse(jsonStr);
+		if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+			return parsed;
+		}
+	} catch {
+		// Not valid JSON/Python list
+	}
+
+	return null;
+}
+
+/**
+ * Sync port names from a labels parameter value
+ * Updates port names to match labels, keeps generic names for extras
+ */
+export function syncPortNamesFromLabels(
+	nodeId: string,
+	labelsValue: unknown,
+	direction: 'input' | 'output'
+): void {
+	const currentGraph = getCurrentGraph();
+	const node = currentGraph.nodes.get(nodeId);
+	if (!node) return;
+
+	const labels = parsePythonList(labelsValue);
+	const config = getPortConfig(direction);
+	const currentPorts = node[config.portsKey] as PortInstance[];
+
+	// Build new port names: use label if available, else generic name
+	const newPorts = currentPorts.map((port, index) => {
+		const label = labels && index < labels.length ? labels[index] : `${config.defaultName} ${index}`;
+		if (port.name === label) {
+			return port; // No change needed
+		}
+		return { ...port, name: label };
+	});
+
+	// Only update if something changed
+	const hasChanges = newPorts.some((p, i) => p.name !== currentPorts[i].name);
+	if (!hasChanges) return;
+
+	updateNodeById(nodeId, n => ({
+		...n,
+		[config.portsKey]: newPorts
+	}));
+}

@@ -4,6 +4,15 @@
  */
 
 /**
+ * Blocks where a parameter controls port labels.
+ * When the param value changes, port names are updated to match.
+ */
+export const portLabelParams: Record<string, { param: string; direction: 'input' | 'output' }> = {
+	Scope: { param: 'labels', direction: 'input' },
+	Spectrum: { param: 'labels', direction: 'input' }
+};
+
+/**
  * Blocks where output port count must equal input port count.
  * These blocks process inputs as parallel paths - each input has a corresponding output.
  * UI shows only input port controls; outputs auto-sync.

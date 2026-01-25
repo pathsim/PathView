@@ -23,7 +23,9 @@ import {
 	updateCurrentAnnotations
 } from './state';
 import { regenerateGraphIds, createPorts } from './helpers';
+import { syncPortNamesFromLabels } from './ports';
 import { triggerSelectNodes } from '$lib/stores/viewActions';
+import { portLabelParams } from '$lib/nodes/uiConfig';
 
 /**
  * Add a new node to the current graph context
@@ -203,6 +205,15 @@ export function updateNodeColor(id: string, color: string | undefined): void {
  */
 export function updateNodeParams(id: string, params: Record<string, unknown>): void {
 	updateNodeById(id, node => ({ ...node, params: { ...node.params, ...params } }));
+
+	// Sync port names if this block has label-driven ports
+	const node = getCurrentGraph().nodes.get(id);
+	if (node) {
+		const labelConfig = portLabelParams[node.type];
+		if (labelConfig && labelConfig.param in params) {
+			syncPortNamesFromLabels(id, params[labelConfig.param], labelConfig.direction);
+		}
+	}
 }
 
 /**
