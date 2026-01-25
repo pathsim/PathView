@@ -226,7 +226,7 @@
 	}
 
 	.docs-content :global(.cm-container) {
-		font-size: 9px;
+		font-size: 8px;
 		line-height: 1.4;
 	}
 
