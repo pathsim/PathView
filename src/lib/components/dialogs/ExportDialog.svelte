@@ -42,7 +42,7 @@
 	const MAX_LINES = 35;
 	const LINE_HEIGHT_PX = 18.2; // CodeMirror default with 14px font
 	const HEADER_HEIGHT_PX = 41; // Dialog header
-	const CM_PADDING_PX = 16; // .cm-content padding (8px top + 8px bottom)
+	const CM_PADDING_PX = 8; // .cm-content top padding only (bottom removed via CSS)
 
 	let lineCount = $derived(pythonCode.split('\n').length);
 	let dialogHeight = $derived(() => {
@@ -223,6 +223,14 @@
 
 	.code-preview :global(.cm-editor) {
 		height: 100%;
+	}
+
+	.code-preview :global(.cm-scroller) {
+		overflow: auto;
+	}
+
+	.code-preview :global(.cm-content) {
+		padding: 8px 0 0 0;
 	}
 
 	.loading {
