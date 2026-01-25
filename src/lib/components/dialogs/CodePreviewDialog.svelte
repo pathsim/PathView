@@ -23,6 +23,19 @@
 	let currentTheme = $state<Theme>('dark');
 	let copied = $state(false);
 
+	// Line count for dynamic height
+	const MAX_LINES = 35;
+	const LINE_HEIGHT_PX = 20;
+	const HEADER_HEIGHT_PX = 48;
+	const PADDING_PX = 16;
+
+	let lineCount = $derived(code.split('\n').length);
+	let dialogHeight = $derived(() => {
+		const lines = Math.min(lineCount, MAX_LINES);
+		const contentHeight = lines * LINE_HEIGHT_PX + PADDING_PX;
+		return contentHeight + HEADER_HEIGHT_PX;
+	});
+
 	// Subscribe to theme changes
 	const unsubscribeTheme = themeStore.subscribe((theme) => {
 		currentTheme = theme;
@@ -124,7 +137,7 @@
 
 {#if open}
 	<div class="dialog-backdrop nested" transition:fade={{ duration: 150 }} onclick={handleBackdropClick} role="presentation">
-		<div class="dialog glass-panel" transition:scale={{ start: 0.95, duration: 150, easing: cubicOut }} role="dialog" tabindex="-1" aria-labelledby="dialog-title">
+		<div class="dialog glass-panel" style="height: {dialogHeight()}px" transition:scale={{ start: 0.95, duration: 150, easing: cubicOut }} role="dialog" tabindex="-1" aria-labelledby="dialog-title">
 			<div class="dialog-header">
 				<span id="dialog-title">{title}</span>
 				<div class="header-actions">
@@ -167,8 +180,7 @@
 	.dialog {
 		width: 90%;
 		max-width: 700px;
-		height: auto;
-		max-height: 70vh;
+		max-height: 80vh;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
@@ -183,7 +195,6 @@
 	.dialog-body {
 		flex: 1;
 		overflow: hidden;
-		min-height: 200px;
 	}
 
 	.code-preview {
@@ -193,7 +204,6 @@
 
 	.code-preview :global(.cm-editor) {
 		height: 100%;
-		max-height: calc(70vh - 60px);
 	}
 
 	.loading {
