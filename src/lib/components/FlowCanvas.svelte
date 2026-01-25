@@ -33,7 +33,8 @@
 		import { nodeRegistry } from '$lib/nodes';
 	import { NODE_TYPES } from '$lib/constants/nodeTypes';
 	import { GRID_SIZE, SNAP_GRID, BACKGROUND_GAP } from '$lib/constants/grid';
-	import { calculateNodeDimensions } from '$lib/constants/dimensions';
+	import { calculateNodeDimensions, NODE } from '$lib/constants/dimensions';
+	import { mathWidthStore } from '$lib/stores/mathWidths';
 	import type { NodeInstance, Connection, Annotation } from '$lib/nodes/types';
 	import type { EventInstance } from '$lib/events/types';
 
@@ -456,6 +457,24 @@
 		});
 	});
 
+	// Update node widths when math measurements change
+	cleanups.push(mathWidthStore.subscribe((widthMap) => {
+		if (isSyncing) return;
+		let updated = false;
+		nodes = nodes.map(node => {
+			if (node.type !== 'pathview') return node;
+			const measuredWidth = widthMap.get(node.id);
+			if (measuredWidth !== undefined) {
+				const newWidth = Math.max(NODE.baseWidth, measuredWidth);
+				if (node.width !== newWidth) {
+					updated = true;
+					return { ...node, width: newWidth };
+				}
+			}
+			return node;
+		});
+	}));
+
 	// Subscribe to current nodes (filtered by current navigation context)
 	cleanups.push(graphStore.nodes.subscribe((graphNodesMap: Map<string, NodeInstance>) => {
 		if (isSyncing) return;
@@ -535,7 +554,7 @@
 				? graphNode.pinnedParams.filter(name => typeDef.params.some(p => p.name === name)).length
 				: 0;
 			const rotation = (graphNode.params?.['_rotation'] as number) || 0;
-			const { width, height } = calculateNodeDimensions(
+			const dims = calculateNodeDimensions(
 				graphNode.name,
 				graphNode.inputs.length,
 				graphNode.outputs.length,
@@ -543,6 +562,12 @@
 				rotation,
 				typeDef?.name
 			);
+			// Use measured math width if available, otherwise use calculated
+			const measuredWidth = mathWidthStore.get(graphNode.id);
+			const width = measuredWidth !== undefined
+				? Math.max(NODE.baseWidth, measuredWidth)
+				: dims.width;
+			const height = dims.height;
 
 			// If node exists, update data but don't preserve selection here
 			// Selection is managed by SvelteFlow, trigger subscriptions, and merge effect
