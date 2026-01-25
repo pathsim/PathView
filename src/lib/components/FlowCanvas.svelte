@@ -457,24 +457,6 @@
 		});
 	});
 
-	// Update node widths when math measurements change
-	cleanups.push(mathWidthStore.subscribe((widthMap) => {
-		if (isSyncing) return;
-		let updated = false;
-		nodes = nodes.map(node => {
-			if (node.type !== 'pathview') return node;
-			const measuredWidth = widthMap.get(node.id);
-			if (measuredWidth !== undefined) {
-				const newWidth = Math.max(NODE.baseWidth, measuredWidth);
-				if (node.width !== newWidth) {
-					updated = true;
-					return { ...node, width: newWidth };
-				}
-			}
-			return node;
-		});
-	}));
-
 	// Subscribe to current nodes (filtered by current navigation context)
 	cleanups.push(graphStore.nodes.subscribe((graphNodesMap: Map<string, NodeInstance>) => {
 		if (isSyncing) return;

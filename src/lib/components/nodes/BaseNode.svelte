@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { Handle, Position } from '@xyflow/svelte';
+	import { Handle, Position, useSvelteFlow } from '@xyflow/svelte';
 	import { nodeRegistry, type NodeInstance } from '$lib/nodes';
 	import { getShapeCssClass, isSubsystem } from '$lib/nodes/shapes/index';
 	import { NODE_TYPES } from '$lib/constants/nodeTypes';
@@ -24,6 +24,9 @@
 	}
 
 	let { id, data, selected = false }: Props = $props();
+
+	// Get SvelteFlow instance for updating node bounds
+	const { getNode, updateNode } = useSvelteFlow();
 
 	// Get type definition
 	const typeDef = $derived(nodeRegistry.get(data.type));
@@ -105,7 +108,13 @@
 				const dims = measureRenderedMath(cached.html);
 				measuredNameWidth = dims.width;
 				// Store for FlowCanvas to use in SvelteFlow bounds
-				mathWidthStore.set(id, snapTo2G(dims.width));
+				const newWidth = snapTo2G(dims.width);
+				mathWidthStore.set(id, newWidth);
+				// Update SvelteFlow node bounds directly
+				const sfNode = getNode(id);
+				if (sfNode && sfNode.width !== Math.max(NODE.baseWidth, newWidth)) {
+					updateNode(id, { width: Math.max(NODE.baseWidth, newWidth) });
+				}
 			} else {
 				// Render async
 				renderInlineMath(data.name).then((result) => {
@@ -114,7 +123,13 @@
 					const dims = measureRenderedMath(result.html);
 					measuredNameWidth = dims.width;
 					// Store for FlowCanvas to use in SvelteFlow bounds
-					mathWidthStore.set(id, snapTo2G(dims.width));
+					const newWidth = snapTo2G(dims.width);
+					mathWidthStore.set(id, newWidth);
+					// Update SvelteFlow node bounds directly
+					const sfNode = getNode(id);
+					if (sfNode && sfNode.width !== Math.max(NODE.baseWidth, newWidth)) {
+						updateNode(id, { width: Math.max(NODE.baseWidth, newWidth) });
+					}
 				});
 			}
 		} else {
