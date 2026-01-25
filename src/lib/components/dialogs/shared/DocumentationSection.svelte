@@ -226,20 +226,20 @@
 	}
 
 	.docs-content :global(.cm-container) {
-		font-size: 8px;
+		font-size: 11px;
 		line-height: 1.4;
 	}
 
 	/* CodeMirror overrides for compact display */
 	.docs-content :global(.cm-editor) {
 		background: var(--surface);
-		font-size: 8px !important;
+		font-size: 11px !important;
 	}
 
 	.docs-content :global(.cm-scroller),
 	.docs-content :global(.cm-content),
 	.docs-content :global(.cm-line) {
-		font-size: 8px !important;
+		font-size: 11px !important;
 	}
 
 	/* Hide line numbers in docs code blocks */
