@@ -39,7 +39,11 @@ function loadMathJax(): Promise<void> {
 		(window as any).MathJax = {
 			tex: {
 				inlineMath: [['$', '$']],
-				displayMath: [['$$', '$$']]
+				displayMath: [['$$', '$$']],
+				packages: { '[+]': ['boldsymbol'] }
+			},
+			loader: {
+				load: ['[tex]/boldsymbol']
 			},
 			svg: {
 				fontCache: 'none' // Embed fonts for standalone SVG

@@ -90,7 +90,7 @@ async function renderMathLabel(
 
 	try {
 		// Render the LaTeX to SVG using MathJax
-		// Wrap in \boldsymbol to match the bold font-weight used on canvas
+		// Wrap in \boldsymbol to match the bold font-weight (600) used on canvas
 		const boldLatex = `\\boldsymbol{${mathParts.latex}}`;
 		let svg = await latexToSvg(boldLatex, false);
 		const dims = getSvgDimensions(svg);
