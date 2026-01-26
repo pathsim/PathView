@@ -1,9 +1,6 @@
 /**
  * Backend Module
  * Provides a general-purpose streaming REPL interface for Python execution
- *
- * This module abstracts the Python execution backend, allowing different
- * implementations (Pyodide, local server, remote) to be swapped.
  */
 
 // Re-export types
@@ -12,33 +9,48 @@ export type { Backend, BackendState, REPLRequest, REPLResponse } from './types';
 // Re-export state store
 export { backendState } from './state';
 
-// Re-export registry
-export {
-	getBackend,
-	createBackend,
-	switchBackend,
-	getBackendType,
-	hasBackend,
-	terminateBackend,
-	type BackendType
-} from './registry';
-
 // Re-export PyodideBackend for direct use if needed
 export { PyodideBackend } from './pyodide/backend';
 
-// ============================================================================
-// Backward-Compatible Convenience Functions
-// These delegate to the current backend and maintain API compatibility
-// ============================================================================
-
-import { getBackend } from './registry';
+import { PyodideBackend } from './pyodide/backend';
+import type { Backend } from './types';
 import { backendState } from './state';
 import { consoleStore } from '$lib/stores/console';
+
+// ============================================================================
+// Backend Singleton
+// ============================================================================
+
+let currentBackend: Backend | null = null;
+
+/**
+ * Get the current backend, creating a Pyodide backend if none exists
+ */
+export function getBackend(): Backend {
+	if (!currentBackend) {
+		currentBackend = new PyodideBackend();
+	}
+	return currentBackend;
+}
+
+/**
+ * Terminate the current backend
+ */
+export function terminateBackend(): void {
+	if (currentBackend) {
+		currentBackend.terminate();
+		currentBackend = null;
+	}
+}
 
 // Alias for backward compatibility
 export const replState = {
 	subscribe: backendState.subscribe
 };
+
+// ============================================================================
+// Convenience Functions
+// ============================================================================
 
 /**
  * Initialize the backend
