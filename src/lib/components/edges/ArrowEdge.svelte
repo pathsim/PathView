@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BaseEdge, getSmoothStepPath, type EdgeProps } from '@xyflow/svelte';
 	import { hoveredHandle, selectedNodeHighlight } from '$lib/stores/hoveredHandle';
+	import { onDestroy } from 'svelte';
 
 	let {
 		id,
@@ -20,11 +21,16 @@
 
 	// Check if this edge is connected to the hovered handle
 	let hovered = $state<{ nodeId: string; handleId: string; color?: string } | null>(null);
-	hoveredHandle.subscribe((h) => (hovered = h));
+	const unsubscribeHovered = hoveredHandle.subscribe((h) => (hovered = h));
 
 	// Check if this edge is connected to a selected node
 	let selectedNode = $state<{ nodeId: string; color?: string } | null>(null);
-	selectedNodeHighlight.subscribe((s) => (selectedNode = s));
+	const unsubscribeSelected = selectedNodeHighlight.subscribe((s) => (selectedNode = s));
+
+	onDestroy(() => {
+		unsubscribeHovered();
+		unsubscribeSelected();
+	});
 
 	const isHoverHighlighted = $derived(() => {
 		if (!hovered) return false;

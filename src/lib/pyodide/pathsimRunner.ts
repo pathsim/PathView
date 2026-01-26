@@ -11,6 +11,7 @@ import { eventRegistry } from '$lib/events/registry';
 import { NODE_TYPES } from '$lib/constants/nodeTypes';
 import { BLOCK_CATEGORY_ORDER } from '$lib/constants/python';
 import { isSubsystem, isInterface } from '$lib/nodes/shapes';
+import { blockImportPaths } from '$lib/nodes/generated/blocks';
 import { graphStore, findParentSubsystem } from '$lib/stores/graph';
 import {
 	runStreamingSimulation,
@@ -67,76 +68,6 @@ function generateEventParams(
 ): string {
 	return generateParamString(params, validParamNames, { multiLine });
 }
-
-/**
- * Generate Python code for events
- */
-function generateEventCode(
-	events: EventInstance[],
-	lines: string[],
-	nodeVars: Map<string, string>,
-	varNames: string[],
-	multiLine: boolean = false
-): void {
-	if (events.length === 0) return;
-
-	lines.push('# EVENTS');
-
-	for (const event of events) {
-		const typeDef = eventRegistry.get(event.type);
-		if (!typeDef) continue;
-
-		// Generate variable name for event
-		let varName = sanitizeName(event.name);
-		if (!varName || varNames.includes(varName)) {
-			varName = `event_${varNames.length}`;
-		}
-		varNames.push(varName);
-
-		const validParamNames = new Set(typeDef.params.map(p => p.name));
-		const params = generateEventParams(event.params, validParamNames, multiLine);
-
-		if (params) {
-			lines.push(`${varName} = ${typeDef.eventClass}(${params})`);
-		} else {
-			lines.push(`${varName} = ${typeDef.eventClass}()`);
-		}
-	}
-
-	lines.push('');
-	lines.push('events = [');
-	// Only add events we generated (not blocks)
-	for (const event of events) {
-		const varName = varNames.find(v => v === sanitizeName(event.name) || v.startsWith('event_'));
-		if (varName) {
-			lines.push(`    ${varName},`);
-		}
-	}
-	lines.push(']');
-	lines.push('');
-}
-
-/**
- * Get child nodes of a subsystem (from nested graph structure)
- */
-function getChildNodes(subsystemNode: NodeInstance): NodeInstance[] {
-	return subsystemNode.graph?.nodes ?? [];
-}
-
-/**
- * Get child connections of a subsystem (from nested graph structure)
- */
-function getChildConnections(subsystemNode: NodeInstance): Connection[] {
-	return subsystemNode.graph?.connections ?? [];
-}
-
-/**
- * Get child events of a subsystem (from nested graph structure)
- */
-function getChildEvents(subsystemNode: NodeInstance): EventInstance[] {
-	return subsystemNode.graph?.events ?? [];
-}
-
 
 
 /**
@@ -212,11 +143,31 @@ function getAllNodesRecursively(nodes: NodeInstance[]): NodeInstance[] {
 	for (const node of nodes) {
 		allNodes.push(node);
 		if (isSubsystem(node)) {
-			const childNodes = getChildNodes(node);
-			allNodes.push(...getAllNodesRecursively(childNodes));
+			allNodes.push(...getAllNodesRecursively(node.graph?.nodes ?? []));
 		}
 	}
 	return allNodes;
+}
+
+/**
+ * Collect block classes used across all nodes, grouped by Python import path.
+ * Excludes Subsystem/Interface (imported from pathsim directly).
+ */
+function collectBlockImportGroups(nodes: NodeInstance[]): Map<string, Set<string>> {
+	const allNodes = getAllNodesRecursively(nodes);
+	const groups = new Map<string, Set<string>>();
+
+	for (const node of allNodes) {
+		if (isSubsystem(node) || isInterface(node)) continue;
+		const typeDef = nodeRegistry.get(node.type);
+		if (!typeDef) continue;
+
+		const importPath = blockImportPaths[typeDef.blockClass] || 'pathsim.blocks';
+		if (!groups.has(importPath)) groups.set(importPath, new Set());
+		groups.get(importPath)!.add(typeDef.blockClass);
+	}
+
+	return groups;
 }
 
 /** Options for subsystem code generation */
@@ -238,9 +189,9 @@ function generateSubsystemCode(
 	options: SubsystemCodeOptions = {}
 ): string {
 	const { formatted = false } = options;
-	const childNodes = getChildNodes(subsystemNode);
-	const childConnections = getChildConnections(subsystemNode);
-	const childEvents = getChildEvents(subsystemNode);
+	const childNodes = subsystemNode.graph?.nodes ?? [];
+	const childConnections = subsystemNode.graph?.connections ?? [];
+	const childEvents = subsystemNode.graph?.events ?? [];
 
 	// Generate subsystem variable name
 	let subsystemVarName = sanitizeName(subsystemNode.name);
@@ -398,6 +349,7 @@ function groupNodesByCategory(
 /**
  * Generate Python code from graph state
  * @param includeNodeIdMap - Include node ID mapping for web data extraction (default: true)
+ * @param includeRun - Append sim.run() call (default: true, false for streaming)
  */
 export function generatePythonCode(
 	nodes: NodeInstance[],
@@ -405,7 +357,8 @@ export function generatePythonCode(
 	settings: SimulationSettings,
 	codeContext: string,
 	includeNodeIdMap: boolean = true,
-	events: EventInstance[] = []
+	events: EventInstance[] = [],
+	includeRun: boolean = true
 ): string {
 	const lines: string[] = [];
 
@@ -418,6 +371,9 @@ export function generatePythonCode(
 		events.map(e => eventRegistry.get(e.type)?.eventClass).filter(Boolean)
 	);
 
+	// Collect block import paths dynamically
+	const importGroups = collectBlockImportGroups(nodes);
+
 	// 1. Imports
 	lines.push('# IMPORTS');
 	lines.push('import numpy as np');
@@ -426,7 +382,13 @@ export function generatePythonCode(
 	} else {
 		lines.push('from pathsim import Simulation, Connection');
 	}
-	lines.push('from pathsim.blocks import *');
+	for (const [importPath] of importGroups) {
+		lines.push(`from ${importPath} import *`);
+	}
+	// Ensure at least pathsim.blocks is imported even if no blocks
+	if (!importGroups.has('pathsim.blocks')) {
+		lines.push('from pathsim.blocks import *');
+	}
 	lines.push(`from pathsim.solvers import ${getSettingOrDefault(settings, 'solver')}`);
 	if (hasEvents) {
 		lines.push(`from pathsim.events import ${[...eventClasses].join(', ')}`);
@@ -445,17 +407,14 @@ export function generatePythonCode(
 	const nodeVars = new Map<string, string>();
 	const varNames: string[] = [];
 
-	// With nested structure, input nodes are already root-level
-	const rootNodes = nodes;
-
 	// First, generate subsystems (they need to be defined before being used)
-	const subsystemNodes = rootNodes.filter(isSubsystem);
+	const subsystemNodes = nodes.filter(isSubsystem);
 	for (const subsystemNode of subsystemNodes) {
 		generateSubsystemCode(subsystemNode, nodeVars, varNames, lines);
 	}
 
 	// Then generate regular blocks (excluding subsystems and interfaces)
-	const regularNodes = rootNodes.filter((n) => !isSubsystem(n) && !isInterface(n));
+	const regularNodes = nodes.filter((n) => !isSubsystem(n) && !isInterface(n));
 
 	regularNodes.forEach((node, index) => {
 		const typeDef = nodeRegistry.get(node.type);
@@ -464,7 +423,6 @@ export function generatePythonCode(
 			return;
 		}
 
-		// Generate variable name
 		let varName = sanitizeName(node.name);
 		if (!varName || varNames.includes(varName)) {
 			varName = `block_${index}`;
@@ -472,10 +430,7 @@ export function generatePythonCode(
 		varNames.push(varName);
 		nodeVars.set(node.id, varName);
 
-		// Get valid param names from type definition
 		const validParamNames = new Set(typeDef.params.map(p => p.name));
-
-		// Generate parameter string (only includes valid params)
 		const params = generateBlockParams(node.params, validParamNames);
 
 		if (params) {
@@ -499,12 +454,10 @@ export function generatePythonCode(
 		lines.push('}');
 		lines.push('');
 
-		// Create node name mapping (nodeId -> name) for all nodes including subsystems
 		lines.push('# NODE NAME MAPPING');
 		lines.push('_node_name_map = {');
 		const allNodes = getAllNodesRecursively(nodes);
 		for (const node of allNodes) {
-			// Escape quotes in node names
 			const escapedName = node.name.replace(/"/g, '\\"');
 			lines.push(`    "${node.id}": "${escapedName}",`);
 		}
@@ -534,11 +487,13 @@ export function generatePythonCode(
 	// 6. Simulation setup
 	lines.push('# SIMULATION');
 	generateSimulationSetup(settings, hasEvents, lines);
-	lines.push('');
 
-	// 7. Run simulation (always reset=True for fresh runs)
-	lines.push('# RUN');
-	lines.push(`sim.run(duration=${getSettingOrDefault(settings, 'duration')}, reset=True)`);
+	// 7. Run simulation (omitted for streaming mode)
+	if (includeRun) {
+		lines.push('');
+		lines.push('# RUN');
+		lines.push(`sim.run(duration=${getSettingOrDefault(settings, 'duration')}, reset=True)`);
+	}
 
 	return lines.join('\n');
 }
@@ -594,45 +549,25 @@ function generateFormattedPythonCode(
 	} else {
 		lines.push('from pathsim import Simulation, Connection');
 	}
-	lines.push('from pathsim.blocks import (');
 
-	// Collect unique block classes by category (excluding Subsystem category - handled separately)
-	// Use all nodes recursively to include blocks inside subsystems
-	const allNodes = getAllNodesRecursively(nodes);
-	const blocksByCategory = groupNodesByCategory(allNodes);
-	const importedClasses = new Set<string>();
+	// Collect block classes grouped by import path
+	const importGroups = collectBlockImportGroups(nodes);
 
-	for (const category of BLOCK_CATEGORY_ORDER) {
-		if (category === 'Subsystem') continue; // Skip - Subsystem/Interface imported from pathsim
-		const group = blocksByCategory.get(category);
-		if (!group || group.length === 0) continue;
-
-		const classNames = [...new Set(group.map((g) => g.typeDef!.blockClass))].sort();
-		for (const className of classNames) {
-			if (!importedClasses.has(className) && className !== 'Subsystem' && className !== 'Interface') {
-				importedClasses.add(className);
+	// Generate explicit imports for each import path
+	for (const [importPath, classes] of importGroups) {
+		const sorted = [...classes].sort();
+		if (sorted.length === 1) {
+			lines.push(`from ${importPath} import ${sorted[0]}`);
+		} else {
+			lines.push(`from ${importPath} import (`);
+			for (let i = 0; i < sorted.length; i++) {
+				const comma = i < sorted.length - 1 ? ',' : '';
+				lines.push(`    ${sorted[i]}${comma}`);
 			}
+			lines.push(')');
 		}
 	}
 
-	// Also check for any remaining categories not in BLOCK_CATEGORY_ORDER
-	for (const [category, group] of blocksByCategory) {
-		if (BLOCK_CATEGORY_ORDER.includes(category)) continue;
-		const classNames = [...new Set(group.map((g) => g.typeDef!.blockClass))].sort();
-		for (const className of classNames) {
-			if (!importedClasses.has(className) && className !== 'Subsystem' && className !== 'Interface') {
-				importedClasses.add(className);
-			}
-		}
-	}
-
-	// Output imports grouped
-	const sortedClasses = [...importedClasses].sort();
-	for (let i = 0; i < sortedClasses.length; i++) {
-		const comma = i < sortedClasses.length - 1 ? ',' : '';
-		lines.push(`    ${sortedClasses[i]}${comma}`);
-	}
-	lines.push(')');
 	lines.push(`from pathsim.solvers import ${getSettingOrDefault(settings, 'solver')}`);
 	if (hasEvents) {
 		lines.push(`from pathsim.events import ${[...eventClasses].join(', ')}`);
@@ -805,154 +740,10 @@ export async function runGraphStreamingSimulation(
 	events: EventInstance[] = [],
 	onUpdate?: (result: SimulationResult) => void
 ): Promise<SimulationResult | null> {
-	// Generate code without the sim.run() call - streaming will handle that
-	const code = generatePythonCodeForStreaming(nodes, connections, settings, codeContext, events);
+	// Generate code without sim.run() - streaming will handle execution
+	const code = generatePythonCode(nodes, connections, settings, codeContext, true, events, false);
 	const duration = getSettingOrDefault(settings, 'duration');
 	return runStreamingSimulation(code, String(duration), onUpdate);
-}
-
-/**
- * Generate Python code for streaming simulation (without sim.run())
- */
-function generatePythonCodeForStreaming(
-	nodes: NodeInstance[],
-	connections: Connection[],
-	settings: SimulationSettings,
-	codeContext: string,
-	events: EventInstance[] = []
-): string {
-	const lines: string[] = [];
-
-	// Check if we have any subsystems
-	const hasSubsystems = nodes.some(isSubsystem);
-
-	// Check if we have any events
-	const hasEvents = events.length > 0;
-	const eventClasses = new Set(
-		events.map(e => eventRegistry.get(e.type)?.eventClass).filter(Boolean)
-	);
-
-	// 1. Imports
-	lines.push('# IMPORTS');
-	lines.push('import numpy as np');
-	if (hasSubsystems) {
-		lines.push('from pathsim import Simulation, Connection, Subsystem, Interface');
-	} else {
-		lines.push('from pathsim import Simulation, Connection');
-	}
-	lines.push('from pathsim.blocks import *');
-
-	// there should be a test to see if importing pathsim_chem is needed
-	lines.push('from pathsim_chem.tritium import *');
-	lines.push(`from pathsim.solvers import ${getSettingOrDefault(settings, 'solver')}`);
-	if (hasEvents) {
-		lines.push(`from pathsim.events import ${[...eventClasses].join(', ')}`);
-	}
-	lines.push('');
-
-	// 2. Code context (user-defined variables/functions)
-	if (codeContext.trim()) {
-		lines.push('# CODE CONTEXT');
-		lines.push(codeContext.trim());
-		lines.push('');
-	}
-
-	// 3. Create blocks
-	lines.push('# BLOCKS');
-	const nodeVars = new Map<string, string>();
-	const varNames: string[] = [];
-
-	// With nested structure, input nodes are already root-level
-	const rootNodes = nodes;
-
-	// First, generate subsystems (they need to be defined before being used)
-	const subsystemNodes = rootNodes.filter(isSubsystem);
-	for (const subsystemNode of subsystemNodes) {
-		generateSubsystemCode(subsystemNode, nodeVars, varNames, lines);
-	}
-
-	// Then generate regular blocks (excluding subsystems and interfaces)
-	const regularNodes = rootNodes.filter((n) => !isSubsystem(n) && !isInterface(n));
-
-	regularNodes.forEach((node, index) => {
-		const typeDef = nodeRegistry.get(node.type);
-		if (!typeDef) {
-			console.warn(`Unknown node type: ${node.type}`);
-			return;
-		}
-
-		// Generate variable name
-		let varName = sanitizeName(node.name);
-		if (!varName || varNames.includes(varName)) {
-			varName = `block_${index}`;
-		}
-		varNames.push(varName);
-		nodeVars.set(node.id, varName);
-
-		// Get valid param names from type definition
-		const validParamNames = new Set(typeDef.params.map(p => p.name));
-
-		// Generate parameter string (only includes valid params)
-		const params = generateBlockParams(node.params, validParamNames);
-
-		if (params) {
-			lines.push(`${varName} = ${typeDef.blockClass}(${params})`);
-		} else {
-			lines.push(`${varName} = ${typeDef.blockClass}()`);
-		}
-	});
-
-	lines.push('');
-	lines.push(...generateListDefinition('blocks', varNames));
-	lines.push('');
-
-	// Create node ID mapping for data extraction
-	lines.push('# NODE ID MAPPING (for data extraction)');
-	lines.push('_node_id_map = {');
-	for (const [nodeId, varName] of nodeVars) {
-		lines.push(`    id(${varName}): "${nodeId}",`);
-	}
-	lines.push('}');
-	lines.push('');
-
-	// Create node name mapping (nodeId -> name) for all nodes including subsystems
-	lines.push('# NODE NAME MAPPING');
-	lines.push('_node_name_map = {');
-	const allNodes = getAllNodesRecursively(nodes);
-	for (const node of allNodes) {
-		// Escape quotes in node names
-		const escapedName = node.name.replace(/"/g, '\\"');
-		lines.push(`    "${node.id}": "${escapedName}",`);
-	}
-	lines.push('}');
-	lines.push('');
-
-	// 4. Connections (grouped by source for multi-target syntax)
-	lines.push('# CONNECTIONS');
-	lines.push('connections = [');
-	const connLines = generateConnectionLines(connections, nodeVars, '    ');
-	for (const line of connLines) {
-		lines.push(line);
-	}
-	lines.push(']');
-	lines.push('');
-
-	// 5. Events (if any)
-	if (hasEvents) {
-		lines.push('# EVENTS');
-		const eventVarNames = generateEventDefinitions(events, varNames, lines);
-		lines.push('');
-		lines.push(...generateListDefinition('events', eventVarNames));
-		lines.push('');
-	}
-
-	// 6. Simulation setup (no sim.run() - streaming will handle that)
-	lines.push('# SIMULATION');
-	generateSimulationSetup(settings, hasEvents, lines);
-
-	// Note: No sim.run() here - streaming generator will run the simulation
-
-	return lines.join('\n');
 }
 
 /**

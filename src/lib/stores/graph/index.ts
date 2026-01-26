@@ -120,13 +120,10 @@ export {
 	createPorts,
 	getSubsystemByPath,
 	deriveInterfaceNode,
-	collectAllNodes,
-	collectAllConnections,
 	isSubsystemNode,
 	isInterfaceNode,
 	findParentSubsystem,
 	cloneNode,
 	cloneNodeForPaste,
-	resizePorts,
 	regenerateGraphIds
 } from './helpers';

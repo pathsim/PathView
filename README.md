@@ -52,7 +52,6 @@ src/
 │   ├── export/            # Export utilities
 │   │   └── svg/           # SVG graph export (renderer, types)
 │   ├── nodes/             # Node type system
-│   │   ├── features/      # Node feature flags
 │   │   ├── generated/     # Auto-generated from PathSim
 │   │   └── shapes/        # Node shape definitions
 │   ├── plotting/          # Plot system
