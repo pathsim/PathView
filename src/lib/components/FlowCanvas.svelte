@@ -13,6 +13,7 @@
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 
+	import { isInputFocused } from '$lib/utils/focus';
 	import BaseNode from './nodes/BaseNode.svelte';
 	import EventNode from './nodes/EventNode.svelte';
 	import AnnotationNode from './nodes/AnnotationNode.svelte';
@@ -63,12 +64,7 @@
 
 	// Keyboard shortcuts for node manipulation
 	function handleKeydown(event: KeyboardEvent) {
-		// Ignore if typing in an input field or code editor
-		const isInputFocused =
-			event.target instanceof HTMLInputElement ||
-			event.target instanceof HTMLTextAreaElement ||
-			(event.target as HTMLElement)?.closest?.('.cm-editor');
-		if (isInputFocused) return;
+		if (isInputFocused(event)) return;
 
 		// Handle Delete key (SvelteFlow's deleteKeyCode doesn't work reliably for 'Delete')
 		if (event.key === 'Delete') {

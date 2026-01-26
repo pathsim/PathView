@@ -50,6 +50,7 @@
 	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
 	import { clipboardStore } from '$lib/stores/clipboard';
 	import Tooltip, { tooltip } from '$lib/components/Tooltip.svelte';
+	import { isInputFocused } from '$lib/utils/focus';
 
 	// Track mouse position for paste operations
 	let mousePosition = $state({ x: 0, y: 0 });
@@ -496,9 +497,7 @@
 
 	// Keyboard shortcuts
 	function handleKeydown(event: KeyboardEvent) {
-		const isInputFocused = event.target instanceof HTMLInputElement ||
-			event.target instanceof HTMLTextAreaElement ||
-			(event.target as HTMLElement)?.closest?.('.cm-editor');
+		const inputFocused = isInputFocused(event);
 
 		// Shift+Enter for continue simulation
 		if (event.shiftKey && event.key === 'Enter') {
@@ -537,26 +536,26 @@
 					graphStore.duplicateSelected();
 					return;
 				case 'c':
-					if (!isInputFocused) {
+					if (!inputFocused) {
 						event.preventDefault();
 						clipboardStore.copy();
 					}
 					return;
 				case 'x':
-					if (!isInputFocused) {
+					if (!inputFocused) {
 						event.preventDefault();
 						clipboardStore.cut();
 					}
 					return;
 				case 'v':
-					if (!isInputFocused) {
+					if (!inputFocused) {
 						event.preventDefault();
 						const flowPosition = screenToFlow(mousePosition);
 						clipboardStore.paste(flowPosition);
 					}
 					return;
 				case 'a':
-					if (!isInputFocused) {
+					if (!inputFocused) {
 						event.preventDefault();
 						graphStore.selectAll();
 					}
@@ -581,7 +580,7 @@
 		}
 
 		// Non-modifier shortcuts (only when not typing)
-		if (!isInputFocused) {
+		if (!inputFocused) {
 			switch (event.key) {
 				case 'Escape':
 					// Progressive close - one thing at a time
