@@ -55,6 +55,26 @@
 	// Track mouse position for paste operations
 	let mousePosition = $state({ x: 0, y: 0 });
 
+	// Save feedback animation state
+	let saveFlash = $state<'save' | 'save-as' | null>(null);
+	let saveFlashTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	function flashSaveButton(which: 'save' | 'save-as') {
+		clearTimeout(saveFlashTimeout);
+		saveFlash = which;
+		saveFlashTimeout = setTimeout(() => { saveFlash = null; }, 1500);
+	}
+
+	async function handleSave() {
+		const success = await saveFile();
+		if (success) flashSaveButton('save');
+	}
+
+	async function handleSaveAs() {
+		const success = await saveAsFile();
+		if (success) flashSaveButton('save-as');
+	}
+
 	// Panel visibility state
 	let showProperties = $state(false);
 	let showNodeLibrary = $state(false);
@@ -514,9 +534,9 @@
 				case 's':
 					event.preventDefault();
 					if (event.shiftKey) {
-						saveAsFile();
+						handleSaveAs();
 					} else {
-						saveFile();
+						handleSave();
 					}
 					return;
 				case 'o':
@@ -991,8 +1011,35 @@
 			<button class="toolbar-btn" onclick={handleOpen} use:tooltip={{ text: "Open/Import", shortcut: "Ctrl+O" }} aria-label="Open/Import">
 				<Icon name="download" size={16} />
 			</button>
-			<button class="toolbar-btn" onclick={() => saveFile()} use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }} aria-label="Save">
-				<Icon name="upload" size={16} />
+			<button
+				class="toolbar-btn"
+				class:save-flash={saveFlash === 'save'}
+				onclick={() => handleSave()}
+				use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }}
+				aria-label="Save"
+			>
+				<span class="save-icon" class:flashing={saveFlash === 'save'}>
+					{#if saveFlash === 'save'}
+						<Icon name="check" size={16} />
+					{:else}
+						<Icon name="save" size={16} />
+					{/if}
+				</span>
+			</button>
+			<button
+				class="toolbar-btn"
+				class:save-flash={saveFlash === 'save-as'}
+				onclick={() => handleSaveAs()}
+				use:tooltip={{ text: "Save As", shortcut: "Ctrl+Shift+S" }}
+				aria-label="Save As"
+			>
+				<span class="save-icon" class:flashing={saveFlash === 'save-as'}>
+					{#if saveFlash === 'save-as'}
+						<Icon name="check" size={16} />
+					{:else}
+						<Icon name="file-plus" size={16} />
+					{/if}
+				</span>
 			</button>
 			<button class="toolbar-btn" onclick={() => exportDialogOpen = true} use:tooltip={{ text: "Python Code", shortcut: "Ctrl+E" }} aria-label="View Python Code">
 				<Icon name="braces" size={16} />
@@ -1373,6 +1420,30 @@
 		color: var(--error);
 		border-color: var(--error);
 		background: color-mix(in srgb, var(--error) 15%, var(--surface-raised));
+	}
+
+	/* Save flash animation */
+	.toolbar-btn.save-flash {
+		color: var(--success);
+		border-color: var(--success);
+		background: color-mix(in srgb, var(--success) 12%, var(--surface-raised));
+	}
+
+	.save-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.save-icon.flashing {
+		animation: save-check 1.5s ease forwards;
+	}
+
+	@keyframes save-check {
+		0% { transform: scale(1.3); opacity: 0.7; }
+		15% { transform: scale(1); opacity: 1; }
+		70% { opacity: 1; }
+		100% { opacity: 1; }
 	}
 
 	/* Logo overlay */
