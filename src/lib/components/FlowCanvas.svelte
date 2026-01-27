@@ -166,21 +166,23 @@
 				return n;
 			});
 
-			// Sync positions to appropriate stores
-			nodes.forEach(n => {
-				if (n.selected) {
-					if (n.type === 'eventNode') {
-						if (graphStore.isAtRoot()) {
-							eventStore.updateEventPosition(n.id, n.position);
+			// Sync positions to appropriate stores (as a single undoable action)
+			historyStore.mutate(() => {
+				nodes.forEach(n => {
+					if (n.selected) {
+						if (n.type === 'eventNode') {
+							if (graphStore.isAtRoot()) {
+								eventStore.updateEventPosition(n.id, n.position);
+							} else {
+								graphStore.updateSubsystemEventPosition(n.id, n.position);
+							}
+						} else if (n.type === 'annotation') {
+							graphStore.updateAnnotationPosition(n.id, n.position);
 						} else {
-							graphStore.updateSubsystemEventPosition(n.id, n.position);
+							graphStore.updateNodePosition(n.id, n.position);
 						}
-					} else if (n.type === 'annotation') {
-						graphStore.updateAnnotationPosition(n.id, n.position);
-					} else {
-						graphStore.updateNodePosition(n.id, n.position);
 					}
-				}
+				});
 			});
 		}
 	});
@@ -802,47 +804,49 @@
 		const targetMatch = connection.targetHandle.match(/-input-(\d+)$/);
 
 		if (sourceMatch && targetMatch) {
-			const sourcePortIndex = parseInt(sourceMatch[1], 10);
-			let targetPortIndex = parseInt(targetMatch[1], 10);
+			historyStore.mutate(() => {
+				const sourcePortIndex = parseInt(sourceMatch[1], 10);
+				let targetPortIndex = parseInt(targetMatch[1], 10);
 
-			// Check if the target port is already connected
-			const currentConnections = get(graphStore.connections);
-			const isPortOccupied = currentConnections.some(
-				(c) => c.targetNodeId === connection.target && c.targetPortIndex === targetPortIndex
-			);
+				// Check if the target port is already connected
+				const currentConnections = get(graphStore.connections);
+				const isPortOccupied = currentConnections.some(
+					(c) => c.targetNodeId === connection.target && c.targetPortIndex === targetPortIndex
+				);
 
-			if (isPortOccupied) {
-				// Find the first available port instead
-				const availablePort = findFirstAvailableInputPort(connection.target);
+				if (isPortOccupied) {
+					// Find the first available port instead
+					const availablePort = findFirstAvailableInputPort(connection.target);
 
-				if (availablePort !== null) {
-					// Use the first available port
-					targetPortIndex = availablePort;
-				} else {
-					// No available port - check if we can create a new one
-					const graphNodes = get(graphStore.nodesArray);
-					const targetNode = graphNodes.find((n) => n.id === connection.target);
-					if (!targetNode) return;
+					if (availablePort !== null) {
+						// Use the first available port
+						targetPortIndex = availablePort;
+					} else {
+						// No available port - check if we can create a new one
+						const graphNodes = get(graphStore.nodesArray);
+						const targetNode = graphNodes.find((n) => n.id === connection.target);
+						if (!targetNode) return;
 
-					const typeDef = nodeRegistry.get(targetNode.type);
-					if (!typeDef || typeDef.ports.maxInputs !== null) {
-						// Can't create new port, abort
-						return;
+						const typeDef = nodeRegistry.get(targetNode.type);
+						if (!typeDef || typeDef.ports.maxInputs !== null) {
+							// Can't create new port, abort
+							return;
+						}
+
+						// Create a new port and use it
+						graphStore.addInputPort(connection.target);
+						targetPortIndex = targetNode.inputs.length; // The new port index
 					}
-
-					// Create a new port and use it
-					graphStore.addInputPort(connection.target);
-					targetPortIndex = targetNode.inputs.length; // The new port index
 				}
-			}
 
-			// addConnection uses current navigation context automatically
-			graphStore.addConnection(
-				connection.source,
-				sourcePortIndex,
-				connection.target,
-				targetPortIndex
-			);
+				// addConnection uses current navigation context automatically
+				graphStore.addConnection(
+					connection.source,
+					sourcePortIndex,
+					connection.target,
+					targetPortIndex
+				);
+			});
 		}
 	}
 

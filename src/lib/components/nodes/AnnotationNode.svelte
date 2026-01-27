@@ -2,6 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { NodeResizer } from '@xyflow/svelte';
 	import { graphStore, ANNOTATION_FONT_SIZE } from '$lib/stores/graph';
+	import { historyStore } from '$lib/stores/history';
 	import { editAnnotationTrigger } from '$lib/stores/viewActions';
 	import { renderMarkdown } from '$lib/utils/markdownRenderer';
 	import { getKatexCssUrl } from '$lib/utils/katexLoader';
@@ -84,6 +85,14 @@
 		}
 	});
 
+	function handleTextareaFocus() {
+		historyStore.beginDrag();
+	}
+
+	function handleTextareaBlur() {
+		historyStore.endDrag();
+	}
+
 	function handleInput(e: Event) {
 		const value = (e.target as HTMLTextAreaElement).value;
 		graphStore.updateAnnotation(id, { content: value });
@@ -109,17 +118,17 @@
 	}
 
 	function handleColorSelect(newColor: string | undefined) {
-		graphStore.updateAnnotation(id, { color: newColor });
+		historyStore.mutate(() => graphStore.updateAnnotation(id, { color: newColor }));
 	}
 
 	function increaseFontSize() {
 		const newSize = Math.min(fontSize + ANNOTATION_FONT_SIZE.STEP, ANNOTATION_FONT_SIZE.MAX);
-		graphStore.updateAnnotation(id, { fontSize: newSize });
+		historyStore.mutate(() => graphStore.updateAnnotation(id, { fontSize: newSize }));
 	}
 
 	function decreaseFontSize() {
 		const newSize = Math.max(fontSize - ANNOTATION_FONT_SIZE.STEP, ANNOTATION_FONT_SIZE.MIN);
-		graphStore.updateAnnotation(id, { fontSize: newSize });
+		historyStore.mutate(() => graphStore.updateAnnotation(id, { fontSize: newSize }));
 	}
 
 	function handleWheel(e: WheelEvent) {
@@ -134,10 +143,10 @@
 	function handleResizeEnd(_event: unknown, params: { width: number; height: number }) {
 		const snappedWidth = Math.round(params.width / GRID_SIZE) * GRID_SIZE;
 		const snappedHeight = Math.round(params.height / GRID_SIZE) * GRID_SIZE;
-		graphStore.updateAnnotation(id, {
+		historyStore.mutate(() => graphStore.updateAnnotation(id, {
 			width: Math.max(100, snappedWidth),
 			height: Math.max(50, snappedHeight)
-		});
+		}));
 	}
 </script>
 
@@ -198,6 +207,8 @@
 			value={content}
 			oninput={handleInput}
 			onkeydown={handleTextareaKeydown}
+			onfocus={handleTextareaFocus}
+			onblur={handleTextareaBlur}
 			onwheel={handleWheel}
 			placeholder="Markdown with $math$..."
 			spellcheck="false"

@@ -3,6 +3,7 @@
 	import { useSvelteFlow, useUpdateNodeInternals } from '@xyflow/svelte';
 	import { graphStore } from '$lib/stores/graph';
 	import { eventStore } from '$lib/stores/events';
+	import { historyStore } from '$lib/stores/history';
 	import { eventRegistry } from '$lib/events/registry';
 	import type { EventInstance } from '$lib/events/types';
 	import { fitViewTrigger, fitViewPadding, type FitViewPadding, zoomInTrigger, zoomOutTrigger, panTrigger, focusNodeTrigger, registerScreenToFlowConverter } from '$lib/stores/viewActions';
@@ -131,9 +132,11 @@
 			const nodeType = event.dataTransfer?.getData('application/pathview-node');
 			if (nodeType) {
 				// addNode uses current navigation context automatically
-				graphStore.addNode(nodeType, {
-					x: position.x - 80,
-					y: position.y - 30
+				historyStore.mutate(() => {
+					graphStore.addNode(nodeType, {
+						x: position.x - 80,
+						y: position.y - 30
+					});
 				});
 				return;
 			}
@@ -146,23 +149,25 @@
 					y: position.y - 40
 				};
 
-				if (graphStore.isAtRoot()) {
-					// Root level: use eventStore
-					eventStore.addEvent(eventType, eventPos);
-				} else {
-					// Subsystem level: use graphStore
-					const typeDef = eventRegistry.get(eventType);
-					if (typeDef) {
-						const newEvent: EventInstance = {
-							id: crypto.randomUUID(),
-							type: eventType,
-							name: typeDef.name,
-							position: eventPos,
-							params: {}
-						};
-						graphStore.addSubsystemEvent(newEvent);
+				historyStore.mutate(() => {
+					if (graphStore.isAtRoot()) {
+						// Root level: use eventStore
+						eventStore.addEvent(eventType, eventPos);
+					} else {
+						// Subsystem level: use graphStore
+						const typeDef = eventRegistry.get(eventType);
+						if (typeDef) {
+							const newEvent: EventInstance = {
+								id: crypto.randomUUID(),
+								type: eventType,
+								name: typeDef.name,
+								position: eventPos,
+								params: {}
+							};
+							graphStore.addSubsystemEvent(newEvent);
+						}
 					}
-				}
+				});
 				return;
 			}
 		});

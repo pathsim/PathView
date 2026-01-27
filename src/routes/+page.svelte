@@ -313,14 +313,15 @@
 		return buildContextMenuItems(contextMenuTarget, contextMenuPosition, contextMenuCallbacks);
 	}
 
-	// Helper to rotate a node (single node, creates its own snapshot)
+	// Helper to rotate a node (single node)
 	function rotateNode(nodeId: string) {
 		const node = graphStore.getNode(nodeId);
 		if (node) {
-			const currentRotation = (node.params?.['_rotation'] as number) || 0;
-			const newRotation = (currentRotation + 1) % 4;
-			// Note: updateNodeParams creates a snapshot internally
-			graphStore.updateNodeParams(nodeId, { '_rotation': newRotation });
+			historyStore.mutate(() => {
+				const currentRotation = (node.params?.['_rotation'] as number) || 0;
+				const newRotation = (currentRotation + 1) % 4;
+				graphStore.updateNodeParams(nodeId, { '_rotation': newRotation });
+			});
 			// Queue update to re-render handles
 			nodeUpdatesStore.queueUpdate([nodeId]);
 		}
@@ -553,7 +554,7 @@
 					return;
 				case 'd':
 					event.preventDefault();
-					graphStore.duplicateSelected();
+					historyStore.mutate(() => graphStore.duplicateSelected());
 					return;
 				case 'c':
 					if (!inputFocused) {
@@ -932,7 +933,7 @@
 
 		// addNode uses current navigation context automatically
 		// Subsystem creation auto-creates Interface block inside
-		graphStore.addNode(type, position);
+		historyStore.mutate(() => graphStore.addNode(type, position));
 	}
 </script>
 

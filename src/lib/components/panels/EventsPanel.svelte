@@ -3,6 +3,7 @@
 	import type { EventTypeDefinition, EventInstance } from '$lib/events/types';
 	import { eventStore } from '$lib/stores/events';
 	import { graphStore } from '$lib/stores/graph';
+	import { historyStore } from '$lib/stores/history';
 	import { screenToFlow } from '$lib/stores/viewActions';
 	import { tooltip } from '$lib/components/Tooltip.svelte';
 	import EventPreview from '$lib/components/nodes/EventPreview.svelte';
@@ -32,20 +33,22 @@
 		const typeDef = eventRegistry.get(type);
 		if (!typeDef) return;
 
-		if (isAtRoot) {
-			// Root level: use eventStore
-			eventStore.addEvent(type, position);
-		} else {
-			// Subsystem level: use graphStore
-			const event: EventInstance = {
-				id: crypto.randomUUID(),
-				type,
-				name: typeDef.name,
-				position,
-				params: {}
-			};
-			graphStore.addSubsystemEvent(event);
-		}
+		historyStore.mutate(() => {
+			if (isAtRoot) {
+				// Root level: use eventStore
+				eventStore.addEvent(type, position);
+			} else {
+				// Subsystem level: use graphStore
+				const event: EventInstance = {
+					id: crypto.randomUUID(),
+					type,
+					name: typeDef.name,
+					position,
+					params: {}
+				};
+				graphStore.addSubsystemEvent(event);
+			}
+		});
 	}
 
 	// Handle drag start

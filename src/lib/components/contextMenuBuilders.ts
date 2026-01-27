@@ -7,6 +7,7 @@ import { get } from 'svelte/store';
 import type { MenuItemType } from './ContextMenu.svelte';
 import type { ContextMenuTarget } from '$lib/stores/contextMenu';
 import { graphStore, ANNOTATION_FONT_SIZE } from '$lib/stores/graph';
+import { historyStore } from '$lib/stores/history';
 import { routingStore } from '$lib/stores/routing';
 import { eventStore } from '$lib/stores/events';
 import { clipboardStore } from '$lib/stores/clipboard';
@@ -142,7 +143,7 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 				label: 'Delete',
 				icon: 'trash',
 				shortcut: 'Del',
-				action: () => graphStore.removeNode(nodeId)
+				action: () => historyStore.mutate(() => graphStore.removeNode(nodeId))
 			}
 		];
 	}
@@ -191,7 +192,7 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 			shortcut: 'Ctrl+D',
 			action: () => {
 				graphStore.selectNode(nodeId, false);
-				graphStore.duplicateSelected();
+				historyStore.mutate(() => graphStore.duplicateSelected());
 			}
 		},
 		{
@@ -208,7 +209,7 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 			label: 'Delete',
 			icon: 'trash',
 			shortcut: 'Del',
-			action: () => graphStore.removeNode(nodeId)
+			action: () => historyStore.mutate(() => graphStore.removeNode(nodeId))
 		}
 	);
 
@@ -228,7 +229,7 @@ function buildSelectionMenu(
 			label: `Duplicate ${count} nodes`,
 			icon: 'copy',
 			shortcut: 'Ctrl+D',
-			action: () => graphStore.duplicateSelected()
+			action: () => historyStore.mutate(() => graphStore.duplicateSelected())
 		},
 		{
 			label: `Copy ${count} nodes`,
@@ -270,7 +271,7 @@ function buildEventMenu(eventId: string): MenuItemType[] {
 			shortcut: 'Ctrl+D',
 			action: () => {
 				eventStore.selectEvent(eventId, false);
-				eventStore.duplicateSelected();
+				historyStore.mutate(() => eventStore.duplicateSelected());
 			}
 		},
 		{
@@ -287,7 +288,7 @@ function buildEventMenu(eventId: string): MenuItemType[] {
 			label: 'Delete',
 			icon: 'trash',
 			shortcut: 'Del',
-			action: () => eventStore.removeEvent(eventId)
+			action: () => historyStore.mutate(() => eventStore.removeEvent(eventId))
 		}
 	];
 }
@@ -307,7 +308,7 @@ function buildEdgeMenu(edgeId: string): MenuItemType[] {
 			label: 'Delete',
 			icon: 'trash',
 			shortcut: 'Del',
-			action: () => graphStore.removeConnection(edgeId)
+			action: () => historyStore.mutate(() => graphStore.removeConnection(edgeId))
 		}
 	];
 }
@@ -338,7 +339,7 @@ function buildCanvasMenu(
 			icon: 'type',
 			action: () => {
 				const flowPos = screenToFlow(screenPosition);
-				graphStore.addAnnotation(flowPos);
+				historyStore.mutate(() => graphStore.addAnnotation(flowPos));
 			}
 		},
 		DIVIDER,
@@ -413,7 +414,7 @@ function buildAnnotationMenu(annotationId: string): MenuItemType[] {
 			icon: 'font-size-increase',
 			action: () => {
 				if (currentFontSize < ANNOTATION_FONT_SIZE.MAX) {
-					graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize + ANNOTATION_FONT_SIZE.STEP });
+					historyStore.mutate(() => graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize + ANNOTATION_FONT_SIZE.STEP }));
 				}
 			},
 			disabled: currentFontSize >= ANNOTATION_FONT_SIZE.MAX
@@ -423,7 +424,7 @@ function buildAnnotationMenu(annotationId: string): MenuItemType[] {
 			icon: 'font-size-decrease',
 			action: () => {
 				if (currentFontSize > ANNOTATION_FONT_SIZE.MIN) {
-					graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize - ANNOTATION_FONT_SIZE.STEP });
+					historyStore.mutate(() => graphStore.updateAnnotation(annotationId, { fontSize: currentFontSize - ANNOTATION_FONT_SIZE.STEP }));
 				}
 			},
 			disabled: currentFontSize <= ANNOTATION_FONT_SIZE.MIN
@@ -435,7 +436,7 @@ function buildAnnotationMenu(annotationId: string): MenuItemType[] {
 			shortcut: 'Ctrl+D',
 			action: () => {
 				graphStore.selectNode(annotationId, false);
-				graphStore.duplicateSelected();
+				historyStore.mutate(() => graphStore.duplicateSelected());
 			}
 		},
 		{
@@ -452,7 +453,7 @@ function buildAnnotationMenu(annotationId: string): MenuItemType[] {
 			label: 'Delete',
 			icon: 'trash',
 			shortcut: 'Del',
-			action: () => graphStore.removeAnnotation(annotationId)
+			action: () => historyStore.mutate(() => graphStore.removeAnnotation(annotationId))
 		}
 	];
 }

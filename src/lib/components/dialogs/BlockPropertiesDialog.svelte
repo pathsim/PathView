@@ -3,6 +3,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { graphStore } from '$lib/stores/graph';
+	import { historyStore } from '$lib/stores/history';
 	import { nodeDialogStore, closeNodeDialog } from '$lib/stores/nodeDialog';
 	import { nodeRegistry, type NodeInstance } from '$lib/nodes';
 	import { generateBlockCode } from '$lib/pyodide/pathsimRunner';
@@ -58,7 +59,8 @@
 	// Handle color selection
 	function handleColorSelect(color: string | undefined) {
 		if (!node) return;
-		graphStore.updateNodeColor(node.id, color);
+		const nodeId = node.id;
+		historyStore.mutate(() => graphStore.updateNodeColor(nodeId, color));
 	}
 
 	// Code preview state
@@ -112,7 +114,8 @@
 	// No parsing or type coercion - user writes valid Python syntax
 	function handleParamChange(paramName: string, value: string) {
 		if (!node) return;
-		graphStore.updateNodeParams(node.id, { [paramName]: value });
+		const nodeId = node.id;
+		historyStore.mutate(() => graphStore.updateNodeParams(nodeId, { [paramName]: value }));
 	}
 
 	// Check if a parameter is pinned to the node
@@ -123,17 +126,19 @@
 	// Toggle pin state for a parameter
 	function togglePinParam(paramName: string) {
 		if (!node) return;
+		const nodeId = node.id;
 		const currentPinned = node.pinnedParams ?? [];
 		const newPinned = currentPinned.includes(paramName)
 			? currentPinned.filter(p => p !== paramName)
 			: [...currentPinned, paramName];
-		graphStore.updateNode(node.id, { pinnedParams: newPinned });
+		historyStore.mutate(() => graphStore.updateNode(nodeId, { pinnedParams: newPinned }));
 	}
 
 	// Handle name change
 	function handleNameChange(name: string) {
 		if (!node) return;
-		graphStore.updateNodeName(node.id, name);
+		const nodeId = node.id;
+		historyStore.mutate(() => graphStore.updateNodeName(nodeId, name));
 	}
 
 	// Format value for display

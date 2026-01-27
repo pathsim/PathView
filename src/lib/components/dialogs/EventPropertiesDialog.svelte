@@ -4,6 +4,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { get } from 'svelte/store';
 	import { eventStore } from '$lib/stores/events';
+	import { historyStore } from '$lib/stores/history';
 	import { eventDialogStore, closeEventDialog } from '$lib/stores/eventDialog';
 	import { eventRegistry } from '$lib/events/registry';
 	import { graphStore } from '$lib/stores/graph';
@@ -53,7 +54,8 @@
 	// Handle color selection
 	function handleColorSelect(color: string | undefined) {
 		if (!event) return;
-		eventStore.updateEventColor(event.id, color);
+		const eventId = event.id;
+		historyStore.mutate(() => eventStore.updateEventColor(eventId, color));
 	}
 
 	// Code preview state
@@ -91,13 +93,15 @@
 	// Handle parameter change
 	function handleParamChange(paramName: string, value: string) {
 		if (!event) return;
-		eventStore.updateEventParams(event.id, { [paramName]: value });
+		const eventId = event.id;
+		historyStore.mutate(() => eventStore.updateEventParams(eventId, { [paramName]: value }));
 	}
 
 	// Handle name change
 	function handleNameChange(name: string) {
 		if (!event) return;
-		eventStore.updateEventName(event.id, name);
+		const eventId = event.id;
+		historyStore.mutate(() => eventStore.updateEventName(eventId, name));
 	}
 
 	// Format value for display

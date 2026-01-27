@@ -6,6 +6,7 @@
 	import { NODE_TYPES } from '$lib/constants/nodeTypes';
 	import { openNodeDialog } from '$lib/stores/nodeDialog';
 	import { graphStore } from '$lib/stores/graph';
+	import { historyStore } from '$lib/stores/history';
 	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
 	import { hoveredHandle, selectedNodeHighlight } from '$lib/stores/hoveredHandle';
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
@@ -257,7 +258,7 @@
 	// Add input port
 	function handleAddInput(event: MouseEvent) {
 		event.stopPropagation();
-		graphStore.addInputPort(id);
+		historyStore.mutate(() => graphStore.addInputPort(id));
 	}
 
 	// Get min ports from type definition
@@ -268,21 +269,21 @@
 	function handleRemoveInput(event: MouseEvent) {
 		event.stopPropagation();
 		if (data.inputs.length > minInputs) {
-			graphStore.removeInputPort(id);
+			historyStore.mutate(() => graphStore.removeInputPort(id));
 		}
 	}
 
 	// Add output port
 	function handleAddOutput(event: MouseEvent) {
 		event.stopPropagation();
-		graphStore.addOutputPort(id);
+		historyStore.mutate(() => graphStore.addOutputPort(id));
 	}
 
 	// Remove output port (respects minOutputs)
 	function handleRemoveOutput(event: MouseEvent) {
 		event.stopPropagation();
 		if (data.outputs.length > minOutputs) {
-			graphStore.removeOutputPort(id);
+			historyStore.mutate(() => graphStore.removeOutputPort(id));
 		}
 	}
 
@@ -294,7 +295,7 @@
 
 	// Handle pinned param change
 	function handlePinnedParamChange(paramName: string, value: string) {
-		graphStore.updateNodeParams(id, { [paramName]: value });
+		historyStore.mutate(() => graphStore.updateNodeParams(id, { [paramName]: value }));
 	}
 
 	// Format value for display
