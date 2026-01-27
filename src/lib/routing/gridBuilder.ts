@@ -182,17 +182,20 @@ export class SparseGrid {
 
 	/**
 	 * Update port stub obstacles (called when connections change)
+	 * Blocks 2 cells in the port direction to prevent bends near arrowheads
 	 */
 	updatePortStubs(portStubs?: PortStub[]): void {
 		this.portStubObstacles = [];
 		if (portStubs) {
 			for (const stub of portStubs) {
 				const vec = DIRECTION_VECTORS[stub.direction];
-				const stubX = stub.position.x + vec.x * GRID_SIZE;
-				const stubY = stub.position.y + vec.y * GRID_SIZE;
-				const gx = worldToGrid(stubX - this.offsetX);
-				const gy = worldToGrid(stubY - this.offsetY);
-				this.portStubObstacles.push({ minGx: gx, minGy: gy, maxGx: gx, maxGy: gy });
+				for (let i = 1; i <= 2; i++) {
+					const stubX = stub.position.x + vec.x * GRID_SIZE * i;
+					const stubY = stub.position.y + vec.y * GRID_SIZE * i;
+					const gx = worldToGrid(stubX - this.offsetX);
+					const gy = worldToGrid(stubY - this.offsetY);
+					this.portStubObstacles.push({ minGx: gx, minGy: gy, maxGx: gx, maxGy: gy });
+				}
 			}
 		}
 	}
