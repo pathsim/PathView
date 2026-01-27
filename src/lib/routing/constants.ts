@@ -7,11 +7,11 @@ import { G } from '$lib/constants/grid';
 /** Margin around nodes for routing (0 - block edges are grid-aligned, giving natural 1G clearance) */
 export const ROUTING_MARGIN = 0;
 
-/** Minimum distance from source port before first turn (2G = 20px) */
-export const SOURCE_CLEARANCE = 2 * G.unit;
+/** Minimum distance from source port before first turn (0 - handle provides clearance) */
+export const SOURCE_CLEARANCE = 0;
 
-/** Minimum distance from target port before first turn (3G = 30px) */
-export const TARGET_CLEARANCE = 3 * G.unit;
+/** Minimum distance from target port before first turn (0.5G = 5px) */
+export const TARGET_CLEARANCE = G.unit / 2;
 
 /** Grid resolution for pathfinding (matches base grid = 10px) */
 export const GRID_SIZE = G.unit;
