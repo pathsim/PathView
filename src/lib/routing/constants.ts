@@ -10,8 +10,8 @@ export const ROUTING_MARGIN = 0;
 /** Minimum distance from source port before first turn (0 - handle offset provides clearance) */
 export const SOURCE_CLEARANCE = 0;
 
-/** Minimum distance from target port before first turn (1G = 10px) */
-export const TARGET_CLEARANCE = G.unit;
+/** Minimum distance from target port before first turn (2G = 20px) */
+export const TARGET_CLEARANCE = 2 * G.unit;
 
 /** Grid resolution for pathfinding (matches base grid = 10px) */
 export const GRID_SIZE = G.unit;
