@@ -55,6 +55,26 @@
 	// Track mouse position for paste operations
 	let mousePosition = $state({ x: 0, y: 0 });
 
+	// Save feedback animation state
+	let saveFlash = $state<'save' | 'save-as' | null>(null);
+	let saveFlashTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	function flashSaveButton(which: 'save' | 'save-as') {
+		clearTimeout(saveFlashTimeout);
+		saveFlash = which;
+		saveFlashTimeout = setTimeout(() => { saveFlash = null; }, 1500);
+	}
+
+	async function handleSave() {
+		const success = await saveFile();
+		if (success) flashSaveButton('save');
+	}
+
+	async function handleSaveAs() {
+		const success = await saveAsFile();
+		if (success) flashSaveButton('save-as');
+	}
+
 	// Panel visibility state
 	let showProperties = $state(false);
 	let showNodeLibrary = $state(false);
@@ -514,9 +534,9 @@
 				case 's':
 					event.preventDefault();
 					if (event.shiftKey) {
-						saveAsFile();
+						handleSaveAs();
 					} else {
-						saveFile();
+						handleSave();
 					}
 					return;
 				case 'o':
@@ -991,8 +1011,41 @@
 			<button class="toolbar-btn" onclick={handleOpen} use:tooltip={{ text: "Open/Import", shortcut: "Ctrl+O" }} aria-label="Open/Import">
 				<Icon name="download" size={16} />
 			</button>
-			<button class="toolbar-btn" onclick={() => saveFile()} use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }} aria-label="Save">
-				<Icon name="upload" size={16} />
+			<button
+				class="toolbar-btn"
+				onclick={() => handleSave()}
+				use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }}
+				aria-label="Save"
+			>
+				<span class="icon-crossfade">
+					{#if saveFlash === 'save'}
+						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+							<Icon name="check" size={16} />
+						</span>
+					{:else}
+						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+							<Icon name="upload" size={16} />
+						</span>
+					{/if}
+				</span>
+			</button>
+			<button
+				class="toolbar-btn"
+				onclick={() => handleSaveAs()}
+				use:tooltip={{ text: "Save As", shortcut: "Ctrl+Shift+S" }}
+				aria-label="Save As"
+			>
+				<span class="icon-crossfade">
+					{#if saveFlash === 'save-as'}
+						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+							<Icon name="check" size={16} />
+						</span>
+					{:else}
+						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
+							<Icon name="upload-plus" size={16} />
+						</span>
+					{/if}
+				</span>
 			</button>
 			<button class="toolbar-btn" onclick={() => exportDialogOpen = true} use:tooltip={{ text: "Python Code", shortcut: "Ctrl+E" }} aria-label="View Python Code">
 				<Icon name="braces" size={16} />
@@ -1373,6 +1426,20 @@
 		color: var(--error);
 		border-color: var(--error);
 		background: color-mix(in srgb, var(--error) 15%, var(--surface-raised));
+	}
+
+	.icon-crossfade {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+	}
+
+	.icon-crossfade-item {
+		position: absolute;
+		display: flex;
 	}
 
 	/* Logo overlay */
