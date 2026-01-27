@@ -138,7 +138,7 @@
 		<polyline points="17 8 12 3 7 8"/>
 		<line x1="12" y1="3" x2="12" y2="15"/>
 		<line x1="21" y1="0" x2="21" y2="5"/>
-		<line x1="18.5" y1="2.5" x2="23.5" y2="2.5"/>
+		<line x1="18" y1="2.5" x2="23" y2="2.5"/>
 	</svg>
 {:else if name === 'play'}
 	<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
