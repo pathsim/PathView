@@ -296,12 +296,44 @@ export class FlaskBackend implements Backend {
 									console.log("Uint8Array for Chunk is ", chunk.value)
 
 									const decoder = new TextDecoder("utf-8");
-									const jsonString = decoder.decode(
+									let jsonString = decoder.decode(
 										chunk.value,
 									);
+									
+									console.log("Original JSON String: ", jsonString)
+
+									let individualResponses = []
+									const responseSubstr = "success"
+
+									/* Sometimes within the same chunk I'll receive more than one API response
+									 * such that it appears liked jsonString = "{"success":...,"data":...}{"success":...,"data":...}"
+									 * so we need to take the time to break it up into its individual requests
+									 * */
+
+									let doneBreakingUp = false
+
+									while(jsonString.indexOf(responseSubstr) && !doneBreakingUp) {
+										let firstIndex = jsonString.indexOf(responseSubstr)
+
+										let remainingString = jsonString.slice(firstIndex+responseSubstr.length, jsonString.length)
+										let secondIndex = remainingString.indexOf(responseSubstr)
+
+										// console.log(`First index: ${firstIndex}, Second index: ${secondIndex}`)
+
+										if(secondIndex == -1 || firstIndex == -1) {
+											individualResponses.push(jsonString)
+											console.log("Adding response: ", jsonString)
+											doneBreakingUp = true
+										} else {
+											let request = jsonString.slice(firstIndex-2, firstIndex+responseSubstr.length+secondIndex-2)
+											console.log("Adding response: ", request)
+											individualResponses.push(request)
+											jsonString = jsonString.slice(firstIndex+responseSubstr.length+secondIndex-2, jsonString.length)
+										}
+									}
 
 
-									console.log(jsonString)
+									console.log("The individual responses from the string are: ", individualResponses)
 
 									// console.log("JSON String: ", jsonString);
 
