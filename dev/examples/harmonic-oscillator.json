@@ -1,0 +1,338 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2026-01-25T09:56:58.610Z",
+    "modified": "2026-01-25T09:56:58.610Z",
+    "name": "harmonic-oscillator"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+        "type": "Integrator",
+        "name": "velocity",
+        "position": {
+          "x": -40,
+          "y": 530
+        },
+        "inputs": [
+          {
+            "id": "9cd9be6f-5121-4ea0-a059-08bcb0583324-input-0",
+            "nodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "9cd9be6f-5121-4ea0-a059-08bcb0583324-output-0",
+            "nodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": "v0"
+        }
+      },
+      {
+        "id": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+        "type": "Integrator",
+        "name": "position",
+        "position": {
+          "x": 80,
+          "y": 530
+        },
+        "inputs": [
+          {
+            "id": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e-input-0",
+            "nodeId": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e-output-0",
+            "nodeId": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": "x0"
+        }
+      },
+      {
+        "id": "df62c4f6-984d-4477-a895-5d3664ea796f",
+        "type": "Amplifier",
+        "name": "mass",
+        "position": {
+          "x": -160,
+          "y": 530
+        },
+        "inputs": [
+          {
+            "id": "df62c4f6-984d-4477-a895-5d3664ea796f-input-0",
+            "nodeId": "df62c4f6-984d-4477-a895-5d3664ea796f",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "df62c4f6-984d-4477-a895-5d3664ea796f-output-0",
+            "nodeId": "df62c4f6-984d-4477-a895-5d3664ea796f",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "gain": "-1/m"
+        }
+      },
+      {
+        "id": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce",
+        "type": "Amplifier",
+        "name": "damping",
+        "position": {
+          "x": -40,
+          "y": 590
+        },
+        "inputs": [
+          {
+            "id": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce-input-0",
+            "nodeId": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce-output-0",
+            "nodeId": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "_rotation": 2,
+          "gain": "d"
+        }
+      },
+      {
+        "id": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+        "type": "Adder",
+        "name": "Adder",
+        "position": {
+          "x": -280,
+          "y": 530
+        },
+        "inputs": [
+          {
+            "id": "b7337e6a-bac7-4959-a1d7-441ce874ebf9-input-0",
+            "nodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "b7337e6a-bac7-4959-a1d7-441ce874ebf9-input-1",
+            "nodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "b7337e6a-bac7-4959-a1d7-441ce874ebf9-output-0",
+            "nodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+            "name": "out",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {}
+      },
+      {
+        "id": "432f5d93-f961-452c-8902-3f23a0e95850",
+        "type": "Scope",
+        "name": "results",
+        "position": {
+          "x": 210,
+          "y": 520
+        },
+        "inputs": [
+          {
+            "id": "432f5d93-f961-452c-8902-3f23a0e95850-input-0",
+            "nodeId": "432f5d93-f961-452c-8902-3f23a0e95850",
+            "name": "v(t)",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "432f5d93-f961-452c-8902-3f23a0e95850-input-1",
+            "nodeId": "432f5d93-f961-452c-8902-3f23a0e95850",
+            "name": "x(t)",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "labels": "[\"v(t)\", \"x(t)\"]"
+        }
+      },
+      {
+        "id": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa",
+        "type": "Amplifier",
+        "name": "stiffness",
+        "position": {
+          "x": 80,
+          "y": 630
+        },
+        "inputs": [
+          {
+            "id": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa-input-0",
+            "nodeId": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa-output-0",
+            "nodeId": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "_rotation": 2,
+          "gain": "k"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "7a764d56-50a8-40df-b29b-2ede7d829d34",
+        "sourceNodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+        "sourcePortIndex": 0,
+        "targetNodeId": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "16efcabf-cda3-410e-b0ef-89affc53a562",
+        "sourceNodeId": "df62c4f6-984d-4477-a895-5d3664ea796f",
+        "sourcePortIndex": 0,
+        "targetNodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "d5ee4cd9-e537-463f-9b39-92b79cd6b4b2",
+        "sourceNodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+        "sourcePortIndex": 0,
+        "targetNodeId": "df62c4f6-984d-4477-a895-5d3664ea796f",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "4ccac102-b86a-48ef-b99b-db3f7475c3d5",
+        "sourceNodeId": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce",
+        "sourcePortIndex": 0,
+        "targetNodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "6e8e1e65-98a4-44ff-adf4-f378d1939696",
+        "sourceNodeId": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa",
+        "sourcePortIndex": 0,
+        "targetNodeId": "b7337e6a-bac7-4959-a1d7-441ce874ebf9",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "2b4c932f-ffb9-405d-9783-1df0a5fd2f48",
+        "sourceNodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+        "sourcePortIndex": 0,
+        "targetNodeId": "7c7687cc-c479-41c2-9c4e-ab97a6fad5ce",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "6c048fe7-d39e-4edc-845c-688f4ce39e7f",
+        "sourceNodeId": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+        "sourcePortIndex": 0,
+        "targetNodeId": "78d3fc9a-3054-4f02-bf54-64e16b7c65fa",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "a42681f5-f1fe-42cb-8481-7ccd18e2aa21",
+        "sourceNodeId": "9cd9be6f-5121-4ea0-a059-08bcb0583324",
+        "sourcePortIndex": 0,
+        "targetNodeId": "432f5d93-f961-452c-8902-3f23a0e95850",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "f334f933-6dc6-488b-be44-a48889fcfd51",
+        "sourceNodeId": "8cd6f0a8-45f5-4f44-9fb6-4e631da49e5e",
+        "sourcePortIndex": 0,
+        "targetNodeId": "432f5d93-f961-452c-8902-3f23a0e95850",
+        "targetPortIndex": 1
+      }
+    ],
+    "annotations": [
+      {
+        "id": "ccb4b214-4362-4e3b-9af3-117a1168b999",
+        "position": {
+          "x": -330,
+          "y": 650
+        },
+        "content": "# The Harmonic Oscillator\n\nLinear spring-mass-damper-system. Two integrators for position and velocity, some amps and an adder. Change the system parameters in the editor (E).",
+        "width": 440,
+        "height": 80,
+        "fontSize": 11
+      }
+    ]
+  },
+  "events": [],
+  "codeContext": {
+    "code": "# initial conditions (position, velocity)\nx0 = 1 \nv0 = 0\n\n# system parameters (mass, stiffness, damping)\nm = 1\nk = 0.2\nd = 0.05"
+  },
+  "simulationSettings": {
+    "duration": "100",
+    "dt": "1",
+    "solver": "RKCK54",
+    "adaptive": true,
+    "atol": "",
+    "rtol": "",
+    "ftol": "",
+    "dt_min": "",
+    "dt_max": "",
+    "ghostTraces": 0,
+    "plotResults": true
+  }
+}
