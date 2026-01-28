@@ -56,6 +56,7 @@ export class FlaskBackend implements Backend {
 	};
 	private pendingRequests = new Map<string, PendingRequest>();
 	private messageId = 0;
+	private isInitializing = false
 
 	// Output callbacks
 	private stdoutCallback: ((value: string) => void) | null = null;
@@ -68,13 +69,34 @@ export class FlaskBackend implements Backend {
 	async init(): Promise<void> {
 		const state = this.getState();
 		if (state.initialized || state.loading) return;
+		
+		let id = this.generateId()
 
-		this.handleResponse({
-			type: "stdout",
-			value: "Your backend preference has been set to a Flask web server, initialization has already occured",
-		});
+		this.isInitializing = true
 
-		this.handleResponse({ type: "ready" });
+		let data:any = await fetch(getFlaskBackendUrl()+"/initialize").then(res => res.json())
+
+		if(data.success) {
+			this.handleResponse({
+				type: "stdout",
+				value: "Your backend preference has been set to a Flask web server, initialization has already occured",
+			});
+
+			this.handleResponse({ type: "ready" });
+		} else {
+			let error = data.error
+			this.handleError({
+				type: "error",
+				error: error
+			})
+			this.isInitializing = false
+			backendState.update((s) => ({
+				...s,
+				loading: false,
+				error: error instanceof Error ? error.message : String(error)
+			}));
+			throw error;
+		}
 	}
 
 	terminate(): void {}
@@ -327,6 +349,7 @@ export class FlaskBackend implements Backend {
 					});
 
 					for (let dataChunk of dataChunks) {
+						console.log("Streaming data: ", dataChunk.result)
 						this.handleResponse({
 							type: "stream-data",
 							id,
@@ -415,6 +438,7 @@ export class FlaskBackend implements Backend {
 					loading: false,
 					progress: STATUS_MESSAGES.READY,
 				}));
+				this.isInitializing = false
 				break;
 
 			case "progress":

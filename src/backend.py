@@ -2,8 +2,11 @@ import os
 import json
 import traceback
 import requests as req
-from flask import Flask, request, jsonify, Response, stream_with_context
+from flask import Flask, request, jsonify, Response, stream_with_context, session
 from flask_cors import CORS
+from dotenv import load_dotenv
+import argparse
+from types import SimpleNamespace
 
 import io
 from contextlib import redirect_stdout, redirect_stderr
@@ -19,7 +22,6 @@ print(f"PathSim {pathsim.__version__} loaded successfully")
 STREAMING_STEP_EXPR = "_step_streaming_gen()"
 
 _clean_globals = set(globals().keys())
-namespace = {}
 
 '''
 The Flask web server would not be initialized simultaneously with the SvelteKit website since the latter is statically generated,
@@ -27,8 +29,10 @@ rather there would be some type of deployment of this application such that it c
 "https://view.pathsim.org" (which I think is already encapsualted by the "*" in the CORS.resources.options parameter)
 '''
 
+load_dotenv()
 
 app = Flask(__name__, static_folder="../static", static_url_path="")
+app.secret_key = os.getenv("SECRET_KEY")
 
 if os.getenv("FLASK_ENV") == "production":
     CORS(app,
@@ -51,6 +55,25 @@ else:
         supports_credentials=True
     )
 
+@app.route("/initialize", methods=["GET"])
+def intialize():
+    # The purpose of initialization in Flask is s8imply just to clear the current namespace!
+    try:
+        session["namespace"] = json.dumps({})
+        print("Successfully reset session namespace")
+        return jsonify({
+            "success": True
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": e
+        }), 400
+
+@app.route("/namespaceCheck", methods=["GET"])
+def namespaceCheck():
+    return jsonify({"namespace": session["namespace"]})
+
 # Execute Python route copied from the previous repository
 @app.route("/execute-code", methods=["POST"])
 def execute_code():
@@ -64,7 +87,13 @@ def execute_code():
             return jsonify({"success": False, "error": "No code provided"}), 400
 
         # Create a temporary namespace that includes current eval_namespace
-        # temp_namespace = {}
+        temp_namespace = {}
+        if "namespace" in session:
+            app.logger.info("We have a temporary namespace in session...")
+            temp_namespace = session["namespace"]
+        else:
+            app.logger.info("We are instantiating an empty namespace...")
+            temp_namespace = {}
         # temp_namespace.update(globals())
 
         # Capture stdout and stderr
@@ -73,8 +102,16 @@ def execute_code():
 
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                exec(code, namespace)
-
+                exec(code, globals=globals(), locals= temp_namespace)
+            
+            app.logger.info(type(temp_namespace))
+            app.logger.info(temp_namespace)
+            app.logger.info("Stringified Dictionary: ", str(temp_namespace))
+            # app.logger.info("Temporary Namespace:")
+            # app.logger.info(json.dumps(temp_namespace))
+            # jsonString = json.dumps(temp_namespace)
+            session["namespace"] = repr(temp_namespace)
+            # app.logger.info("What we return is: ", jsonString)
             # Capture any output
             output = stdout_capture.getvalue()
             error_output = stderr_capture.getvalue()
@@ -107,6 +144,12 @@ def evaluate_expression():
         if not expr.strip():
             return jsonify({"success": False, "error": "No Python expression provided"}), 400
         
+        temp_namespace = {}
+
+        if "namespace" in session:
+            temp_namespace = session["namespace"]
+        else:
+            temp_namespace = {}
 
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
@@ -114,7 +157,9 @@ def evaluate_expression():
         try:
             result = ""
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                result = eval(expr, namespace)
+                result = eval(expr, temp_namespace)
+
+            session["namespace"] = json.dumps(SimpleNamespace(temp_namespace))
 
             # Capture any output
             output = stdout_capture.getvalue()
@@ -150,30 +195,32 @@ def check_traceback():
 @app.route("/streamData", methods=["POST", "GET"])
 def stream_data():
     def generate(expr):
+
+        temp_namespace = {}
+        if "namespace" in session:
+            temp_namespace = session["namespace"]
+        else:
+            temp_namespace = {}
+
         # Capture stdout and stderror
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
         isDone = False
-        count = 0
         
         while not isDone:
-            print("(Generator) Count: ", count)
-            # print("Generator expression is: ", expr)
-            # yield json.dumps({"name": "Ayo", "age": 18})
 
             result = " "
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                result = eval(expr, namespace)
-        
-            print("Is the result done? ", result["done"])
+                result = eval(expr, temp_namespace)
+
+            session["namespace"] = json.dumps(SimpleNamespace(temp_namespace))
 
             # Capture any output
             output = stdout_capture.getvalue()
             error_output = stderr_capture.getvalue()
 
             if error_output:
-                print("Oh no there was an error ;-;")
                 return jsonify({"success": False, "error": error_output})
             
             # Directly responding with a Flask Response object (as jsonify(...) does) doesn't work
@@ -188,10 +235,7 @@ def stream_data():
                 }
             )
 
-            count += 1
-
             if result["done"]:
-                print("Concluding the while loop!")
                 isDone = True
     
     try:
@@ -237,5 +281,5 @@ def handle_exception(e):
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000)) 
+    port = int(os.getenv("PORT", 8000))
     app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_ENV") != "production")

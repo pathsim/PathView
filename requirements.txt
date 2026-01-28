@@ -5,3 +5,4 @@ flask-cors>=6.0.1
 numpy
 pathsim
 pathsim_chem
+dotenv

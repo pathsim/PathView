@@ -38,3 +38,4 @@ tmpclaude-*
 
 
 __pycache__/
+src/example.py
