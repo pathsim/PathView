@@ -3,7 +3,6 @@
  * Implements the Backend interface using Pyodide in a Web Worker
  */
 
-import { get } from 'svelte/store';
 import type { Backend, BackendState, REPLRequest, REPLResponse, REPLErrorResponse } from '../types';
 import { backendState } from '../state';
 import { TIMEOUTS } from '$lib/constants/python';

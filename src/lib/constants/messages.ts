@@ -8,7 +8,8 @@ export const PROGRESS_MESSAGES = {
 	INSTALLING_PATHSIM: 'Installing PathSim...',
 	INSTALLING_PATHSIM_CHEM: 'Installing PathSim-Chem...',
 	STARTING_WORKER: 'Starting worker...',
-	STARTING_SIMULATION: 'Starting simulation...'
+	STARTING_SIMULATION: 'Starting simulation...',
+	CHECKING_FLASK_INITIALIZATION: 'Checking Flask web server intialization status...'
 } as const;
 
 export const STATUS_MESSAGES = {

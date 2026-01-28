@@ -57,8 +57,7 @@ export interface SimulationSettings {
 	ftol: string; // Fixed-point iteration tolerance (Python expression)
 	dt_min: string; // Minimum timestep for adaptive solvers (Python expression)
 	dt_max: string; // Maximum timestep for adaptive solvers (Python expression)
-	ghostTraces: number; // Number of previous runs to show as ghost traces (0-6)
-	plotResults: boolean; // UI: auto-open plot panel
+	ghostTraces: number; // Number of previous runs to show as ghost traces
 }
 
 /** Worker message types */

@@ -1,8 +1,13 @@
 <script lang="ts">
+	// --------------------------- ROOT PAGE IMPORTS | START ---------------------------
+	// Svelte Package imports
 	import { onMount } from 'svelte';
     import { base } from '$app/paths';
 	import { fly, fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+
+	// Svelte Component Imports
+	import Tooltip,  { tooltip } from '$lib/components/Tooltip.svelte';
 	import FlowCanvas from '$lib/components/FlowCanvas.svelte';
 	import SimulationPanel from '$lib/components/panels/SimulationPanel.svelte';
 	import BlockPropertiesDialog from '$lib/components/dialogs/BlockPropertiesDialog.svelte';
@@ -23,22 +28,32 @@
 	import ResizablePanel from '$lib/components/ResizablePanel.svelte';
 	import WelcomeModal from '$lib/components/WelcomeModal.svelte';
 	import SubsystemBreadcrumb from '$lib/components/SubsystemBreadcrumb.svelte';
-	import Icon from '$lib/components/icons/Icon.svelte';
-	import { nodeRegistry } from '$lib/nodes';
-	import { NODE_TYPES } from '$lib/constants/nodeTypes';
-	import { PANEL_GAP, PANEL_TOGGLES_WIDTH, MIN_BOTTOM_PANEL_WIDTH, PANEL_DEFAULTS, NAV_HEIGHT } from '$lib/constants/layout';
+	import Icon from "$lib/components/icons/Icon.svelte"
 	import { GRID_SIZE } from '$lib/constants/grid';
-	import { DEFAULT_SIMULATION_SETTINGS } from '$lib/nodes/types';
 	import { graphStore } from '$lib/stores/graph';
 	import { eventStore } from '$lib/stores/events';
 	import { historyStore } from '$lib/stores/history';
 	import { settingsStore } from '$lib/stores/settings';
 	import { codeContextStore } from '$lib/stores/codeContext';
 	import { themeStore, type Theme } from '$lib/stores/theme';
+	import { backendPreferenceStore, type BackendPreference } from '$lib/stores/backendPreference';
 	import { contextMenuStore, type ContextMenuTarget } from '$lib/stores/contextMenu';
+	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
+	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
+	import { clipboardStore } from '$lib/stores/clipboard';
+	import { nodeRegistry } from '$lib/nodes';
+
+	// Dialog imports
 	import { openNodeDialog } from '$lib/stores/nodeDialog';
 	import { openEventDialog } from '$lib/stores/eventDialog';
+
+	// Constants and type imports
 	import type { MenuItemType } from '$lib/components/ContextMenu.svelte';
+	import { NODE_TYPES } from '$lib/constants/nodeTypes';
+	import { PANEL_GAP, PANEL_TOGGLES_WIDTH, MIN_BOTTOM_PANEL_WIDTH, PANEL_DEFAULTS, NAV_HEIGHT } from '$lib/constants/layout';
+	import { DEFAULT_SIMULATION_SETTINGS } from '$lib/nodes/types';
+
+	// Pyodide and Python Functionality imports
 	import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';
 	import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';
 	import { consoleStore } from '$lib/stores/console';
@@ -46,12 +61,14 @@
 	import { confirmationStore } from '$lib/stores/confirmation';
 	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
 	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding } from '$lib/stores/viewActions';
-	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
-	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
-	import { clipboardStore } from '$lib/stores/clipboard';
-	import Tooltip, { tooltip } from '$lib/components/Tooltip.svelte';
-	import { isInputFocused } from '$lib/utils/focus';
+  	
+	import { getFlaskBackendUrl } from '$lib/utils/flaskRoutes';
+  	import type { ValidationResult } from '$lib/types';
 
+	// --------------------------- ROOT PAGE IMPORTS | END ---------------------------
+
+	import { isInputFocused } from '$lib/utils/focus';
+	
 	// Track mouse position for paste operations
 	let mousePosition = $state({ x: 0, y: 0 });
 
@@ -362,14 +379,31 @@
 
 	// App state
 	let nodeCount = $state(0);
+
+	// ---- Pyodide Handling : START ----
 	let pyodideReady = $state(false);
 	let pyodideLoading = $state(false);
+	// ---- Pyodide Handling : END ----
+
+	let backendLoading = $derived.by(()=>{
+		switch (backendPreferenceStore.get()) {
+			case "pyodide":
+				return pyodideLoading
+			case "flask":
+				// We'll assume that the flask backend is always running, and we'll just handle errors as appropriate
+				return false
+			default:
+				return pyodideLoading
+		}
+	}) // Determine the loading state based on whichever backend preference is currently active
+
 	let simRunning = $state(false);
 	let isRunStarting = false; // Synchronous flag to prevent race conditions
 	let isContinuing = false; // Synchronous flag to prevent rapid continue calls
 	let hasRunSimulation = $state(false);
 	let statusText = $state('Ready');
 	let currentTheme = $state<Theme>('dark');
+	let currentBackendPreference = $state<BackendPreference>('pyodide');
 	let consoleLogCount = $state(0);
 	let plotActiveTab = $state(0);
 	let plotViewMode = $state<'tabs' | 'tiles'>('tabs');
@@ -394,6 +428,10 @@
 		const unsubTheme = themeStore.subscribe((theme) => {
 			currentTheme = theme;
 		});
+
+		const unsubBackendPreference = backendPreferenceStore.subscribe((backendPreference) => {
+			currentBackendPreference = backendPreference
+		})
 
 		const unsubNodeCount = graphStore.nodesArray.subscribe((nodes) => {
 			nodeCount = nodes.length;
@@ -503,6 +541,7 @@
 			unsubPinnedPreviews();
 			unsubContextMenu();
 			unsubTheme();
+			unsubBackendPreference();
 			unsubNodeCount();
 			unsubPyodide();
 			unsubSimulation();
@@ -671,6 +710,10 @@
 					event.preventDefault();
 					themeStore.toggle();
 					return;
+				case 'q':
+					event.preventDefault();
+					backendPreferenceStore.toggle();
+					return;
 				case '+':
 				case '=':
 					if (!event.ctrlKey && !event.metaKey) {
@@ -721,16 +764,24 @@
 		}
 	}
 
-	// Run simulation (auto-initializes if needed)
+	// Run simulation (auto-initializes if needed) - Interacts with "backend"
 	async function handleRun() {
-		// Prevent concurrent simulation runs (synchronous check for rapid key presses)
-		if (simRunning || isRunStarting || pyodideLoading) return;
+		// Logging the current backend preference
 
-		// Set flag before any async operations to prevent race conditions
-		isRunStarting = true;
+		let usingPyodide = currentBackendPreference == "pyodide"
+
+		if(usingPyodide) {
+			// Prevent concurrent simulation runs (synchronous check for rapid key presses)
+			if (simRunning || isRunStarting || pyodideLoading) return;
+
+		} else {
+			// [Since we are working with flask, we just remove the pyodideLoading requirement]
+			if (simRunning || isRunStarting) return;
+		}
+
 
 		// Auto-initialize if not ready
-		if (!pyodideReady) {
+		if (!pyodideReady && usingPyodide) {
 			try {
 				await initPyodide();
 			} catch (error) {
@@ -756,11 +807,15 @@
 
 			const codeContext = codeContextStore.getCode();
 
+			// TODO: Add Flask Parallel
 			// Validate before running
 			try {
 				statusText = 'Validating...';
-				const validation = await validateGraphSimulation(nodes, codeContext);
 
+				let validation
+				
+				validation = await validateGraphSimulation(nodes, codeContext);
+				
 				if (!validation.valid) {
 					// Show validation errors
 					showConsole = true;
@@ -784,6 +839,7 @@
 				return;
 			}
 
+			// TODO: Add Flask Parallel
 			// Run streaming simulation
 			try {
 				const events = eventStore.toJSON();
@@ -809,7 +865,7 @@
 		}
 	}
 
-	// Continue simulation from where it left off (streaming)
+	// Continue simulation from where it left off (streaming) - Interacts with "backend"
 	async function handleContinue() {
 		// Prevent concurrent continue calls (synchronous check for rapid key presses)
 		if (!pyodideReady || !hasRunSimulation || simRunning || isContinuing) return;
@@ -1115,6 +1171,14 @@
 				aria-label="Console"
 			>
 				<Icon name="terminal" size={18} />
+			</button>
+			<button
+				class="toggle-btn"
+				onclick={() => backendPreferenceStore.toggle()}
+				use:tooltip={{ text: currentBackendPreference === 'pyodide' ? 'You are using Pyodide Web Assembly' : 'You are using a Flask Web Server', shortcut: "Q", position: "right" }}
+				aria-label="Toggle your backend preference"
+			>
+				<Icon name={currentBackendPreference === 'pyodide' ? 'laptop' : 'server'} size={18} />
 			</button>
 		</div>
 

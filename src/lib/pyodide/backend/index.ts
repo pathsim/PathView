@@ -34,6 +34,7 @@ export { PyodideBackend } from './pyodide/backend';
 import { getBackend } from './registry';
 import { backendState } from './state';
 import { consoleStore } from '$lib/stores/console';
+import type { BackendPreference } from '$lib/types';
 
 // Alias for backward compatibility
 export const replState = {

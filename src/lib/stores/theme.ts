@@ -10,8 +10,8 @@ export type Theme = 'light' | 'dark';
 
 // Get initial theme from localStorage or system preference
 function getInitialTheme(): Theme {
-	if (!browser) return 'dark';
-
+	if (!browser || typeof window == "undefined") return 'dark';
+	
 	const stored = localStorage.getItem('pathview-theme');
 	if (stored === 'light' || stored === 'dark') {
 		return stored;
@@ -30,7 +30,7 @@ const theme = writable<Theme>(getInitialTheme());
 
 // Apply theme to document and persist
 theme.subscribe((value) => {
-	if (!browser) return;
+	if (!browser || typeof window == "undefined") return;
 
 	// Set data-theme attribute on document
 	document.documentElement.setAttribute('data-theme', value);

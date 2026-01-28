@@ -25,6 +25,8 @@ import {
 	generateListDefinition,
 	sanitizeName
 } from './codeBuilder';
+import type { BackendPreference } from '$lib/types';
+import { backendPreferenceStore } from '$lib/stores';
 
 // Re-export sanitizeName for external use
 export { sanitizeName } from './codeBuilder';

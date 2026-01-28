@@ -83,3 +83,6 @@ export type {
 	ModelContent
 } from './component';
 export { COMPONENT_EXTENSIONS, COMPONENT_MIME_TYPES, ALL_COMPONENT_EXTENSIONS } from './component';
+
+// Backend Preference type
+export type BackendPreference = 'pyodide' | 'flask';

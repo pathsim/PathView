@@ -49,7 +49,9 @@ def _extract_scope_data(blocks, node_id_map, incremental=False):
             if block_name == 'Scope':
                 try:
                     data = block.read(incremental=incremental)
-                    if data is not None:
+                    if type(data) is tuple and data[0] is None and data[1] is None:
+                        pass
+                    elif data is not None:
                         time_arr, signals = data
                         labels = list(block.labels) if hasattr(block, 'labels') and block.labels else []
                         scope_data[block_id] = {
@@ -58,6 +60,8 @@ def _extract_scope_data(blocks, node_id_map, incremental=False):
                             'labels': labels
                         }
                 except Exception as e:
+                    print("Data: ", data)
+                    print("Block ID: ", block_id)
                     print(f"Error reading Scope: {e}")
             elif block_name == 'Subsystem':
                 if hasattr(block, 'blocks'):

@@ -415,6 +415,15 @@
 		<circle cx="8.5" cy="8.5" r="1.5"/>
 		<polyline points="21 15 16 10 5 21"/>
 	</svg>
+{:else if name === "server"}
+	<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+	<g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 17c0-1.886 0-2.828.586-3.414S4.114 13 6 13h12c1.886 0 2.828 0 3.414.586S22 15.114 22 17s0 2.828-.586 3.414S19.886 21 18 21H6c-1.886 0-2.828 0-3.414-.586S2 18.886 2 17ZM2 6c0-1.886 0-2.828.586-3.414S4.114 2 6 2h12c1.886 0 2.828 0 3.414.586S22 4.114 22 6s0 2.828-.586 3.414S19.886 10 18 10H6c-1.886 0-2.828 0-3.414-.586S2 7.886 2 6Z"/><path stroke-linecap="round" d="M11 6h7M6 6h2m3 11h7M6 17h2"/></g>
+	</svg>
+{:else if name == "laptop"}
+	<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<g>
+		<path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M19.647 15.536H4.353m15.294 0V8c0-1.886 0-2.828-.586-3.414C18.476 4 17.533 4 15.647 4H8.353c-1.886 0-2.828 0-3.414.586S4.353 6.114 4.353 8v7.536m15.294 0l1.744 1.8l.088.092a2 2 0 0 1 .52 1.284l.001.127c0 .15 0 .224-.004.287a2 2 0 0 1-1.87 1.87a5 5 0 0 1-.287.004H4.161c-.15 0-.224 0-.287-.004a2 2 0 0 1-1.87-1.87C2 19.063 2 18.988 2 18.84l.001-.127a2 2 0 0 1 .52-1.284l.088-.092l1.744-1.8M9.5 18.5h5"/><path fill="currentColor" d="M12.75 6.75a.75.75 0 1 1-1.5 0a.75.75 0 0 1 1.5 0"/></g>
+	</svg>
 {:else if name === 'font-size-increase'}
 	<svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
 		<text x="2" y="18" font-size="16" font-weight="700" font-family="system-ui, sans-serif">A</text>

@@ -58,7 +58,7 @@
 				{ keys: ['H'], description: 'Go to root' },
 				{ keys: ['+'], description: 'Zoom in' },
 				{ keys: ['-'], description: 'Zoom out' },
-				{ keys: ['T'], description: 'Theme' }
+				{ keys: ['T'], description: 'Theme' },
 			]
 		},
 		{
@@ -70,7 +70,7 @@
 				{ keys: ['E'], description: 'Editor' },
 				{ keys: ['V'], description: 'Results' },
 				{ keys: ['C'], description: 'Console' },
-				{ keys: ['P'], description: 'Pin plots' }
+				{ keys: ['P'], description: 'Pin plots' },
 			]
 		},
 		{
@@ -78,7 +78,8 @@
 			items: [
 				{ keys: ['Ctrl', 'Enter'], description: 'Simulate' },
 				{ keys: ['Shift', 'Enter'], description: 'Continue' },
-				{ keys: ['?'], description: 'Shortcuts' }
+				{ keys: ['?'], description: 'Shortcuts' },
+				{ keys: ['Q'], description: 'Toggle Backend Preference'},
 			]
 		}
 	];

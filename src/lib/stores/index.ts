@@ -7,6 +7,7 @@ export { graphStore } from './graph';
 export { eventStore } from './events';
 export { settingsStore } from './settings';
 export { themeStore } from './theme';
+export { backendPreferenceStore } from './backendPreference'
 export { consoleStore } from './console';
 export { codeContextStore } from './codeContext';
 

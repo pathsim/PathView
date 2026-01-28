@@ -45,6 +45,7 @@ import {
 	STREAMING_STEP_EXPR,
 	STREAMING_STOP_CODE
 } from './pythonHelpers';
+import type { BackendPreference } from '$lib/types';
 
 // Result types
 export interface SimulationResult {
@@ -528,7 +529,6 @@ export async function validateGraph(
 
 		// Get validation result
 		const result = await evaluate<ValidationResult>(VALIDATION_RESULT_EXPR, TIMEOUTS.VALIDATION);
-
 		// Clean up
 		await exec(CLEANUP_TEMP_CODE);
 
@@ -580,6 +580,7 @@ export async function stopSimulation(): Promise<void> {
 if 'sim' in dir() and sim is not None:
     sim.stop()
 		`, TIMEOUTS.VALIDATION);
+		consoleStore.info("Stopped simulation (streaming)...")
 	} catch {
 		// Ignore errors - simulation might not exist yet
 	}
