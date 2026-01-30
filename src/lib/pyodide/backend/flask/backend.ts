@@ -531,10 +531,12 @@ export class FlaskBackend implements Backend {
 							headers: {
 								"Content-Type": "application/json",
 							},
-							body: JSON.stringify({ code: code }),
+							body: JSON.stringify({ namespace: localStorage.getItem("namespace"), code: code }),
 						},
 					).then((res) => res.json());
 					if (data.success && !data.error) {
+						localStorage.setItem("namespace", data.namespace)
+						console.log("The data given from /execute-code", data)
 						if (data.output) {
 							this.handleResponse({
 								type: "stdout",

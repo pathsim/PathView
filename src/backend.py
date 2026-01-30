@@ -4,15 +4,20 @@ import traceback
 import requests as req
 from flask import Flask, request, jsonify, Response, stream_with_context, session
 from flask_cors import CORS
+from flask_session import Session
+from cachelib import FileSystemCache
+
 from dotenv import load_dotenv
-import argparse
-from types import SimpleNamespace
+import pickle
+import types
+import uuid
 
 import io
 from contextlib import redirect_stdout, redirect_stderr
 
 # Initialization Code
 
+import ast
 import numpy as np
 import gc
 import pathsim, pathsim_chem
@@ -31,8 +36,19 @@ rather there would be some type of deployment of this application such that it c
 
 load_dotenv()
 
+server_namespace = {}
+
 app = Flask(__name__, static_folder="../static", static_url_path="")
-app.secret_key = os.getenv("SECRET_KEY")
+
+print("The secret key is: ", os.getenv("SECRET_KEY"))
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+SESSION_TYPE = 'cachelib'
+SESSION_SERIALIZATION_FORMAT = 'json'
+SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="/sessions")
+app.config.from_object(__name__)
+
+Session(app)
 
 if os.getenv("FLASK_ENV") == "production":
     CORS(app,
@@ -56,13 +72,24 @@ else:
     )
 
 @app.route("/initialize", methods=["GET"])
-def intialize():
-    # The purpose of initialization in Flask is s8imply just to clear the current namespace!
+def initalize():
+    session_id = "None provided...."
+
+    if "id" in session:
+        app.logger.info("Our current session ID is %s", session["id"])
+        session_id = session["id"]
+    else:
+        app.logger.info("Making a session id...")
+        session_id = uuid.uuid4()
+        session["id"] = session_id
+        session.permanent = True
+        app.logger.info("Made the id: ", session_id)
+
     try:
-        session["namespace"] = json.dumps({})
-        print("Successfully reset session namespace")
+
         return jsonify({
-            "success": True
+            "success": True,
+            "id": session_id
         })
     except Exception as e:
         return jsonify({
@@ -70,9 +97,13 @@ def intialize():
             "error": e
         }), 400
 
-@app.route("/namespaceCheck", methods=["GET"])
+@app.route("/idCheck", methods=["GET"])
 def namespaceCheck():
-    return jsonify({"namespace": session["namespace"]})
+    session_id = "No ID provided"
+    if "id" in session:
+        session_id = session["id"]
+
+    return jsonify({ "success": True, "id": session_id })
 
 # Execute Python route copied from the previous repository
 @app.route("/execute-code", methods=["POST"])
@@ -86,43 +117,27 @@ def execute_code():
         if not code.strip():
             return jsonify({"success": False, "error": "No code provided"}), 400
 
-        # Create a temporary namespace that includes current eval_namespace
-        temp_namespace = {}
-        if "namespace" in session:
-            app.logger.info("We have a temporary namespace in session...")
-            temp_namespace = session["namespace"]
-        else:
-            app.logger.info("We are instantiating an empty namespace...")
-            temp_namespace = {}
-        # temp_namespace.update(globals())
-
         # Capture stdout and stderr
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
+        temp_namespace = {}
+
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                exec(code, globals=globals(), locals= temp_namespace)
-            
-            app.logger.info(type(temp_namespace))
-            app.logger.info(temp_namespace)
-            app.logger.info("Stringified Dictionary: ", str(temp_namespace))
-            # app.logger.info("Temporary Namespace:")
-            # app.logger.info(json.dumps(temp_namespace))
-            # jsonString = json.dumps(temp_namespace)
-            session["namespace"] = repr(temp_namespace)
-            # app.logger.info("What we return is: ", jsonString)
+                exec(code, server_namespace)
+
             # Capture any output
             output = stdout_capture.getvalue()
             error_output = stderr_capture.getvalue()
 
             if error_output:
                 return jsonify({"success": False, "error": error_output})
-            
+
             return jsonify(
                 {
                     "success": True,
-                    "output": output
+                    "output": output,
                 }
             )
 
@@ -146,20 +161,13 @@ def evaluate_expression():
         
         temp_namespace = {}
 
-        if "namespace" in session:
-            temp_namespace = session["namespace"]
-        else:
-            temp_namespace = {}
-
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
 
         try:
             result = ""
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                result = eval(expr, temp_namespace)
-
-            session["namespace"] = json.dumps(SimpleNamespace(temp_namespace))
+                result = eval(expr, server_namespace)
 
             # Capture any output
             output = stdout_capture.getvalue()
@@ -196,12 +204,6 @@ def check_traceback():
 def stream_data():
     def generate(expr):
 
-        temp_namespace = {}
-        if "namespace" in session:
-            temp_namespace = session["namespace"]
-        else:
-            temp_namespace = {}
-
         # Capture stdout and stderror
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
@@ -212,9 +214,7 @@ def stream_data():
 
             result = " "
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-                result = eval(expr, temp_namespace)
-
-            session["namespace"] = json.dumps(SimpleNamespace(temp_namespace))
+                result = eval(expr, server_namespace)
 
             # Capture any output
             output = stdout_capture.getvalue()

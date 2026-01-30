@@ -18,6 +18,7 @@ let currentBackendType: BackendPreference | null = null;
  * Get the current backend, creating a Pyodide backend if none exists
  */
 export function getBackend(): Backend {
+	
 	let currentBackendPreference = backendPreferenceStore.get()
 	if (!currentBackend) {
 		if(currentBackendPreference == null) currentBackendPreference = "pyodide"

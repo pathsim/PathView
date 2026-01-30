@@ -91,6 +91,8 @@ print(f"${pkg.import} {${pkg.import}.__version__} loaded successfully")
 
     // Capture clean state for later cleanup
     await pyodide.runPythonAsync(`_clean_globals = set(globals().keys())`);
+    console.log("Pyodide Globals are: ", pyodide.globals)
+    console.log("Trying to access numpy, ", pyodide.globals.get("numpy"))
 
     isInitialized = true;
     send({ type: "ready" });
