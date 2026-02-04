@@ -13,8 +13,9 @@
 	import { showTooltip, hideTooltip } from '$lib/components/Tooltip.svelte';
 	import { paramInput } from '$lib/actions/paramInput';
 	import { plotDataStore } from '$lib/plotting/processing/plotDataStore';
-	import { NODE, PORT_LABEL, getPortPositionCalc, calculateNodeDimensions, snapTo2G } from '$lib/constants/dimensions';
-	import { containsMath, renderInlineMath, renderInlineMathSync, measureRenderedMath, getBaselineTextHeight } from '$lib/utils/inlineMathRenderer';
+	import { PORT_LABEL, getPortPositionCalc, calculateNodeDimensions } from '$lib/constants/dimensions';
+	import { truncatePortLabel } from '$lib/utils/portLabels';
+	import { containsMath, renderInlineMath, renderInlineMathSync, measureRenderedMath } from '$lib/utils/inlineMathRenderer';
 	import { getKatexCssUrl } from '$lib/utils/katexLoader';
 	import PlotPreview from './PlotPreview.svelte';
 
@@ -69,15 +70,16 @@
 	const nodeShowInputLabels = $derived(data.params?.['_showInputLabels'] as boolean | undefined);
 	const nodeShowOutputLabels = $derived(data.params?.['_showOutputLabels'] as boolean | undefined);
 
-	// Effective visibility (per-node overrides global)
+	// Effective visibility settings (per-node overrides global)
 	const showInputLabels = $derived(nodeShowInputLabels ?? globalShowPortLabels);
 	const showOutputLabels = $derived(nodeShowOutputLabels ?? globalShowPortLabels);
 
-	// For CSS class (show-labels only when labels are actually displayed)
-	const showPortLabels = $derived(
-		(showInputLabels && data.inputs.length > 0) ||
-		(showOutputLabels && data.outputs.length > 0)
-	);
+	// Actual visibility: setting is ON and ports exist (single source of truth)
+	const hasVisibleInputLabels = $derived(showInputLabels && data.inputs.length > 0);
+	const hasVisibleOutputLabels = $derived(showOutputLabels && data.outputs.length > 0);
+
+	// For CSS class (show-labels when any labels are actually displayed)
+	const showPortLabels = $derived(hasVisibleInputLabels || hasVisibleOutputLabels);
 
 	// Re-measure node when port labels toggle changes
 	$effect(() => {
@@ -209,6 +211,13 @@
 	const maxPortsOnSide = $derived(Math.max(data.inputs.length, data.outputs.length));
 	const pinnedCount = $derived(validPinnedParams().length);
 
+	// Measured name dimensions for math rendering (null if not measured or no math)
+	const measuredName = $derived(
+		nameHasMath && measuredNameWidth !== null && measuredNameHeight !== null
+			? { width: measuredNameWidth, height: measuredNameHeight }
+			: null
+	);
+
 	// Node dimensions - calculated from shared utility (same as SvelteFlow bounds)
 	const nodeDimensions = $derived(calculateNodeDimensions(
 		data.name,
@@ -217,76 +226,43 @@
 		pinnedCount,
 		rotation,
 		typeDef?.name,
-		showInputLabels,
-		showOutputLabels
+		hasVisibleInputLabels,
+		hasVisibleOutputLabels,
+		measuredName
 	));
-	// Use measured width if math is rendered and measured, otherwise use calculated
-	const nodeWidth = $derived(() => {
-		if (measuredNameWidth !== null && nameHasMath) {
-			// For math names, use measured width instead of string-length estimate
-			// But still respect minimum width needed for ports, pinned params, type label
-			const isVertical = rotation === 1 || rotation === 3;
-			const maxPortsOnSide = Math.max(data.inputs.length, data.outputs.length);
-			const minPortDimension = Math.max(1, maxPortsOnSide) * NODE.portSpacing;
-			const typeWidth = typeDef ? typeDef.name.length * 5 + 20 : 0;
-			const pinnedParamsWidth = pinnedCount > 0 ? 160 : 0;
 
-			// Minimum content width for layout (without name string-length estimate)
-			const minContentWidth = snapTo2G(Math.max(
-				NODE.baseWidth,
-				typeWidth,
-				pinnedParamsWidth,
-				isVertical ? minPortDimension : 0
-			));
+	// Grid template for port labels layout (computed in JS instead of CSS selectors)
+	const gridTemplate = $derived(() => {
+		if (!showPortLabels) return { columns: undefined, rows: undefined };
 
-			// Add horizontal padding from .node-content (12px each side = 24px)
-			const measuredMathWidth = snapTo2G(measuredNameWidth + 24);
+		const labelSize = `${PORT_LABEL.columnWidth}px`;
 
-			// Content width is max of minimum and measured
-			let totalWidth = Math.max(minContentWidth, measuredMathWidth);
-
-			// Add port label columns on top of content width (horizontal ports only)
-			if (!isVertical) {
-				if (showInputLabels && data.inputs.length > 0) totalWidth += PORT_LABEL.columnWidth;
-				if (showOutputLabels && data.outputs.length > 0) totalWidth += PORT_LABEL.columnWidth;
+		if (isVertical) {
+			// Vertical layout: rows for input/output labels
+			if (hasVisibleInputLabels && hasVisibleOutputLabels) {
+				// Both: [input-labels] [content] [output-labels]
+				return { columns: undefined, rows: `${labelSize} 1fr ${labelSize}` };
+			} else if (hasVisibleInputLabels) {
+				// Input only: rotation 1 = top, rotation 3 = bottom
+				return { columns: undefined, rows: rotation === 1 ? `${labelSize} 1fr` : `1fr ${labelSize}` };
+			} else if (hasVisibleOutputLabels) {
+				// Output only: rotation 1 = bottom, rotation 3 = top
+				return { columns: undefined, rows: rotation === 1 ? `1fr ${labelSize}` : `${labelSize} 1fr` };
 			}
-
-			return totalWidth;
-		}
-		return nodeDimensions.width;
-	});
-
-	// Height calculation - only override for tall math (like \displaystyle)
-	// Compare measured math height to baseline text height for robustness
-	const nodeHeight = $derived(() => {
-		if (measuredNameHeight !== null && nameHasMath) {
-			// Get baseline height of standard text - only grow if math is significantly taller
-			const baselineHeight = getBaselineTextHeight();
-			if (measuredNameHeight > baselineHeight * 1.2) {
-				const isVertical = rotation === 1 || rotation === 3;
-				const maxPortsOnSide = Math.max(data.inputs.length, data.outputs.length);
-				const minPortDimension = Math.max(1, maxPortsOnSide) * NODE.portSpacing;
-
-				// Pinned params height: border(1) + padding(10) + rows(24 each)
-				const pinnedParamsHeight = pinnedCount > 0 ? 7 + 24 * pinnedCount : 0;
-
-				// Content height: math height + type label (12px) + padding (12px)
-				const contentHeight = measuredNameHeight + 24 + pinnedParamsHeight;
-
-				let totalHeight = isVertical
-					? snapTo2G(contentHeight)
-					: snapTo2G(Math.max(contentHeight, minPortDimension));
-
-				// Add port label rows on top of content height (vertical ports only)
-				if (isVertical) {
-					if (showInputLabels && data.inputs.length > 0) totalHeight += PORT_LABEL.rowHeight;
-					if (showOutputLabels && data.outputs.length > 0) totalHeight += PORT_LABEL.rowHeight;
-				}
-
-				return totalHeight;
+		} else {
+			// Horizontal layout: columns for input/output labels
+			if (hasVisibleInputLabels && hasVisibleOutputLabels) {
+				// Both: [input-labels] [content] [output-labels]
+				return { columns: `${labelSize} 1fr ${labelSize}`, rows: undefined };
+			} else if (hasVisibleInputLabels) {
+				// Input only: rotation 0 = left, rotation 2 = right
+				return { columns: rotation === 0 ? `${labelSize} 1fr` : `1fr ${labelSize}`, rows: undefined };
+			} else if (hasVisibleOutputLabels) {
+				// Output only: rotation 0 = right, rotation 2 = left
+				return { columns: rotation === 0 ? `1fr ${labelSize}` : `${labelSize} 1fr`, rows: undefined };
 			}
 		}
-		return nodeDimensions.height;
+		return { columns: undefined, rows: undefined };
 	});
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
@@ -353,11 +329,6 @@
 		if (value === null || value === undefined) return '';
 		if (typeof value === 'object') return JSON.stringify(value);
 		return String(value);
-	}
-
-	// Truncate port label for display
-	function truncateLabel(name: string, maxChars: number = 5): string {
-		return name.length > maxChars ? name.slice(0, maxChars) : name;
 	}
 
 	// Format default value for placeholder (Python style)
@@ -435,10 +406,10 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	class:show-labels={showPortLabels}
-	class:has-inputs={showInputLabels && data.inputs.length > 0}
-	class:has-outputs={showOutputLabels && data.outputs.length > 0}
+	class:has-inputs={hasVisibleInputLabels}
+	class:has-outputs={hasVisibleOutputLabels}
 	data-rotation={rotation}
-	style="width: {nodeWidth()}px; height: {nodeHeight()}px; --node-color: {nodeColor};"
+	style="width: {nodeDimensions.width}px; height: {nodeDimensions.height}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
 	onmouseenter={handleMouseEnter}
 	onmouseleave={handleMouseLeave}
@@ -459,14 +430,18 @@
 	{/if}
 
 	<!-- Clip wrapper - contains all visible content, clips to rounded corners -->
-	<div class="node-clip">
+	<div
+		class="node-clip"
+		style:grid-template-columns={gridTemplate().columns}
+		style:grid-template-rows={gridTemplate().rows}
+	>
 		<!-- Input port labels -->
-		{#if showInputLabels && data.inputs.length > 0}
+		{#if hasVisibleInputLabels}
 			{#if isVertical}
 				<div class="port-labels port-labels-input port-labels-row">
 					{#each data.inputs as port, i}
 						<span class="port-label" style="left: {getPortPositionCalc(i, data.inputs.length)};">
-							{truncateLabel(port.name)}
+							{truncatePortLabel(port.name)}
 						</span>
 					{/each}
 				</div>
@@ -474,7 +449,7 @@
 				<div class="port-labels port-labels-input">
 					{#each data.inputs as port, i}
 						<span class="port-label" style="top: {getPortPositionCalc(i, data.inputs.length)};">
-							{truncateLabel(port.name)}
+							{truncatePortLabel(port.name)}
 						</span>
 					{/each}
 				</div>
@@ -522,12 +497,12 @@
 		</div>
 
 		<!-- Output port labels -->
-		{#if showOutputLabels && data.outputs.length > 0}
+		{#if hasVisibleOutputLabels}
 			{#if isVertical}
 				<div class="port-labels port-labels-output port-labels-row">
 					{#each data.outputs as port, i}
 						<span class="port-label" style="left: {getPortPositionCalc(i, data.outputs.length)};">
-							{truncateLabel(port.name)}
+							{truncatePortLabel(port.name)}
 						</span>
 					{/each}
 				</div>
@@ -535,7 +510,7 @@
 				<div class="port-labels port-labels-output">
 					{#each data.outputs as port, i}
 						<span class="port-label" style="top: {getPortPositionCalc(i, data.outputs.length)};">
-							{truncateLabel(port.name)}
+							{truncatePortLabel(port.name)}
 						</span>
 					{/each}
 				</div>
@@ -991,48 +966,10 @@
 		}
 	}
 
-	/* Port labels - grid layout when labels are shown (horizontal) */
-	/* Base: enable grid on .node-clip with fallback column template */
-	.node.show-labels:not(.vertical) .node-clip {
+	/* Port labels - grid layout when labels are shown */
+	/* Grid template columns/rows are set via inline style from JS */
+	.node.show-labels .node-clip {
 		display: grid;
-		grid-template-columns: 1fr;
-		grid-template-rows: 1fr;
-	}
-
-	/* Rotation 0/2: Both inputs and outputs - 3 columns */
-	.node.show-labels:not(.vertical).has-inputs.has-outputs .node-clip {
-		grid-template-columns: 40px 1fr 40px;
-	}
-	/* Rotation 0: inputs only - 2 columns (labels left, content right) */
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs:not(.has-outputs) .node-clip,
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-outputs:not(.has-inputs) .node-clip {
-		grid-template-columns: 40px 1fr;
-	}
-	/* Rotation 0: outputs only - 2 columns (content left, labels right) */
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-outputs:not(.has-inputs) .node-clip,
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs:not(.has-outputs) .node-clip {
-		grid-template-columns: 1fr 40px;
-	}
-
-	/* Port labels - grid layout when labels are shown (vertical) */
-	.node.show-labels.vertical .node-clip {
-		display: grid;
-		grid-template-columns: 1fr;
-	}
-
-	/* Rotation 1/3: Both inputs and outputs - 3 rows */
-	.node.show-labels.vertical.has-inputs.has-outputs .node-clip {
-		grid-template-rows: 40px 1fr 40px;
-	}
-	/* Rotation 1: inputs only - 2 rows (labels top, content bottom) */
-	.node.show-labels.vertical[data-rotation="1"].has-inputs:not(.has-outputs) .node-clip,
-	.node.show-labels.vertical[data-rotation="3"].has-outputs:not(.has-inputs) .node-clip {
-		grid-template-rows: 40px 1fr;
-	}
-	/* Rotation 1: outputs only - 2 rows (content top, labels bottom) */
-	.node.show-labels.vertical[data-rotation="1"].has-outputs:not(.has-inputs) .node-clip,
-	.node.show-labels.vertical[data-rotation="3"].has-inputs:not(.has-outputs) .node-clip {
-		grid-template-rows: 1fr 40px;
 	}
 
 	/* Label containers */

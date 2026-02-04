@@ -59,6 +59,23 @@ export function snapTo2G(value: number): number {
 }
 
 /**
+ * Calculate port offset from center in pixels.
+ * Used for SVG rendering and numeric calculations.
+ *
+ * @param index - Port index (0-based)
+ * @param total - Total number of ports on this edge
+ * @returns Offset in pixels from center (negative = before center, positive = after)
+ */
+export function getPortOffset(index: number, total: number): number {
+	if (total <= 0 || total === 1) {
+		return 0; // Single port at center
+	}
+	// For N ports with spacing S: span = (N-1)*S, offset from center = -span/2 + i*S
+	const span = (total - 1) * NODE.portSpacing;
+	return -span / 2 + index * NODE.portSpacing;
+}
+
+/**
  * Calculate port position as CSS calc() expression.
  * Uses offset from center to ensure grid alignment regardless of node size,
  * since the node center is always at a grid-aligned position.
@@ -68,24 +85,23 @@ export function snapTo2G(value: number): number {
  * @returns CSS position value (e.g., "50%" or "calc(50% + 10px)")
  */
 export function getPortPositionCalc(index: number, total: number): string {
-	if (total <= 0 || total === 1) {
-		return '50%'; // Single port at center
-	}
-	// For N ports with spacing S: span = (N-1)*S, offset from center = -span/2 + i*S
-	const span = (total - 1) * NODE.portSpacing;
-	const offsetFromCenter = -span / 2 + index * NODE.portSpacing;
-	if (offsetFromCenter === 0) {
+	const offset = getPortOffset(index, total);
+	if (offset === 0) {
 		return '50%';
 	}
-	return `calc(50% + ${offsetFromCenter}px)`;
+	return `calc(50% + ${offset}px)`;
 }
+
+/** Baseline text height for comparing math rendering (approximate) */
+const BASELINE_TEXT_HEIGHT = 14;
 
 /**
  * Calculate node dimensions from node data.
  * Used by both SvelteFlow (for bounds) and BaseNode (for CSS).
  *
- * @param showInputLabels - If true, adds space for input port label column/row
- * @param showOutputLabels - If true, adds space for output port label column/row
+ * @param hasVisibleInputLabels - True if input labels are visible (setting ON and inputs exist)
+ * @param hasVisibleOutputLabels - True if output labels are visible (setting ON and outputs exist)
+ * @param measuredName - Optional measured dimensions for math-rendered names
  */
 export function calculateNodeDimensions(
 	name: string,
@@ -94,23 +110,29 @@ export function calculateNodeDimensions(
 	pinnedParamCount: number,
 	rotation: number,
 	typeName?: string,
-	showInputLabels?: boolean,
-	showOutputLabels?: boolean
+	hasVisibleInputLabels?: boolean,
+	hasVisibleOutputLabels?: boolean,
+	measuredName?: { width: number; height: number } | null
 ): { width: number; height: number } {
 	const isVertical = rotation === 1 || rotation === 3;
 	const maxPortsOnSide = Math.max(inputCount, outputCount);
 	const minPortDimension = Math.max(1, maxPortsOnSide) * NODE.portSpacing;
 
-	// Pinned params height: border(1) + padding(10) + rows(20 each) + gaps(4 between)
+	// Pinned params dimensions
 	const pinnedParamsHeight = pinnedParamCount > 0 ? 7 + 24 * pinnedParamCount : 0;
-
-	// Width: base, name estimate, type name estimate, pinned params minimum, port dimension (if vertical)
-	// Name uses 10px font (~6px per char), type uses 8px font (~5px per char), plus padding for node margins
-	// Use slightly larger estimates to ensure text fits (ceil behavior)
-	const nameWidth = name.length * 6 + 20;
-	const typeWidth = typeName ? typeName.length * 5 + 20 : 0;
 	const pinnedParamsWidth = pinnedParamCount > 0 ? 160 : 0;
-	let width = snapTo2G(Math.max(
+
+	// Type label width estimate (8px font, ~5px per char)
+	const typeWidth = typeName ? typeName.length * 5 + 20 : 0;
+
+	// Name width: use measured if available, otherwise estimate (10px font, ~6px per char)
+	// Add 24px for horizontal padding in .node-content (12px each side)
+	const nameWidth = measuredName
+		? snapTo2G(measuredName.width + 24)
+		: name.length * 6 + 20;
+
+	// Content width (without port labels)
+	let contentWidth = snapTo2G(Math.max(
 		NODE.baseWidth,
 		nameWidth,
 		typeWidth,
@@ -118,21 +140,29 @@ export function calculateNodeDimensions(
 		isVertical ? minPortDimension : 0
 	));
 
-	// Height: content height vs port dimension (they share vertical space)
-	const contentHeight = NODE.baseHeight + pinnedParamsHeight;
+	// Content height: check if math is significantly taller than baseline text
+	let contentHeight: number;
+	if (measuredName && measuredName.height > BASELINE_TEXT_HEIGHT * 1.2) {
+		// Math is tall (e.g., \displaystyle fractions) - use measured height + type label + padding
+		contentHeight = measuredName.height + 24 + pinnedParamsHeight;
+	} else {
+		// Normal text height
+		contentHeight = NODE.baseHeight + pinnedParamsHeight;
+	}
+
+	// Final dimensions accounting for port space
+	let width = contentWidth;
 	let height = isVertical
 		? snapTo2G(contentHeight)
 		: snapTo2G(Math.max(contentHeight, minPortDimension));
 
-	// Add space for port labels if enabled (separately for inputs and outputs)
+	// Add space for port labels if visible
 	if (isVertical) {
-		// Vertical ports: add rows for labels above/below content
-		if (showInputLabels && inputCount > 0) height += PORT_LABEL.rowHeight;
-		if (showOutputLabels && outputCount > 0) height += PORT_LABEL.rowHeight;
+		if (hasVisibleInputLabels) height += PORT_LABEL.rowHeight;
+		if (hasVisibleOutputLabels) height += PORT_LABEL.rowHeight;
 	} else {
-		// Horizontal ports: add columns for labels on left/right
-		if (showInputLabels && inputCount > 0) width += PORT_LABEL.columnWidth;
-		if (showOutputLabels && outputCount > 0) width += PORT_LABEL.columnWidth;
+		if (hasVisibleInputLabels) width += PORT_LABEL.columnWidth;
+		if (hasVisibleOutputLabels) width += PORT_LABEL.columnWidth;
 	}
 
 	return { width, height };
