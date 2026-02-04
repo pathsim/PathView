@@ -27,7 +27,9 @@ export {
 	selectNodeTrigger,
 	triggerSelectNodes,
 	editAnnotationTrigger,
-	triggerEditAnnotation
+	triggerEditAnnotation,
+	flyInAnimationTrigger,
+	triggerFlyInAnimation
 } from './viewTriggers';
 
 // Re-export all utilities
