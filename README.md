@@ -16,7 +16,6 @@ A web-based visual node editor for building and simulating dynamic systems with 
 - [Pyodide](https://pyodide.org/) for in-browser Python/NumPy/SciPy
 - [Plotly.js](https://plotly.com/javascript/) for interactive plots
 - [CodeMirror 6](https://codemirror.net/) for code editing
-- [dom-to-svg](https://github.com/nicolo-ribaudo/dom-to-svg) for SVG graph export
 
 ## Getting Started
 
