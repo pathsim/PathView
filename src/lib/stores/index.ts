@@ -19,6 +19,7 @@ export { contextMenuStore } from './contextMenu';
 export { nodeUpdatesStore } from './nodeUpdates';
 export { pinnedPreviewsStore } from './pinnedPreviews';
 export { hoveredHandle, selectedNodeHighlight } from './hoveredHandle';
+export { portLabelsStore } from './portLabels';
 
 // View actions (re-exports triggers and utils)
 export * from './viewActions';

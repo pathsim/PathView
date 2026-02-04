@@ -58,6 +58,7 @@
 				{ keys: ['H'], description: 'Go to root' },
 				{ keys: ['+'], description: 'Zoom in' },
 				{ keys: ['-'], description: 'Zoom out' },
+				{ keys: ['L'], description: 'Port labels' },
 				{ keys: ['T'], description: 'Theme' }
 			]
 		},

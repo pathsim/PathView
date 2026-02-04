@@ -48,6 +48,7 @@
 	import { triggerFitView, triggerZoomIn, triggerZoomOut, triggerPan, getViewportCenter, screenToFlow, triggerClearSelection, triggerNudge, hasAnySelection, setFitViewPadding, triggerFlyInAnimation } from '$lib/stores/viewActions';
 	import { nodeUpdatesStore } from '$lib/stores/nodeUpdates';
 	import { pinnedPreviewsStore } from '$lib/stores/pinnedPreviews';
+	import { portLabelsStore } from '$lib/stores/portLabels';
 	import { clipboardStore } from '$lib/stores/clipboard';
 	import Tooltip, { tooltip } from '$lib/components/Tooltip.svelte';
 	import { isInputFocused } from '$lib/utils/focus';
@@ -652,6 +653,10 @@
 				case 'p':
 					event.preventDefault();
 					pinnedPreviewsStore.toggle();
+					return;
+				case 'l':
+					event.preventDefault();
+					portLabelsStore.toggle();
 					return;
 				case 'b':
 					event.preventDefault();
