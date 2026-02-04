@@ -46,8 +46,8 @@ export const EXPORT_PADDING = G.x4;
 export const PORT_LABEL = {
 	/** Width of label column for horizontal ports: 4 grid units = 40px */
 	columnWidth: G.x4,
-	/** Height of label row for vertical ports: 2 grid units = 20px */
-	rowHeight: G.x2
+	/** Height of label row for vertical ports: 4 grid units = 40px (same as column width) */
+	rowHeight: G.x4
 } as const;
 
 /**
@@ -84,7 +84,8 @@ export function getPortPositionCalc(index: number, total: number): string {
  * Calculate node dimensions from node data.
  * Used by both SvelteFlow (for bounds) and BaseNode (for CSS).
  *
- * @param showPortLabels - If true, adds space for port label columns/rows
+ * @param showInputLabels - If true, adds space for input port label column/row
+ * @param showOutputLabels - If true, adds space for output port label column/row
  */
 export function calculateNodeDimensions(
 	name: string,
@@ -93,7 +94,8 @@ export function calculateNodeDimensions(
 	pinnedParamCount: number,
 	rotation: number,
 	typeName?: string,
-	showPortLabels?: boolean
+	showInputLabels?: boolean,
+	showOutputLabels?: boolean
 ): { width: number; height: number } {
 	const isVertical = rotation === 1 || rotation === 3;
 	const maxPortsOnSide = Math.max(inputCount, outputCount);
@@ -122,17 +124,15 @@ export function calculateNodeDimensions(
 		? snapTo2G(contentHeight)
 		: snapTo2G(Math.max(contentHeight, minPortDimension));
 
-	// Add space for port labels if enabled
-	if (showPortLabels) {
-		if (isVertical) {
-			// Vertical ports: add rows for labels above/below content
-			if (inputCount > 0) height += PORT_LABEL.rowHeight;
-			if (outputCount > 0) height += PORT_LABEL.rowHeight;
-		} else {
-			// Horizontal ports: add columns for labels on left/right
-			if (inputCount > 0) width += PORT_LABEL.columnWidth;
-			if (outputCount > 0) width += PORT_LABEL.columnWidth;
-		}
+	// Add space for port labels if enabled (separately for inputs and outputs)
+	if (isVertical) {
+		// Vertical ports: add rows for labels above/below content
+		if (showInputLabels && inputCount > 0) height += PORT_LABEL.rowHeight;
+		if (showOutputLabels && outputCount > 0) height += PORT_LABEL.rowHeight;
+	} else {
+		// Horizontal ports: add columns for labels on left/right
+		if (showInputLabels && inputCount > 0) width += PORT_LABEL.columnWidth;
+		if (showOutputLabels && outputCount > 0) width += PORT_LABEL.columnWidth;
 	}
 
 	return { width, height };

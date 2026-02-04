@@ -59,16 +59,27 @@
 		hasPlotData = state.plots.has(id);
 	});
 
-	// Port labels visibility
-	let showPortLabels = $state(false);
+	// Global port labels visibility
+	let globalShowPortLabels = $state(false);
 	const unsubscribePortLabels = portLabelsStore.subscribe((value) => {
-		showPortLabels = value;
+		globalShowPortLabels = value;
 	});
+
+	// Per-node overrides (undefined = follow global)
+	const nodeShowInputLabels = $derived(data.params?.['_showInputLabels'] as boolean | undefined);
+	const nodeShowOutputLabels = $derived(data.params?.['_showOutputLabels'] as boolean | undefined);
+
+	// Effective visibility (per-node overrides global)
+	const showInputLabels = $derived(nodeShowInputLabels ?? globalShowPortLabels);
+	const showOutputLabels = $derived(nodeShowOutputLabels ?? globalShowPortLabels);
+
+	// For CSS class (show-labels when either is visible)
+	const showPortLabels = $derived(showInputLabels || showOutputLabels);
 
 	// Re-measure node when port labels toggle changes
 	$effect(() => {
-		// Dependency on showPortLabels
-		if (showPortLabels !== undefined) {
+		// Dependency on showInputLabels and showOutputLabels
+		if (showInputLabels !== undefined || showOutputLabels !== undefined) {
 			updateNodeInternals(id);
 		}
 	});
@@ -203,7 +214,8 @@
 		pinnedCount,
 		rotation,
 		typeDef?.name,
-		showPortLabels
+		showInputLabels,
+		showOutputLabels
 	));
 	// Use measured width if math is rendered and measured, otherwise use calculated
 	const nodeWidth = $derived(() => {
@@ -225,9 +237,9 @@
 			));
 
 			// Add port label columns if enabled (horizontal ports only)
-			if (showPortLabels && !isVertical) {
-				if (data.inputs.length > 0) minLayoutWidth += PORT_LABEL.columnWidth;
-				if (data.outputs.length > 0) minLayoutWidth += PORT_LABEL.columnWidth;
+			if (!isVertical) {
+				if (showInputLabels && data.inputs.length > 0) minLayoutWidth += PORT_LABEL.columnWidth;
+				if (showOutputLabels && data.outputs.length > 0) minLayoutWidth += PORT_LABEL.columnWidth;
 			}
 
 			// Add horizontal padding from .node-content (12px each side = 24px)
@@ -255,9 +267,9 @@
 				let contentHeight = measuredNameHeight + 24 + pinnedParamsHeight;
 
 				// Add port label rows if enabled (vertical ports only)
-				if (showPortLabels && isVertical) {
-					if (data.inputs.length > 0) contentHeight += PORT_LABEL.rowHeight;
-					if (data.outputs.length > 0) contentHeight += PORT_LABEL.rowHeight;
+				if (isVertical) {
+					if (showInputLabels && data.inputs.length > 0) contentHeight += PORT_LABEL.rowHeight;
+					if (showOutputLabels && data.outputs.length > 0) contentHeight += PORT_LABEL.rowHeight;
 				}
 
 				return isVertical
@@ -414,8 +426,8 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	class:show-labels={showPortLabels}
-	class:has-inputs={data.inputs.length > 0}
-	class:has-outputs={data.outputs.length > 0}
+	class:has-inputs={showInputLabels && data.inputs.length > 0}
+	class:has-outputs={showOutputLabels && data.outputs.length > 0}
 	data-rotation={rotation}
 	style="width: {nodeWidth()}px; height: {nodeHeight()}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
@@ -437,85 +449,90 @@
 		<div class="selection-glow"></div>
 	{/if}
 
-	<!-- Input port labels (horizontal: left side for rotation 0, right for rotation 2) -->
-	{#if showPortLabels && data.inputs.length > 0 && !isVertical}
-		<div class="port-labels port-labels-input" class:port-labels-right={rotation === 2}>
-			{#each data.inputs as port, i}
-				<span class="port-label" style="top: {getPortPositionCalc(i, data.inputs.length)};">
-					{truncateLabel(port.name)}
-				</span>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Input port labels (vertical: top row for rotation 1, bottom row for rotation 3) -->
-	{#if showPortLabels && data.inputs.length > 0 && isVertical}
-		<div class="port-labels port-labels-row" class:port-labels-bottom={rotation === 3}>
-			{#each data.inputs as port}
-				<span class="port-label">{truncateLabel(port.name)}</span>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Inner wrapper for content clipping -->
-	<div class="node-inner">
-		<!-- Node content -->
-		<div class="node-content">
-			{#if renderedNameHtml}
-				<span class="node-name">{@html renderedNameHtml}</span>
+	<!-- Clip wrapper - contains all visible content, clips to rounded corners -->
+	<div class="node-clip">
+		<!-- Input port labels -->
+		{#if showInputLabels && data.inputs.length > 0}
+			{#if isVertical}
+				<div class="port-labels port-labels-input port-labels-row">
+					{#each data.inputs as port, i}
+						<span class="port-label" style="left: {getPortPositionCalc(i, data.inputs.length)};">
+							{truncateLabel(port.name)}
+						</span>
+					{/each}
+				</div>
 			{:else}
-				<span class="node-name">{data.name}</span>
+				<div class="port-labels port-labels-input">
+					{#each data.inputs as port, i}
+						<span class="port-label" style="top: {getPortPositionCalc(i, data.inputs.length)};">
+							{truncateLabel(port.name)}
+						</span>
+					{/each}
+				</div>
 			{/if}
-			{#if typeDef}
-				<span class="node-type">{typeDef.name}</span>
+		{/if}
+
+		<!-- Inner wrapper for content -->
+		<div class="node-inner">
+			<!-- Node content -->
+			<div class="node-content">
+				{#if renderedNameHtml}
+					<span class="node-name">{@html renderedNameHtml}</span>
+				{:else}
+					<span class="node-name">{data.name}</span>
+				{/if}
+				{#if typeDef}
+					<span class="node-type">{typeDef.name}</span>
+				{/if}
+			</div>
+
+			<!-- Pinned parameters -->
+			{#if validPinnedParams().length > 0 && typeDef}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<div class="pinned-params" onclick={(e) => e.stopPropagation()} ondblclick={(e) => e.stopPropagation()}>
+					{#each validPinnedParams() as paramName}
+						{@const paramDef = typeDef.params.find(p => p.name === paramName)}
+						{#if paramDef}
+							<div class="pinned-param">
+								<label for="pinned-{id}-{paramName}">{paramName}</label>
+								<input
+									id="pinned-{id}-{paramName}"
+									type="text"
+									value={formatParamValue(data.params[paramName])}
+									placeholder={formatDefault(paramDef.default)}
+									oninput={(e) => handlePinnedParamChange(paramName, e.currentTarget.value)}
+									onmousedown={(e) => e.stopPropagation()}
+									onfocus={(e) => e.stopPropagation()}
+									use:paramInput
+								/>
+							</div>
+						{/if}
+					{/each}
+				</div>
 			{/if}
 		</div>
 
-		<!-- Pinned parameters -->
-		{#if validPinnedParams().length > 0 && typeDef}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<div class="pinned-params" onclick={(e) => e.stopPropagation()} ondblclick={(e) => e.stopPropagation()}>
-				{#each validPinnedParams() as paramName}
-					{@const paramDef = typeDef.params.find(p => p.name === paramName)}
-					{#if paramDef}
-						<div class="pinned-param">
-							<label for="pinned-{id}-{paramName}">{paramName}</label>
-							<input
-								id="pinned-{id}-{paramName}"
-								type="text"
-								value={formatParamValue(data.params[paramName])}
-								placeholder={formatDefault(paramDef.default)}
-								oninput={(e) => handlePinnedParamChange(paramName, e.currentTarget.value)}
-								onmousedown={(e) => e.stopPropagation()}
-								onfocus={(e) => e.stopPropagation()}
-								use:paramInput
-							/>
-						</div>
-					{/if}
-				{/each}
-			</div>
+		<!-- Output port labels -->
+		{#if showOutputLabels && data.outputs.length > 0}
+			{#if isVertical}
+				<div class="port-labels port-labels-output port-labels-row">
+					{#each data.outputs as port, i}
+						<span class="port-label" style="left: {getPortPositionCalc(i, data.outputs.length)};">
+							{truncateLabel(port.name)}
+						</span>
+					{/each}
+				</div>
+			{:else}
+				<div class="port-labels port-labels-output">
+					{#each data.outputs as port, i}
+						<span class="port-label" style="top: {getPortPositionCalc(i, data.outputs.length)};">
+							{truncateLabel(port.name)}
+						</span>
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</div>
-
-	<!-- Output port labels (horizontal: right side for rotation 0, left for rotation 2) -->
-	{#if showPortLabels && data.outputs.length > 0 && !isVertical}
-		<div class="port-labels port-labels-output" class:port-labels-left={rotation === 2}>
-			{#each data.outputs as port, i}
-				<span class="port-label" style="top: {getPortPositionCalc(i, data.outputs.length)};">
-					{truncateLabel(port.name)}
-				</span>
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Output port labels (vertical: bottom row for rotation 1, top row for rotation 3) -->
-	{#if showPortLabels && data.outputs.length > 0 && isVertical}
-		<div class="port-labels port-labels-row" class:port-labels-top={rotation === 3}>
-			{#each data.outputs as port}
-				<span class="port-label">{truncateLabel(port.name)}</span>
-			{/each}
-		</div>
-	{/if}
 
 	<!-- Port controls for dynamic inputs (only show when selected) -->
 	{#if allowsDynamicInputs && selected}
@@ -569,29 +586,32 @@
 		position: relative;
 		/* Dimensions set via inline style using grid constants */
 		/* Note: center-origin handled by SvelteFlow's nodeOrigin={[0.5, 0.5]} */
-		display: flex;
-		flex-direction: column;
 		background: var(--surface-raised);
 		border: 1px solid var(--edge);
 		font-size: 10px;
-		overflow: visible;
+		overflow: visible; /* Allow handles to extend outside */
+		--node-radius: 8px;
 	}
 
-	/* Shape variants */
+	/* Shape variants - set both border-radius and custom property for inner clipping */
 	.shape-pill {
-		border-radius: 20px;
+		--node-radius: 20px;
+		border-radius: var(--node-radius);
 	}
 
 	.shape-rect {
-		border-radius: 4px;
+		--node-radius: 4px;
+		border-radius: var(--node-radius);
 	}
 
 	.shape-circle {
-		border-radius: 16px;
+		--node-radius: 16px;
+		border-radius: var(--node-radius);
 	}
 
 	.shape-diamond {
-		border-radius: 4px;
+		--node-radius: 4px;
+		border-radius: var(--node-radius);
 		transform: rotate(45deg);
 	}
 
@@ -600,11 +620,13 @@
 	}
 
 	.shape-mixed {
+		--node-radius: 12px;
 		border-radius: 12px 4px 12px 4px;
 	}
 
 	.shape-default {
-		border-radius: 8px;
+		--node-radius: 8px;
+		border-radius: var(--node-radius);
 	}
 
 	/* Subsystem/Interface dashed border */
@@ -627,13 +649,21 @@
 		z-index: 1000 !important;
 	}
 
-	/* Inner wrapper for content - fills node, clips to rounded corners */
+	/* Clip wrapper - fills node, clips content to rounded corners */
+	.node-clip {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		border-radius: max(0px, calc(var(--node-radius, 8px) - 1px));
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Inner wrapper for content */
 	.node-inner {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		border-radius: inherit;
-		overflow: hidden;
 		min-height: 0;
 	}
 
@@ -690,21 +720,24 @@
 		margin-top: 2px;
 	}
 
-	/* Pinned parameters */
+	/* Pinned parameters - rectangular, clipped by node-clip's overflow:hidden */
 	.pinned-params {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
-		padding: 4px 10px 6px;
+		padding: 4px 8px 6px;
 		border-top: 1px solid var(--border);
 		background: var(--surface);
+		border-radius: 0;
+		overflow: hidden;
 	}
 
 	.pinned-param {
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: 4px;
 		min-width: 0;
+		max-width: 100%;
 	}
 
 	.pinned-param label {
@@ -721,7 +754,7 @@
 		flex: 1;
 		min-width: 0;
 		height: 20px;
-		padding: 2px 8px;
+		padding: 2px 6px;
 		font-size: 8px;
 		font-family: var(--font-mono);
 		background: var(--surface-raised);
@@ -949,27 +982,45 @@
 	}
 
 	/* Port labels - 3-column grid layout when labels are shown (horizontal) */
-	.node.show-labels:not(.vertical) {
+	.node.show-labels:not(.vertical) .node-clip {
 		display: grid;
-		grid-template-columns: var(--input-col, 0px) 1fr var(--output-col, 0px);
+		grid-template-columns: var(--left-col, 0px) 1fr var(--right-col, 0px);
+		grid-template-rows: 1fr;
 	}
-	.node.show-labels.has-inputs:not(.vertical) {
-		--input-col: 40px;
+	/* Rotation 0: inputs left, outputs right */
+	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs {
+		--left-col: 40px;
 	}
-	.node.show-labels.has-outputs:not(.vertical) {
-		--output-col: 40px;
+	.node.show-labels:not(.vertical)[data-rotation="0"].has-outputs {
+		--right-col: 40px;
+	}
+	/* Rotation 2: inputs right, outputs left */
+	.node.show-labels:not(.vertical)[data-rotation="2"].has-outputs {
+		--left-col: 40px;
+	}
+	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs {
+		--right-col: 40px;
 	}
 
 	/* Port labels - 3-row grid layout when labels are shown (vertical) */
-	.node.show-labels.vertical {
+	.node.show-labels.vertical .node-clip {
 		display: grid;
-		grid-template-rows: var(--input-row, 0px) 1fr var(--output-row, 0px);
+		grid-template-columns: 1fr;
+		grid-template-rows: var(--top-row, 0px) 1fr var(--bottom-row, 0px);
 	}
-	.node.show-labels.vertical.has-inputs {
-		--input-row: 20px;
+	/* Rotation 1: inputs top, outputs bottom */
+	.node.show-labels.vertical[data-rotation="1"].has-inputs {
+		--top-row: 40px;
 	}
-	.node.show-labels.vertical.has-outputs {
-		--output-row: 20px;
+	.node.show-labels.vertical[data-rotation="1"].has-outputs {
+		--bottom-row: 40px;
+	}
+	/* Rotation 3: inputs bottom, outputs top */
+	.node.show-labels.vertical[data-rotation="3"].has-outputs {
+		--top-row: 40px;
+	}
+	.node.show-labels.vertical[data-rotation="3"].has-inputs {
+		--bottom-row: 40px;
 	}
 
 	/* Label containers */
@@ -977,27 +1028,63 @@
 		position: relative;
 		min-width: 0;
 		min-height: 0;
-		overflow: hidden;
+		overflow: visible;
 	}
 
-	/* Horizontal layout: left/right columns */
-	.port-labels-input:not(.port-labels-right) {
-		text-align: right;
-		padding-right: 4px;
+	/* Horizontal layout: explicit grid column placement */
+	.node.show-labels:not(.vertical) .node-clip > .port-labels-input {
+		grid-column: 1;
+		grid-row: 1;
+		border-right: 1px solid var(--border);
 	}
-	.port-labels-output:not(.port-labels-left) {
-		text-align: left;
-		padding-left: 4px;
+	.node.show-labels:not(.vertical) .node-clip > .node-inner {
+		grid-column: 2;
+		grid-row: 1;
+	}
+	.node.show-labels:not(.vertical) .node-clip > .port-labels-output {
+		grid-column: 3;
+		grid-row: 1;
+		border-left: 1px solid var(--border);
 	}
 
-	/* Flipped for rotation 2 */
-	.port-labels-input.port-labels-right {
-		text-align: left;
-		padding-left: 4px;
+	/* Rotation 2: swap input/output column positions */
+	.node.show-labels:not(.vertical)[data-rotation="2"] .node-clip > .port-labels-input {
+		grid-column: 3;
+		border-right: none;
+		border-left: 1px solid var(--border);
 	}
-	.port-labels-output.port-labels-left {
-		text-align: right;
-		padding-right: 4px;
+	.node.show-labels:not(.vertical)[data-rotation="2"] .node-clip > .port-labels-output {
+		grid-column: 1;
+		border-left: none;
+		border-right: 1px solid var(--border);
+	}
+
+	/* Vertical layout: explicit grid row placement */
+	.node.show-labels.vertical .node-clip > .port-labels-input {
+		grid-column: 1;
+		grid-row: 1;
+		border-bottom: 1px solid var(--border);
+	}
+	.node.show-labels.vertical .node-clip > .node-inner {
+		grid-column: 1;
+		grid-row: 2;
+	}
+	.node.show-labels.vertical .node-clip > .port-labels-output {
+		grid-column: 1;
+		grid-row: 3;
+		border-top: 1px solid var(--border);
+	}
+
+	/* Rotation 3: swap input/output row positions */
+	.node.show-labels.vertical[data-rotation="3"] .node-clip > .port-labels-input {
+		grid-row: 3;
+		border-bottom: none;
+		border-top: 1px solid var(--border);
+	}
+	.node.show-labels.vertical[data-rotation="3"] .node-clip > .port-labels-output {
+		grid-row: 1;
+		border-top: none;
+		border-bottom: 1px solid var(--border);
 	}
 
 	/* Individual port labels (absolute positioning for horizontal) */
@@ -1010,25 +1097,69 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: 36px;
-		left: 0;
-		right: 0;
+		line-height: 1;
 	}
 
-	/* Vertical rotation - horizontal row of labels */
-	.port-labels-row {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 20px;
-		height: 100%;
+	/* Input labels: align right (near separator), away from handle edge */
+	.port-labels-input .port-label {
+		right: 6px;
+		text-align: right;
 	}
 
-	.port-labels-row .port-label {
-		position: relative;
-		transform: none;
-		top: auto;
-		left: auto;
+	/* Output labels: align left (near separator), away from handle edge */
+	.port-labels-output .port-label {
+		left: 6px;
+		text-align: left;
+	}
+
+	/* Rotation 2: swap alignment */
+	.node[data-rotation="2"] .port-labels-input .port-label {
 		right: auto;
-		text-align: center;
+		left: 6px;
+		text-align: left;
+	}
+	.node[data-rotation="2"] .port-labels-output .port-label {
+		left: auto;
+		right: 6px;
+		text-align: right;
+	}
+
+	/* Vertical rotation - row of labels with 90deg rotation */
+	.port-labels-row {
+		position: relative;
+	}
+
+	/* Reset horizontal-specific styles for vertical labels */
+	.port-labels-row .port-label {
+		position: absolute;
+		width: auto;
+		max-width: none;
+		right: auto;
+		/* Use center origin for simpler positioning */
+		transform-origin: center center;
+		/* text-align: left = text starts at original left edge = visual bottom after -90deg rotation */
+		text-align: left;
+	}
+
+	/* Input labels at top row: center vertically, shift toward bottom separator */
+	.node.show-labels.vertical .port-labels-input .port-label {
+		top: 50%;
+		bottom: auto;
+		transform: translateX(-50%) translateY(calc(-50% + 6px)) rotate(-90deg);
+	}
+
+	/* Output labels at bottom row: center vertically, shift toward top separator */
+	.node.show-labels.vertical .port-labels-output .port-label {
+		top: 50%;
+		bottom: auto;
+		transform: translateX(-50%) translateY(calc(-50% - 6px)) rotate(-90deg);
+	}
+
+	/* Rotation 3: swap the vertical shifts */
+	.node.show-labels.vertical[data-rotation="3"] .port-labels-input .port-label {
+		transform: translateX(-50%) translateY(calc(-50% - 6px)) rotate(-90deg);
+	}
+	.node.show-labels.vertical[data-rotation="3"] .port-labels-output .port-label {
+		transform: translateX(-50%) translateY(calc(-50% + 6px)) rotate(-90deg);
 	}
 </style>

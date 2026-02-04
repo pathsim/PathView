@@ -25,6 +25,7 @@ import { hasExportableData, exportRecordingData } from '$lib/utils/csvExport';
 import { exportToSVG } from '$lib/export/svg';
 import { downloadSvg } from '$lib/utils/download';
 import { plotSettingsStore, DEFAULT_BLOCK_SETTINGS } from '$lib/stores/plotSettings';
+import { portLabelsStore } from '$lib/stores/portLabels';
 
 /** Divider menu item */
 const DIVIDER: MenuItemType = { label: '', action: () => {}, divider: true };
@@ -73,6 +74,10 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 
 	// Interface blocks have limited options
 	if (isInterface) {
+		const globalLabels = get(portLabelsStore);
+		const showInputLabels = (node.params?.['_showInputLabels'] as boolean | undefined) ?? globalLabels;
+		const showOutputLabels = (node.params?.['_showOutputLabels'] as boolean | undefined) ?? globalLabels;
+
 		return [
 			{
 				label: 'Properties',
@@ -87,6 +92,21 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 			},
 			DIVIDER,
 			{
+				label: showInputLabels ? 'Hide Input Labels' : 'Show Input Labels',
+				icon: 'tag',
+				action: () => historyStore.mutate(() =>
+					graphStore.updateNodeParams(nodeId, { _showInputLabels: !showInputLabels })
+				)
+			},
+			{
+				label: showOutputLabels ? 'Hide Output Labels' : 'Show Output Labels',
+				icon: 'tag',
+				action: () => historyStore.mutate(() =>
+					graphStore.updateNodeParams(nodeId, { _showOutputLabels: !showOutputLabels })
+				)
+			},
+			DIVIDER,
+			{
 				label: 'View Code',
 				icon: 'braces',
 				action: () => showBlockCode(nodeId)
@@ -96,6 +116,10 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 
 	// Subsystem blocks get "Enter" option
 	if (isSubsystem) {
+		const globalLabels = get(portLabelsStore);
+		const showInputLabels = (node.params?.['_showInputLabels'] as boolean | undefined) ?? globalLabels;
+		const showOutputLabels = (node.params?.['_showOutputLabels'] as boolean | undefined) ?? globalLabels;
+
 		return [
 			{
 				label: 'Properties',
@@ -107,6 +131,21 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 				icon: 'enter',
 				shortcut: 'Dbl-click',
 				action: () => graphStore.drillDown(nodeId)
+			},
+			DIVIDER,
+			{
+				label: showInputLabels ? 'Hide Input Labels' : 'Show Input Labels',
+				icon: 'tag',
+				action: () => historyStore.mutate(() =>
+					graphStore.updateNodeParams(nodeId, { _showInputLabels: !showInputLabels })
+				)
+			},
+			{
+				label: showOutputLabels ? 'Hide Output Labels' : 'Show Output Labels',
+				icon: 'tag',
+				action: () => historyStore.mutate(() =>
+					graphStore.updateNodeParams(nodeId, { _showOutputLabels: !showOutputLabels })
+				)
 			},
 			DIVIDER,
 			{
@@ -152,6 +191,11 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 	const isRecordingNode = node.type === 'Scope' || node.type === 'Spectrum';
 	const dataSource = node.type === 'Scope' ? 'scope' : 'spectrum';
 
+	// Per-node port label visibility (undefined = follow global)
+	const globalLabels = get(portLabelsStore);
+	const showInputLabels = (node.params?.['_showInputLabels'] as boolean | undefined) ?? globalLabels;
+	const showOutputLabels = (node.params?.['_showOutputLabels'] as boolean | undefined) ?? globalLabels;
+
 	// Regular blocks
 	const items: MenuItemType[] = [
 		{
@@ -159,6 +203,21 @@ function buildNodeMenu(nodeId: string): MenuItemType[] {
 			icon: 'settings',
 			shortcut: 'Dbl-click',
 			action: () => openNodeDialog(nodeId)
+		},
+		DIVIDER,
+		{
+			label: showInputLabels ? 'Hide Input Labels' : 'Show Input Labels',
+			icon: 'tag',
+			action: () => historyStore.mutate(() =>
+				graphStore.updateNodeParams(nodeId, { _showInputLabels: !showInputLabels })
+			)
+		},
+		{
+			label: showOutputLabels ? 'Hide Output Labels' : 'Show Output Labels',
+			icon: 'tag',
+			action: () => historyStore.mutate(() =>
+				graphStore.updateNodeParams(nodeId, { _showOutputLabels: !showOutputLabels })
+			)
 		},
 		DIVIDER,
 		{
