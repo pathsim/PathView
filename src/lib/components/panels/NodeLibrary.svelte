@@ -22,6 +22,10 @@
 	// Track drag state to prevent click after drag
 	let isDragging = $state(false);
 
+	// Drag preview - rendered off-screen, used as drag image
+	let dragPreviewNode = $state<NodeTypeDefinition | null>(null);
+	let dragPreviewElement: HTMLDivElement;
+
 	// Collapsed categories
 	let collapsedCategories = $state<Set<string>>(new Set());
 
@@ -85,12 +89,27 @@
 		return result;
 	});
 
+	// Handle mouse enter to prepare drag preview
+	function handleMouseEnter(node: NodeTypeDefinition) {
+		dragPreviewNode = node;
+	}
+
 	// Handle drag start
 	function handleDragStart(event: DragEvent, nodeType: NodeTypeDefinition) {
 		isDragging = true;
 		if (event.dataTransfer) {
 			event.dataTransfer.setData('application/pathview-node', nodeType.type);
 			event.dataTransfer.effectAllowed = 'copy';
+
+			// Use the pre-rendered preview as drag image, centered on cursor
+			if (dragPreviewElement) {
+				const rect = dragPreviewElement.getBoundingClientRect();
+				event.dataTransfer.setDragImage(
+					dragPreviewElement,
+					rect.width / 2,
+					rect.height / 2
+				);
+			}
 		}
 	}
 
@@ -99,6 +118,7 @@
 		// Reset after a short delay to prevent click from firing
 		setTimeout(() => {
 			isDragging = false;
+			dragPreviewNode = null;
 		}, 100);
 	}
 
@@ -196,6 +216,7 @@
 								class="node-tile"
 								class:selected={isSelected(node)}
 								draggable="true"
+								onmouseenter={() => handleMouseEnter(node)}
 								ondragstart={(e) => handleDragStart(e, node)}
 								ondragend={handleDragEnd}
 								onclick={() => handleNodeClick(node)}
@@ -218,6 +239,15 @@
 	<div class="footer">
 		<span>Click or drag to add</span>
 		<span>↑↓ Enter</span>
+	</div>
+
+	<!-- Hidden drag preview container (rendered off-screen, used as drag image) -->
+	<div class="drag-preview-container" aria-hidden="true">
+		{#if dragPreviewNode}
+			<div bind:this={dragPreviewElement} class="drag-preview-wrapper">
+				<NodePreview node={dragPreviewNode} />
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -379,5 +409,17 @@
 		border-top: 1px solid var(--border);
 		font-size: 10px;
 		color: var(--text-disabled);
+	}
+
+	/* Hidden container for drag preview image */
+	.drag-preview-container {
+		position: fixed;
+		left: -9999px;
+		top: -9999px;
+		pointer-events: none;
+	}
+
+	.drag-preview-wrapper {
+		display: inline-block;
 	}
 </style>
