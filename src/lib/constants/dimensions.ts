@@ -42,6 +42,14 @@ export const EVENT = {
 /** Export padding: 4 grid units = 40px */
 export const EXPORT_PADDING = G.x4;
 
+/** Port label dimensions (when labels are shown) */
+export const PORT_LABEL = {
+	/** Width of label column for horizontal ports: 4 grid units = 40px */
+	columnWidth: G.x4,
+	/** Height of label row for vertical ports: 2 grid units = 20px */
+	rowHeight: G.x2
+} as const;
+
 /**
  * Round up to next 2G (20px) boundary.
  * This ensures nodes expand by 1G in each direction (symmetric from center).
@@ -75,6 +83,8 @@ export function getPortPositionCalc(index: number, total: number): string {
 /**
  * Calculate node dimensions from node data.
  * Used by both SvelteFlow (for bounds) and BaseNode (for CSS).
+ *
+ * @param showPortLabels - If true, adds space for port label columns/rows
  */
 export function calculateNodeDimensions(
 	name: string,
@@ -82,7 +92,8 @@ export function calculateNodeDimensions(
 	outputCount: number,
 	pinnedParamCount: number,
 	rotation: number,
-	typeName?: string
+	typeName?: string,
+	showPortLabels?: boolean
 ): { width: number; height: number } {
 	const isVertical = rotation === 1 || rotation === 3;
 	const maxPortsOnSide = Math.max(inputCount, outputCount);
@@ -97,7 +108,7 @@ export function calculateNodeDimensions(
 	const nameWidth = name.length * 6 + 20;
 	const typeWidth = typeName ? typeName.length * 5 + 20 : 0;
 	const pinnedParamsWidth = pinnedParamCount > 0 ? 160 : 0;
-	const width = snapTo2G(Math.max(
+	let width = snapTo2G(Math.max(
 		NODE.baseWidth,
 		nameWidth,
 		typeWidth,
@@ -107,9 +118,22 @@ export function calculateNodeDimensions(
 
 	// Height: content height vs port dimension (they share vertical space)
 	const contentHeight = NODE.baseHeight + pinnedParamsHeight;
-	const height = isVertical
+	let height = isVertical
 		? snapTo2G(contentHeight)
 		: snapTo2G(Math.max(contentHeight, minPortDimension));
+
+	// Add space for port labels if enabled
+	if (showPortLabels) {
+		if (isVertical) {
+			// Vertical ports: add rows for labels above/below content
+			if (inputCount > 0) height += PORT_LABEL.rowHeight;
+			if (outputCount > 0) height += PORT_LABEL.rowHeight;
+		} else {
+			// Horizontal ports: add columns for labels on left/right
+			if (inputCount > 0) width += PORT_LABEL.columnWidth;
+			if (outputCount > 0) width += PORT_LABEL.columnWidth;
+		}
+	}
 
 	return { width, height };
 }
