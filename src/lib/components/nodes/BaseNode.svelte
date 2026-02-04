@@ -673,6 +673,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		min-width: 0;
 		min-height: 0;
 	}
 
@@ -991,9 +992,10 @@
 	}
 
 	/* Port labels - grid layout when labels are shown (horizontal) */
-	/* Base: enable grid on .node-clip */
+	/* Base: enable grid on .node-clip with fallback column template */
 	.node.show-labels:not(.vertical) .node-clip {
 		display: grid;
+		grid-template-columns: 1fr;
 		grid-template-rows: 1fr;
 	}
 
