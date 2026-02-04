@@ -17,6 +17,8 @@ export interface ThemeColors {
 	text: string;
 	/** Muted text color */
 	textMuted: string;
+	/** Disabled text color (lighter than muted) */
+	textDisabled: string;
 	/** Accent color (default node color) */
 	accent: string;
 }
@@ -27,18 +29,20 @@ export const THEMES: Record<'light' | 'dark', ThemeColors> = {
 		surface: '#08080c',
 		surfaceRaised: '#1c1c26',
 		border: 'rgba(255, 255, 255, 0.08)',
-		edge: '#7F7F7F',
+		edge: '#808090',
 		text: '#f0f0f5',
 		textMuted: '#808090',
+		textDisabled: '#505060',
 		accent: '#0070C0'
 	},
 	light: {
 		surface: '#f0f0f4',
 		surfaceRaised: '#ffffff',
 		border: 'rgba(0, 0, 0, 0.10)',
-		edge: '#7F7F7F',
+		edge: '#808090',  // inherits from :root
 		text: '#1a1a1f',
-		textMuted: '#606068',
+		textMuted: '#808090',  // inherits from :root
+		textDisabled: '#909098',
 		accent: '#0070C0'
 	}
 } as const;
