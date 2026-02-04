@@ -73,8 +73,11 @@
 	const showInputLabels = $derived(nodeShowInputLabels ?? globalShowPortLabels);
 	const showOutputLabels = $derived(nodeShowOutputLabels ?? globalShowPortLabels);
 
-	// For CSS class (show-labels when either is visible)
-	const showPortLabels = $derived(showInputLabels || showOutputLabels);
+	// For CSS class (show-labels only when labels are actually displayed)
+	const showPortLabels = $derived(
+		(showInputLabels && data.inputs.length > 0) ||
+		(showOutputLabels && data.outputs.length > 0)
+	);
 
 	// Re-measure node when port labels toggle changes
 	$effect(() => {
