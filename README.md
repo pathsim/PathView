@@ -527,6 +527,8 @@ PathView uses JSON-based file formats for saving and sharing:
 | `.blk` | Block | Single block with parameters (for sharing/reuse) |
 | `.sub` | Subsystem | Subsystem with internal graph (for sharing/reuse) |
 
+The `.pvm` format is fully documented in [**docs/pvm-spec.md**](docs/pvm-spec.md). Use this spec if you are building tools that read or write PathView models (e.g., code generators, importers). A reference Python code generator is available at `scripts/pvm2py.py`.
+
 ### Export Options
 
 - **File > Save** - Save complete model as `.pvm`
