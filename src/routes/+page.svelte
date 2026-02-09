@@ -856,15 +856,6 @@
 		}
 	}
 
-	// Load example file
-	async function handleLoadExample(url: string) {
-		const result = await importFromUrl(url);
-		if (result.success) {
-			// Trigger fit view after a brief delay to let nodes render
-			setTimeout(() => triggerFitView(), 100);
-		}
-	}
-
 	/**
 	 * Expand GitHub shorthand to raw.githubusercontent.com URL
 	 * Format: owner/repo/path/to/file.pvm
@@ -1362,7 +1353,6 @@
 	{#if showWelcomeModal}
 		<WelcomeModal
 			onNew={handleNew}
-			onLoadExample={handleLoadExample}
 			onClose={() => showWelcomeModal = false}
 		/>
 	{/if}
