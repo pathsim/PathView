@@ -16,13 +16,19 @@ export interface PortLabelConfig {
 
 /**
  * Parse an operations string into individual character labels.
- * E.g. '+-' → ['+', '-'], None/null → null
+ * Handles Python-style quoted strings: '+-' or "+-" → ['+', '-']
+ * Also handles unquoted: +- → ['+', '-']
  */
 function parseOperationsString(value: unknown): string[] | null {
 	if (value === null || value === undefined || value === 'None' || value === '') {
 		return null;
 	}
-	const str = String(value).trim();
+	let str = String(value).trim();
+	if (str.length === 0) return null;
+	// Strip surrounding Python quotes (single or double)
+	if ((str.startsWith("'") && str.endsWith("'")) || (str.startsWith('"') && str.endsWith('"'))) {
+		str = str.slice(1, -1);
+	}
 	if (str.length === 0) return null;
 	return [...str];
 }
