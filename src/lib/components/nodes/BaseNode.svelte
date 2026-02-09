@@ -231,38 +231,93 @@
 		measuredName
 	));
 
-	// Grid template for port labels layout (computed in JS instead of CSS selectors)
-	const gridTemplate = $derived(() => {
-		if (!showPortLabels) return { columns: undefined, rows: undefined };
+	// Grid layout for port labels (computed in JS, replaces CSS grid-placement selectors)
+	const gridLayout = $derived(() => {
+		if (!showPortLabels) {
+			return {
+				columns: undefined, rows: undefined,
+				inputStyle: '', innerStyle: '', outputStyle: ''
+			};
+		}
 
 		const labelSize = `${PORT_LABEL.columnWidth}px`;
+		let columns: string | undefined;
+		let rows: string | undefined;
+		let inputStyle = '';
+		let innerStyle = '';
+		let outputStyle = '';
 
 		if (isVertical) {
-			// Vertical layout: rows for input/output labels
+			// Vertical: rows for labels, single column
+			const inputBorder = rotation === 1 ? 'border-bottom' : 'border-top';
+			const outputBorder = rotation === 1 ? 'border-top' : 'border-bottom';
+			const colStyle = 'grid-column: 1;';
+
 			if (hasVisibleInputLabels && hasVisibleOutputLabels) {
-				// Both: [input-labels] [content] [output-labels]
-				return { columns: undefined, rows: `${labelSize} 1fr ${labelSize}` };
+				// rotation 1: input(row1) content(row2) output(row3)
+				// rotation 3: output(row1) content(row2) input(row3)
+				rows = `${labelSize} 1fr ${labelSize}`;
+				if (rotation === 1) {
+					inputStyle = `${colStyle} grid-row: 1; ${inputBorder}: 1px solid var(--border);`;
+					innerStyle = `${colStyle} grid-row: 2;`;
+					outputStyle = `${colStyle} grid-row: 3; ${outputBorder}: 1px solid var(--border);`;
+				} else {
+					outputStyle = `${colStyle} grid-row: 1; ${outputBorder}: 1px solid var(--border);`;
+					innerStyle = `${colStyle} grid-row: 2;`;
+					inputStyle = `${colStyle} grid-row: 3; ${inputBorder}: 1px solid var(--border);`;
+				}
 			} else if (hasVisibleInputLabels) {
-				// Input only: rotation 1 = top, rotation 3 = bottom
-				return { columns: undefined, rows: rotation === 1 ? `${labelSize} 1fr` : `1fr ${labelSize}` };
+				rows = rotation === 1 ? `${labelSize} 1fr` : `1fr ${labelSize}`;
+				const inputRow = rotation === 1 ? 1 : 2;
+				const innerRow = rotation === 1 ? 2 : 1;
+				inputStyle = `${colStyle} grid-row: ${inputRow}; ${inputBorder}: 1px solid var(--border);`;
+				innerStyle = `${colStyle} grid-row: ${innerRow};`;
 			} else if (hasVisibleOutputLabels) {
-				// Output only: rotation 1 = bottom, rotation 3 = top
-				return { columns: undefined, rows: rotation === 1 ? `1fr ${labelSize}` : `${labelSize} 1fr` };
+				rows = rotation === 1 ? `1fr ${labelSize}` : `${labelSize} 1fr`;
+				const outputRow = rotation === 1 ? 2 : 1;
+				const innerRow = rotation === 1 ? 1 : 2;
+				outputStyle = `${colStyle} grid-row: ${outputRow}; ${outputBorder}: 1px solid var(--border);`;
+				innerStyle = `${colStyle} grid-row: ${innerRow};`;
 			}
 		} else {
-			// Horizontal layout: columns for input/output labels
+			// Horizontal: columns for labels, single row
+			const rowStyle = 'grid-row: 1;';
+			// rotation 0: inputs left (border-right), outputs right (border-left)
+			// rotation 2: inputs right (border-left), outputs left (border-right)
+			const inputBorder = rotation === 0 ? 'border-right' : 'border-left';
+			const outputBorder = rotation === 0 ? 'border-left' : 'border-right';
+
 			if (hasVisibleInputLabels && hasVisibleOutputLabels) {
-				// Both: [input-labels] [content] [output-labels]
-				return { columns: `${labelSize} 1fr ${labelSize}`, rows: undefined };
+				columns = `${labelSize} 1fr ${labelSize}`;
+				if (rotation === 0) {
+					// input(col1) content(col2) output(col3)
+					inputStyle = `${rowStyle} grid-column: 1; ${inputBorder}: 1px solid var(--border);`;
+					innerStyle = `${rowStyle} grid-column: 2;`;
+					outputStyle = `${rowStyle} grid-column: 3; ${outputBorder}: 1px solid var(--border);`;
+				} else {
+					// output(col1) content(col2) input(col3)
+					outputStyle = `${rowStyle} grid-column: 1; ${outputBorder}: 1px solid var(--border);`;
+					innerStyle = `${rowStyle} grid-column: 2;`;
+					inputStyle = `${rowStyle} grid-column: 3; ${inputBorder}: 1px solid var(--border);`;
+				}
 			} else if (hasVisibleInputLabels) {
-				// Input only: rotation 0 = left, rotation 2 = right
-				return { columns: rotation === 0 ? `${labelSize} 1fr` : `1fr ${labelSize}`, rows: undefined };
+				// rotation 0: input(col1) content(col2) | rotation 2: content(col1) input(col2)
+				columns = rotation === 0 ? `${labelSize} 1fr` : `1fr ${labelSize}`;
+				const inputCol = rotation === 0 ? 1 : 2;
+				const innerCol = rotation === 0 ? 2 : 1;
+				inputStyle = `${rowStyle} grid-column: ${inputCol}; ${inputBorder}: 1px solid var(--border);`;
+				innerStyle = `${rowStyle} grid-column: ${innerCol};`;
 			} else if (hasVisibleOutputLabels) {
-				// Output only: rotation 0 = right, rotation 2 = left
-				return { columns: rotation === 0 ? `1fr ${labelSize}` : `${labelSize} 1fr`, rows: undefined };
+				// rotation 0: content(col1) output(col2) | rotation 2: output(col1) content(col2)
+				columns = rotation === 0 ? `1fr ${labelSize}` : `${labelSize} 1fr`;
+				const outputCol = rotation === 0 ? 2 : 1;
+				const innerCol = rotation === 0 ? 1 : 2;
+				outputStyle = `${rowStyle} grid-column: ${outputCol}; ${outputBorder}: 1px solid var(--border);`;
+				innerStyle = `${rowStyle} grid-column: ${innerCol};`;
 			}
 		}
-		return { columns: undefined, rows: undefined };
+
+		return { columns, rows, inputStyle, innerStyle, outputStyle };
 	});
 
 	// Check if this is a Subsystem or Interface node (using shapes utility)
@@ -406,8 +461,6 @@
 	class:preview-hovered={showPreview}
 	class:subsystem-type={isSubsystemType}
 	class:show-labels={showPortLabels}
-	class:has-inputs={hasVisibleInputLabels}
-	class:has-outputs={hasVisibleOutputLabels}
 	data-rotation={rotation}
 	style="width: {nodeDimensions.width}px; height: {nodeDimensions.height}px; --node-color: {nodeColor};"
 	ondblclick={handleDoubleClick}
@@ -432,13 +485,13 @@
 	<!-- Clip wrapper - contains all visible content, clips to rounded corners -->
 	<div
 		class="node-clip"
-		style:grid-template-columns={gridTemplate().columns}
-		style:grid-template-rows={gridTemplate().rows}
+		style:grid-template-columns={gridLayout().columns}
+		style:grid-template-rows={gridLayout().rows}
 	>
 		<!-- Input port labels -->
 		{#if hasVisibleInputLabels}
 			{#if isVertical}
-				<div class="port-labels port-labels-input port-labels-row">
+				<div class="port-labels port-labels-input port-labels-row" style={gridLayout().inputStyle}>
 					{#each data.inputs as port, i}
 						<span class="port-label" style="left: {getPortPositionCalc(i, data.inputs.length)};">
 							{truncatePortLabel(port.name)}
@@ -446,7 +499,7 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="port-labels port-labels-input">
+				<div class="port-labels port-labels-input" style={gridLayout().inputStyle}>
 					{#each data.inputs as port, i}
 						<span class="port-label" style="top: {getPortPositionCalc(i, data.inputs.length)};">
 							{truncatePortLabel(port.name)}
@@ -457,7 +510,7 @@
 		{/if}
 
 		<!-- Inner wrapper for content -->
-		<div class="node-inner">
+		<div class="node-inner" style={gridLayout().innerStyle}>
 			<!-- Node content -->
 			<div class="node-content">
 				{#if renderedNameHtml}
@@ -499,7 +552,7 @@
 		<!-- Output port labels -->
 		{#if hasVisibleOutputLabels}
 			{#if isVertical}
-				<div class="port-labels port-labels-output port-labels-row">
+				<div class="port-labels port-labels-output port-labels-row" style={gridLayout().outputStyle}>
 					{#each data.outputs as port, i}
 						<span class="port-label" style="left: {getPortPositionCalc(i, data.outputs.length)};">
 							{truncatePortLabel(port.name)}
@@ -507,7 +560,7 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="port-labels port-labels-output">
+				<div class="port-labels port-labels-output" style={gridLayout().outputStyle}>
 					{#each data.outputs as port, i}
 						<span class="port-label" style="top: {getPortPositionCalc(i, data.outputs.length)};">
 							{truncatePortLabel(port.name)}
@@ -979,70 +1032,6 @@
 		min-height: 0;
 		overflow: visible;
 	}
-
-	/* Horizontal layout: grid column placement - rotation 0 (inputs left, outputs right) */
-	/* Both labels: input=1, content=2, output=3 */
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs.has-outputs .node-clip > .port-labels-input { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs.has-outputs .node-clip > .node-inner { grid-column: 2; }
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs.has-outputs .node-clip > .port-labels-output { grid-column: 3; }
-	/* Input labels only: input=1, content=2 */
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs:not(.has-outputs) .node-clip > .port-labels-input { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-inputs:not(.has-outputs) .node-clip > .node-inner { grid-column: 2; }
-	/* Output labels only: content=1, output=2 */
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-outputs:not(.has-inputs) .node-clip > .node-inner { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="0"].has-outputs:not(.has-inputs) .node-clip > .port-labels-output { grid-column: 2; }
-
-	/* Horizontal layout: grid column placement - rotation 2 (inputs right, outputs left) */
-	/* Both labels: output=1, content=2, input=3 */
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs.has-outputs .node-clip > .port-labels-output { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs.has-outputs .node-clip > .node-inner { grid-column: 2; }
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs.has-outputs .node-clip > .port-labels-input { grid-column: 3; }
-	/* Output labels only (left side): output=1, content=2 */
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-outputs:not(.has-inputs) .node-clip > .port-labels-output { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-outputs:not(.has-inputs) .node-clip > .node-inner { grid-column: 2; }
-	/* Input labels only (right side): content=1, input=2 */
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs:not(.has-outputs) .node-clip > .node-inner { grid-column: 1; }
-	.node.show-labels:not(.vertical)[data-rotation="2"].has-inputs:not(.has-outputs) .node-clip > .port-labels-input { grid-column: 2; }
-
-	/* Horizontal borders */
-	.node.show-labels:not(.vertical) .node-clip > .port-labels-input { grid-row: 1; border-right: 1px solid var(--border); }
-	.node.show-labels:not(.vertical) .node-clip > .node-inner { grid-row: 1; }
-	.node.show-labels:not(.vertical) .node-clip > .port-labels-output { grid-row: 1; border-left: 1px solid var(--border); }
-	/* Rotation 2: swap borders */
-	.node.show-labels:not(.vertical)[data-rotation="2"] .node-clip > .port-labels-input { border-right: none; border-left: 1px solid var(--border); }
-	.node.show-labels:not(.vertical)[data-rotation="2"] .node-clip > .port-labels-output { border-left: none; border-right: 1px solid var(--border); }
-
-	/* Vertical layout: grid row placement - rotation 1 (inputs top, outputs bottom) */
-	/* Both labels: input=1, content=2, output=3 */
-	.node.show-labels.vertical[data-rotation="1"].has-inputs.has-outputs .node-clip > .port-labels-input { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="1"].has-inputs.has-outputs .node-clip > .node-inner { grid-row: 2; }
-	.node.show-labels.vertical[data-rotation="1"].has-inputs.has-outputs .node-clip > .port-labels-output { grid-row: 3; }
-	/* Input labels only: input=1, content=2 */
-	.node.show-labels.vertical[data-rotation="1"].has-inputs:not(.has-outputs) .node-clip > .port-labels-input { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="1"].has-inputs:not(.has-outputs) .node-clip > .node-inner { grid-row: 2; }
-	/* Output labels only: content=1, output=2 */
-	.node.show-labels.vertical[data-rotation="1"].has-outputs:not(.has-inputs) .node-clip > .node-inner { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="1"].has-outputs:not(.has-inputs) .node-clip > .port-labels-output { grid-row: 2; }
-
-	/* Vertical layout: grid row placement - rotation 3 (inputs bottom, outputs top) */
-	/* Both labels: output=1, content=2, input=3 */
-	.node.show-labels.vertical[data-rotation="3"].has-inputs.has-outputs .node-clip > .port-labels-output { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="3"].has-inputs.has-outputs .node-clip > .node-inner { grid-row: 2; }
-	.node.show-labels.vertical[data-rotation="3"].has-inputs.has-outputs .node-clip > .port-labels-input { grid-row: 3; }
-	/* Output labels only (top): output=1, content=2 */
-	.node.show-labels.vertical[data-rotation="3"].has-outputs:not(.has-inputs) .node-clip > .port-labels-output { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="3"].has-outputs:not(.has-inputs) .node-clip > .node-inner { grid-row: 2; }
-	/* Input labels only (bottom): content=1, input=2 */
-	.node.show-labels.vertical[data-rotation="3"].has-inputs:not(.has-outputs) .node-clip > .node-inner { grid-row: 1; }
-	.node.show-labels.vertical[data-rotation="3"].has-inputs:not(.has-outputs) .node-clip > .port-labels-input { grid-row: 2; }
-
-	/* Vertical borders */
-	.node.show-labels.vertical .node-clip > .port-labels-input { grid-column: 1; border-bottom: 1px solid var(--border); }
-	.node.show-labels.vertical .node-clip > .node-inner { grid-column: 1; }
-	.node.show-labels.vertical .node-clip > .port-labels-output { grid-column: 1; border-top: 1px solid var(--border); }
-	/* Rotation 3: swap borders */
-	.node.show-labels.vertical[data-rotation="3"] .node-clip > .port-labels-input { border-bottom: none; border-top: 1px solid var(--border); }
-	.node.show-labels.vertical[data-rotation="3"] .node-clip > .port-labels-output { border-top: none; border-bottom: 1px solid var(--border); }
 
 	/* Individual port labels (absolute positioning for horizontal) */
 	.port-label {
