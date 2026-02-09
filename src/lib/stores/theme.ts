@@ -12,6 +12,14 @@ export type Theme = 'light' | 'dark';
 function getInitialTheme(): Theme {
 	if (!browser) return 'dark';
 
+	// URL parameter has highest priority
+	const urlTheme = new URL(window.location.href).searchParams.get('theme');
+	if (urlTheme === 'dark' || urlTheme === 'light') {
+		localStorage.setItem('pathview-theme', urlTheme);
+		document.documentElement.setAttribute('data-theme', urlTheme);
+		return urlTheme;
+	}
+
 	const stored = localStorage.getItem('pathview-theme');
 	if (stored === 'light' || stored === 'dark') {
 		return stored;
