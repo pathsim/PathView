@@ -12,8 +12,10 @@ import { get } from 'svelte/store';
 import { graphStore } from '$lib/stores/graph';
 import { eventStore } from '$lib/stores/events';
 import { getThemeColors } from '$lib/constants/theme';
-import { NODE, EVENT } from '$lib/constants/dimensions';
+import { NODE, EVENT, PORT_LABEL, getPortOffset } from '$lib/constants/dimensions';
 import { getHandlePath } from '$lib/constants/handlePaths';
+import { portLabelsStore } from '$lib/stores/portLabels';
+import { getEffectivePortLabelVisibility, truncatePortLabel } from '$lib/utils/portLabels';
 import { latexToSvg, getSvgDimensions, preloadMathJax } from '$lib/utils/mathjaxSvg';
 
 // Preload MathJax when module loads
@@ -200,6 +202,143 @@ function renderHandles(nodeId: string, nodeX: number, nodeY: number, ctx: Render
 }
 
 // ============================================================================
+// PORT LABEL RENDERING
+// ============================================================================
+
+/**
+ * Resolve showPortLabels option: 'auto' reads from store, otherwise use boolean value
+ */
+function resolveShowPortLabels(option: boolean | 'auto'): boolean {
+	if (option === 'auto') {
+		return portLabelsStore.get();
+	}
+	return option;
+}
+
+/**
+ * Render port labels for a node as SVG text + separator lines.
+ * Returns SVG string and the pixel offsets consumed by label columns/rows
+ * (used to shift content center).
+ */
+function renderPortLabels(
+	node: NodeInstance,
+	x: number,
+	y: number,
+	width: number,
+	height: number,
+	globalShowLabels: boolean,
+	ctx: RenderContext
+): { svg: string; inputOffset: number; outputOffset: number } {
+	const { inputs: hasInputLabels, outputs: hasOutputLabels } = getEffectivePortLabelVisibility(node, globalShowLabels);
+	if (!hasInputLabels && !hasOutputLabels) {
+		return { svg: '', inputOffset: 0, outputOffset: 0 };
+	}
+
+	const parts: string[] = [];
+	const rotation = (node.params?.['_rotation'] as number) || 0;
+	const isVertical = rotation === 1 || rotation === 3;
+	const labelColumnWidth = PORT_LABEL.columnWidth;
+
+	if (isVertical) {
+		// Vertical: label rows at top/bottom
+		// rotation 1: inputs top, outputs bottom
+		// rotation 3: inputs bottom, outputs top
+		const inputRowY = rotation === 1
+			? y  // top
+			: y + height - labelColumnWidth; // bottom
+		const outputRowY = rotation === 1
+			? y + height - labelColumnWidth  // bottom
+			: y; // top
+
+		if (hasInputLabels) {
+			// Separator line
+			const sepY = rotation === 1 ? inputRowY + labelColumnWidth : inputRowY;
+			parts.push(`<line x1="${x}" y1="${sepY}" x2="${x + width}" y2="${sepY}" stroke="${ctx.theme.border}" stroke-width="1"/>`);
+
+			// Port label text (rotated -90deg)
+			const centerY = inputRowY + labelColumnWidth / 2;
+			for (let i = 0; i < node.inputs.length; i++) {
+				const offset = getPortOffset(i, node.inputs.length);
+				const labelX = x + width / 2 + offset;
+				const label = truncatePortLabel(node.inputs[i].name);
+				parts.push(`<text x="${labelX}" y="${centerY}" text-anchor="middle" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif" transform="rotate(-90 ${labelX} ${centerY})">${escapeXml(label)}</text>`);
+			}
+		}
+
+		if (hasOutputLabels) {
+			// Separator line
+			const sepY = rotation === 1 ? outputRowY : outputRowY + labelColumnWidth;
+			parts.push(`<line x1="${x}" y1="${sepY}" x2="${x + width}" y2="${sepY}" stroke="${ctx.theme.border}" stroke-width="1"/>`);
+
+			// Port label text (rotated -90deg)
+			const centerY = outputRowY + labelColumnWidth / 2;
+			for (let i = 0; i < node.outputs.length; i++) {
+				const offset = getPortOffset(i, node.outputs.length);
+				const labelX = x + width / 2 + offset;
+				const label = truncatePortLabel(node.outputs[i].name);
+				parts.push(`<text x="${labelX}" y="${centerY}" text-anchor="middle" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif" transform="rotate(-90 ${labelX} ${centerY})">${escapeXml(label)}</text>`);
+			}
+		}
+
+		return {
+			svg: parts.join('\n'),
+			inputOffset: hasInputLabels ? labelColumnWidth : 0,
+			outputOffset: hasOutputLabels ? labelColumnWidth : 0
+		};
+	} else {
+		// Horizontal: label columns at left/right
+		// rotation 0: inputs left, outputs right
+		// rotation 2: inputs right, outputs left
+		const inputColX = rotation === 0
+			? x  // left
+			: x + width - labelColumnWidth; // right
+		const outputColX = rotation === 0
+			? x + width - labelColumnWidth  // right
+			: x; // left
+
+		if (hasInputLabels) {
+			// Separator line
+			const sepX = rotation === 0 ? inputColX + labelColumnWidth : inputColX;
+			parts.push(`<line x1="${sepX}" y1="${y}" x2="${sepX}" y2="${y + height}" stroke="${ctx.theme.border}" stroke-width="1"/>`);
+
+			// Port label text
+			// rotation 0: align right (near separator), rotation 2: align left
+			const textAnchor = rotation === 0 ? 'end' : 'start';
+			const textX = rotation === 0 ? inputColX + labelColumnWidth - 6 : inputColX + 6;
+			for (let i = 0; i < node.inputs.length; i++) {
+				const offset = getPortOffset(i, node.inputs.length);
+				const labelY = y + height / 2 + offset;
+				const label = truncatePortLabel(node.inputs[i].name);
+				parts.push(`<text x="${textX}" y="${labelY}" text-anchor="${textAnchor}" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(label)}</text>`);
+			}
+		}
+
+		if (hasOutputLabels) {
+			// Separator line
+			const sepX = rotation === 0 ? outputColX : outputColX + labelColumnWidth;
+			parts.push(`<line x1="${sepX}" y1="${y}" x2="${sepX}" y2="${y + height}" stroke="${ctx.theme.border}" stroke-width="1"/>`);
+
+			// Port label text
+			// rotation 0: align left (near separator), rotation 2: align right
+			const textAnchor = rotation === 0 ? 'start' : 'end';
+			const textX = rotation === 0 ? outputColX + 6 : outputColX + labelColumnWidth - 6;
+			for (let i = 0; i < node.outputs.length; i++) {
+				const offset = getPortOffset(i, node.outputs.length);
+				const labelY = y + height / 2 + offset;
+				const label = truncatePortLabel(node.outputs[i].name);
+				parts.push(`<text x="${textX}" y="${labelY}" text-anchor="${textAnchor}" dominant-baseline="middle" fill="${ctx.theme.textMuted}" font-size="8" font-family="system-ui, -apple-system, sans-serif">${escapeXml(label)}</text>`);
+			}
+		}
+
+		return {
+			svg: parts.join('\n'),
+			inputOffset: hasInputLabels ? labelColumnWidth : 0,
+			outputOffset: hasOutputLabels ? labelColumnWidth : 0
+		};
+	}
+}
+
+// ============================================================================
 // NODE RENDERING - Pure SVG with DOM-read styles
 // ============================================================================
 
@@ -246,20 +385,56 @@ async function renderNode(node: NodeInstance, ctx: RenderContext): Promise<strin
 		`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${borderRadius}" fill="none" stroke="${ctx.theme.edge}" stroke-width="1"${strokeDasharray}/>`
 	);
 
+	// Port labels
+	const showPortLabels = resolveShowPortLabels(ctx.options.showPortLabels);
+	const portLabelResult = showPortLabels
+		? renderPortLabels(node, x, y, width, height, showPortLabels, ctx)
+		: { svg: '', inputOffset: 0, outputOffset: 0 };
+	if (portLabelResult.svg) {
+		parts.push(portLabelResult.svg);
+	}
+
 	// Check for pinned params section in DOM
 	const pinnedParamsEl = nodeEl.querySelector('.pinned-params') as HTMLElement;
 
-	// Calculate content center (above pinned params if present)
+	// Calculate content center, accounting for port label columns/rows and pinned params
+	const rotation = (node.params?.['_rotation'] as number) || 0;
+	const isVerticalNode = rotation === 1 || rotation === 3;
+
+	let contentCenterX = x + width / 2;
 	let contentCenterY = y + height / 2;
+
+	// Shift content center for port label columns/rows
+	if (isVerticalNode) {
+		// Vertical: label rows shift Y center
+		const topOffset = (rotation === 1 ? portLabelResult.inputOffset : portLabelResult.outputOffset);
+		const bottomOffset = (rotation === 1 ? portLabelResult.outputOffset : portLabelResult.inputOffset);
+		const contentTop = y + topOffset;
+		const contentBottom = y + height - bottomOffset;
+		contentCenterY = (contentTop + contentBottom) / 2;
+	} else {
+		// Horizontal: label columns shift X center
+		const leftOffset = (rotation === 0 ? portLabelResult.inputOffset : portLabelResult.outputOffset);
+		const rightOffset = (rotation === 0 ? portLabelResult.outputOffset : portLabelResult.inputOffset);
+		const contentLeft = x + leftOffset;
+		const contentRight = x + width - rightOffset;
+		contentCenterX = (contentLeft + contentRight) / 2;
+	}
+
 	if (pinnedParamsEl) {
+		// pinnedTop is from DOM, already accounts for grid layout including port label rows
 		const pinnedRect = pinnedParamsEl.getBoundingClientRect();
-		const pinnedTop = (pinnedRect.top - nodeRect.top) / zoom;
-		contentCenterY = y + pinnedTop / 2;
+		const pinnedTopFromNode = (pinnedRect.top - nodeRect.top) / zoom;
+		// Content area is from content start to pinned params top
+		const contentAreaTop = isVerticalNode
+			? y + (rotation === 1 ? portLabelResult.inputOffset : portLabelResult.outputOffset)
+			: y;
+		contentCenterY = (contentAreaTop + y + pinnedTopFromNode) / 2;
 	}
 
 	// Labels
 	if (ctx.options.showLabels) {
-		const centerX = x + width / 2;
+		const centerX = contentCenterX;
 
 		if (ctx.options.showTypeLabels && nodeType) {
 			// Name above center (may contain math) - use original node.name for LaTeX source
