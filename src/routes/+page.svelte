@@ -845,6 +845,10 @@
 			if (!confirmed) return;
 		}
 		newGraph();
+		// Clear ?model= URL param so the URL reflects a blank canvas
+		if (window.location.search) {
+			window.history.replaceState({}, '', window.location.pathname);
+		}
 	}
 
 	async function handleOpen() {
