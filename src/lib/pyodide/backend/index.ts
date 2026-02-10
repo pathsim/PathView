@@ -20,20 +20,41 @@ export {
 	getBackendType,
 	hasBackend,
 	terminateBackend,
+	setFlaskHost,
 	type BackendType
 } from './registry';
 
-// Re-export PyodideBackend for direct use if needed
+// Re-export backend implementations
 export { PyodideBackend } from './pyodide/backend';
+export { FlaskBackend } from './flask/backend';
 
 // ============================================================================
 // Backward-Compatible Convenience Functions
 // These delegate to the current backend and maintain API compatibility
 // ============================================================================
 
-import { getBackend } from './registry';
+import { getBackend, switchBackend, setFlaskHost } from './registry';
 import { backendState } from './state';
 import { consoleStore } from '$lib/stores/console';
+
+/**
+ * Initialize backend from URL parameters.
+ * Reads `?backend=flask` and `?host=...` from the current URL.
+ * Call this early in page mount, before any backend usage.
+ */
+export function initBackendFromUrl(): void {
+	if (typeof window === 'undefined') return;
+	const params = new URLSearchParams(window.location.search);
+	const backendParam = params.get('backend');
+	const hostParam = params.get('host');
+
+	if (backendParam === 'flask') {
+		if (hostParam) {
+			setFlaskHost(hostParam);
+		}
+		switchBackend('flask');
+	}
+}
 
 // Alias for backward compatibility
 export const replState = {

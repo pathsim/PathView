@@ -5,11 +5,20 @@
 
 import type { Backend } from './types';
 import { PyodideBackend } from './pyodide/backend';
+import { FlaskBackend } from './flask/backend';
 
-export type BackendType = 'pyodide' | 'local' | 'remote';
+export type BackendType = 'pyodide' | 'flask' | 'remote';
 
 let currentBackend: Backend | null = null;
 let currentBackendType: BackendType | null = null;
+let flaskHost = 'http://localhost:5000';
+
+/**
+ * Set the Flask backend host URL
+ */
+export function setFlaskHost(host: string): void {
+	flaskHost = host;
+}
 
 /**
  * Get the current backend, creating a Pyodide backend if none exists
@@ -29,7 +38,8 @@ export function createBackend(type: BackendType): Backend {
 	switch (type) {
 		case 'pyodide':
 			return new PyodideBackend();
-		case 'local':
+		case 'flask':
+			return new FlaskBackend(flaskHost);
 		case 'remote':
 			throw new Error(`Backend type '${type}' not yet implemented`);
 		default:

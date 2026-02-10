@@ -40,6 +40,7 @@
 	import { openEventDialog } from '$lib/stores/eventDialog';
 	import type { MenuItemType } from '$lib/components/ContextMenu.svelte';
 	import { pyodideState, simulationState, initPyodide, stopSimulation, continueStreamingSimulation } from '$lib/pyodide/bridge';
+	import { initBackendFromUrl } from '$lib/pyodide/backend';
 	import { runGraphStreamingSimulation, validateGraphSimulation } from '$lib/pyodide/pathsimRunner';
 	import { consoleStore } from '$lib/stores/console';
 	import { newGraph, saveFile, saveAsFile, setupAutoSave, clearAutoSave, debouncedAutoSave, openImportDialog, importFromUrl, currentFileName } from '$lib/schema/fileOps';
@@ -381,6 +382,9 @@
 	const continueTooltip = { text: "Continue", shortcut: "Shift+Enter" };
 
 	onMount(() => {
+		// Check URL params for backend selection (e.g. ?backend=flask&host=http://localhost:5000)
+		initBackendFromUrl();
+
 		// Subscribe to stores (with cleanup)
 		const unsubPinnedPreviews = pinnedPreviewsStore.subscribe((pinned) => {
 			showPinnedPreviews = pinned;
