@@ -38,6 +38,9 @@ tmpclaude-*
 
 
 __pycache__/
+*.egg-info/
+dist/
+pathview_server/static/
 
 # Generated screenshots
 static/examples/screenshots/

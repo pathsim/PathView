@@ -56,6 +56,35 @@ export function initBackendFromUrl(): void {
 	}
 }
 
+/**
+ * Auto-detect if a Flask backend is available at the same origin.
+ * Used when the frontend is served by the Flask server (pip package mode).
+ * URL parameters take precedence — if `?backend=` is set, auto-detection is skipped.
+ */
+export async function autoDetectBackend(): Promise<void> {
+	if (typeof window === 'undefined') return;
+
+	// URL params override auto-detection
+	const params = new URLSearchParams(window.location.search);
+	if (params.has('backend')) return;
+
+	try {
+		const response = await fetch('/api/health', {
+			method: 'GET',
+			signal: AbortSignal.timeout(2000)
+		});
+		if (response.ok) {
+			const data = await response.json();
+			if (data.status === 'ok') {
+				setFlaskHost(window.location.origin);
+				switchBackend('flask');
+			}
+		}
+	} catch {
+		// No Flask backend at same origin — will use Pyodide
+	}
+}
+
 // Alias for backward compatibility
 export const replState = {
 	subscribe: backendState.subscribe

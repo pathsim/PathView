@@ -1,0 +1,77 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_to:
+        description: 'Publish target'
+        required: true
+        default: 'testpypi'
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python build tools
+        run: pip install build twine
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r scripts/config/requirements-pyodide.txt
+          pip install -r scripts/config/requirements-build.txt
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Extract blocks from PathSim
+        run: npm run extract
+
+      - name: Build package (frontend + wheel)
+        run: python scripts/build_package.py
+
+      - name: Check distribution
+        run: twine check dist/*
+
+      - name: Publish to Test PyPI
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_to == 'testpypi'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: twine upload --repository testpypi dist/*
+
+      - name: Publish to PyPI
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_to == 'pypi')
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

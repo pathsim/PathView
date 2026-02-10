@@ -17,27 +17,37 @@ A web-based visual node editor for building and simulating dynamic systems with 
 - [Plotly.js](https://plotly.com/javascript/) for interactive plots
 - [CodeMirror 6](https://codemirror.net/) for code editing
 
-## Getting Started
+## Installation
+
+### pip install (recommended for users)
+
+```bash
+pip install pathview
+pathview serve
+```
+
+This starts the PathView server with a local Python backend and opens your browser. No Node.js required.
+
+**Options:**
+- `--port PORT` — server port (default: 5000)
+- `--host HOST` — bind address (default: 127.0.0.1)
+- `--no-browser` — don't auto-open the browser
+- `--debug` — debug mode with auto-reload
+
+### Development setup
 
 ```bash
 npm install
 npm run dev
 ```
 
-To use the Flask backend (server-side Python):
+To use the Flask backend during development:
 
 ```bash
-pip install -r server/requirements.txt
+pip install flask flask-cors
 npm run server   # Start Flask backend on port 5000
 npm run dev      # Start Vite dev server (separate terminal)
 # Open http://localhost:5173/?backend=flask
-```
-
-For production:
-
-```bash
-npm run build
-npm run preview
 ```
 
 ## Project Structure
@@ -82,10 +92,11 @@ src/
 ├── routes/                # SvelteKit pages
 └── app.css                # Global styles with CSS variables
 
-server/
+pathview_server/           # Python package (pip install pathview)
 ├── app.py                 # Flask server (subprocess management, HTTP routes)
 ├── worker.py              # REPL worker subprocess (Python execution)
-└── requirements.txt       # Server Python dependencies
+├── cli.py                 # CLI entry point (pathview serve)
+└── static/                # Bundled frontend (generated at build time)
 
 scripts/
 ├── config/                # Configuration files for extraction
@@ -467,15 +478,21 @@ Browser Tab                     Flask Server                  Worker Subprocess
 └──────────────┘               └──────────────────┘          └──────────────────┘
 ```
 
-**Setup:**
+**Standalone (pip package):**
 
 ```bash
-pip install -r server/requirements.txt
-npm run server   # Starts Flask on port 5000
-npm run dev      # Starts Vite dev server (separate terminal)
+pip install pathview
+pathview serve
 ```
 
-Then open `http://localhost:5173/?backend=flask`.
+**Development (separate servers):**
+
+```bash
+pip install flask flask-cors
+npm run server   # Starts Flask API on port 5000
+npm run dev      # Starts Vite dev server (separate terminal)
+# Open http://localhost:5173/?backend=flask
+```
 
 **Key properties:**
 - **Process isolation** — each session gets its own Python subprocess
@@ -666,7 +683,8 @@ https://view.pathsim.org/?modelgh=pathsim/pathview/static/examples/feedback-syst
 |--------|---------|
 | `npm run dev` | Start Vite development server |
 | `npm run server` | Start Flask backend server (port 5000) |
-| `npm run build` | Production build |
+| `npm run build` | Production build (GitHub Pages) |
+| `npm run build:package` | Build pip package (frontend + wheel) |
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript/Svelte type checking |
 | `npm run lint` | Run ESLint |
@@ -783,13 +801,22 @@ Port labels show the name of each input/output port alongside the node. Toggle g
 
 ## Deployment
 
-PathView uses a dual deployment strategy with automatic versioning:
+PathView has two deployment targets:
+
+### GitHub Pages (web)
 
 | Trigger | What happens | Deployed to |
 |---------|--------------|-------------|
 | Push to `main` | Build with base path `/dev` | [view.pathsim.org/dev/](https://view.pathsim.org/dev/) |
 | Release published | Bump `package.json`, build, deploy | [view.pathsim.org/](https://view.pathsim.org/) |
 | Manual dispatch | Choose `dev` or `release` | Respective path |
+
+### PyPI (pip package)
+
+| Trigger | What happens | Published to |
+|---------|--------------|--------------|
+| Release published | Build frontend + wheel, publish | [pypi.org/project/pathview](https://pypi.org/project/pathview/) |
+| Manual dispatch | Choose `testpypi` or `pypi` | Respective index |
 
 ### How it works
 
