@@ -325,6 +325,8 @@ npm run build
 
 No code changes needed - the extraction script automatically discovers toolbox directories.
 
+For the full toolbox integration reference (Python package contract, config schemas, extraction pipeline, generated output), see [**docs/toolbox-spec.md**](docs/toolbox-spec.md).
+
 ---
 
 ## Python Backend System
@@ -482,6 +484,8 @@ Then open `http://localhost:5173/?backend=flask`.
 - **Session TTL** — stale sessions cleaned up after 1 hour of inactivity
 - **Streaming** — simulations stream via SSE, with the same code injection support as Pyodide
 
+For the full protocol reference (message types, HTTP routes, SSE format, streaming semantics, how to implement a new backend), see [**docs/backend-protocol-spec.md**](docs/backend-protocol-spec.md).
+
 **API routes:**
 
 | Route | Method | Action |
@@ -598,6 +602,14 @@ PathView uses JSON-based file formats for saving and sharing:
 | `.sub` | Subsystem | Subsystem with internal graph (for sharing/reuse) |
 
 The `.pvm` format is fully documented in [**docs/pvm-spec.md**](docs/pvm-spec.md). Use this spec if you are building tools that read or write PathView models (e.g., code generators, importers). A reference Python code generator is available at `scripts/pvm2py.py`.
+
+### Specification Documents
+
+| Document | Audience |
+|----------|----------|
+| [**docs/pvm-spec.md**](docs/pvm-spec.md) | Building tools that read/write `.pvm` model files |
+| [**docs/backend-protocol-spec.md**](docs/backend-protocol-spec.md) | Implementing a new execution backend (remote server, cloud worker, etc.) |
+| [**docs/toolbox-spec.md**](docs/toolbox-spec.md) | Creating a third-party toolbox package for PathView |
 
 ### Export Options
 
