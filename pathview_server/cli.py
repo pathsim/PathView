@@ -50,7 +50,13 @@ def main():
 
     print(f"PathView v{__version__}")
     print(f"Running at http://{args.host}:{args.port}")
-    print("Press Ctrl+C to stop\n")
+
+    if args.host == "0.0.0.0":
+        print("\nWARNING: Binding to 0.0.0.0 makes the server accessible on your network.")
+        print("         There is no authentication — anyone on your network can execute Python code.")
+        print("         Only use this on trusted networks.")
+
+    print("\nPress Ctrl+C to stop\n")
 
     try:
         if args.debug:
