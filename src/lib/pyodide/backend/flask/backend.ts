@@ -371,7 +371,6 @@ export class FlaskBackend implements Backend {
 			const reader = resp.body.getReader();
 			const decoder = new TextDecoder();
 			let buffer = '';
-			let currentEvent = '';
 
 			while (true) {
 				const { value, done } = await reader.read();

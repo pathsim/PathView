@@ -26,7 +26,6 @@ _stdout_lock = threading.Lock()
 
 # Worker state
 _namespace = {}
-_clean_globals = set()
 _initialized = False
 
 # Streaming state
@@ -111,7 +110,7 @@ def _ensure_package(pkg: dict) -> None:
 
 def initialize(packages: list[dict] | None = None) -> None:
     """Initialize the worker: install packages, import standard libs, capture clean globals."""
-    global _initialized, _namespace, _clean_globals
+    global _initialized, _namespace
 
     if _initialized:
         send({"type": "ready"})
@@ -137,9 +136,6 @@ def initialize(packages: list[dict] | None = None) -> None:
                         f"Failed to install required package {pkg.get('pip', pkg.get('import', '?'))}: {e}"
                     )
                 send({"type": "stderr", "value": f"Optional package {pkg.get('import', '?')} failed: {e}\n"})
-
-    # Capture clean state for later cleanup
-    _clean_globals = set(_namespace.keys())
 
     _initialized = True
     send({"type": "ready"})
