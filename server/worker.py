@@ -16,6 +16,7 @@ Threading model:
 import sys
 import io
 import json
+import subprocess
 import threading
 import traceback
 import queue
@@ -73,8 +74,43 @@ def read_message():
     return json.loads(line)
 
 
-def initialize() -> None:
-    """Initialize the worker: import standard packages, capture clean globals."""
+def _install_package(pip_spec: str, pre: bool = False) -> None:
+    """Install a package via pip if not already available."""
+    cmd = [sys.executable, "-m", "pip", "install", pip_spec, "--quiet"]
+    if pre:
+        cmd.append("--pre")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"pip install failed for {pip_spec}: {result.stderr.strip()}")
+
+
+def _ensure_package(pkg: dict) -> None:
+    """Ensure a package is installed and importable. Mirrors the Pyodide worker loop."""
+    import_name = pkg.get("import", "")
+    pip_spec = pkg.get("pip", import_name)
+    required = pkg.get("required", False)
+    pre = pkg.get("pre", False)
+
+    send({"type": "progress", "value": f"Installing {import_name}..."})
+
+    try:
+        # Try importing first — skip pip if already installed
+        exec(f"import {import_name}", _namespace)
+    except ImportError:
+        # Not installed — pip install then import
+        _install_package(pip_spec, pre)
+        exec(f"import {import_name}", _namespace)
+
+    # Log version if available
+    try:
+        version = eval(f"{import_name}.__version__", _namespace)
+        send({"type": "stdout", "value": f"{import_name} {version} loaded successfully\n"})
+    except Exception:
+        send({"type": "stdout", "value": f"{import_name} loaded successfully\n"})
+
+
+def initialize(packages: list[dict] | None = None) -> None:
+    """Initialize the worker: install packages, import standard libs, capture clean globals."""
     global _initialized, _namespace, _clean_globals
 
     if _initialized:
@@ -88,6 +124,19 @@ def initialize() -> None:
     exec("import numpy as np", _namespace)
     exec("import gc", _namespace)
     exec("import json", _namespace)
+
+    # Install and import packages from the frontend config (single source of truth)
+    if packages:
+        send({"type": "progress", "value": "Installing dependencies..."})
+        for pkg in packages:
+            try:
+                _ensure_package(pkg)
+            except Exception as e:
+                if pkg.get("required", False):
+                    raise RuntimeError(
+                        f"Failed to install required package {pkg.get('pip', pkg.get('import', '?'))}: {e}"
+                    )
+                send({"type": "stderr", "value": f"Optional package {pkg.get('import', '?')} failed: {e}\n"})
 
     # Capture clean state for later cleanup
     _clean_globals = set(_namespace.keys())
@@ -252,7 +301,7 @@ def main() -> None:
 
         try:
             if msg_type == "init":
-                initialize()
+                initialize(packages=msg.get("packages"))
 
             elif msg_type == "exec":
                 if not msg_id or not isinstance(code, str):

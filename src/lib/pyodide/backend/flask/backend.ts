@@ -7,6 +7,7 @@ import type { Backend, BackendState } from '../types';
 import { backendState } from '../state';
 import { TIMEOUTS } from '$lib/constants/python';
 import { STATUS_MESSAGES } from '$lib/constants/messages';
+import { PYTHON_PACKAGES } from '$lib/constants/dependencies';
 
 /**
  * Flask Backend Implementation
@@ -76,9 +77,39 @@ export class FlaskBackend implements Backend {
 				throw new Error(`Server health check failed: ${resp.status}`);
 			}
 
-			// Trigger worker initialization with a no-op exec
+			// Initialize worker with packages from the shared config (single source of truth)
 			backendState.update((s) => ({ ...s, progress: 'Initializing Python worker...' }));
-			await this.exec('pass', TIMEOUTS.INIT);
+
+			const initController = new AbortController();
+			const initTimeout = setTimeout(() => initController.abort(), TIMEOUTS.INIT);
+
+			const initResp = await fetch(`${this.host}/api/init`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Session-ID': this.sessionId
+				},
+				body: JSON.stringify({ packages: PYTHON_PACKAGES }),
+				signal: initController.signal
+			});
+			clearTimeout(initTimeout);
+
+			const initData = await initResp.json();
+
+			if (initData.type === 'error') {
+				throw new Error(initData.error);
+			}
+
+			// Forward any stdout/stderr messages from init
+			if (initData.messages) {
+				for (const msg of initData.messages) {
+					if (msg.type === 'stdout' && this.stdoutCallback) this.stdoutCallback(msg.value);
+					if (msg.type === 'stderr' && this.stderrCallback) this.stderrCallback(msg.value);
+					if (msg.type === 'progress') {
+						backendState.update((s) => ({ ...s, progress: msg.value }));
+					}
+				}
+			}
 
 			backendState.update((s) => ({
 				...s,

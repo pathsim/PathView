@@ -67,12 +67,15 @@ class Session:
             return None
         return json.loads(line.strip())
 
-    def ensure_initialized(self) -> list[dict]:
+    def ensure_initialized(self, packages: list[dict] | None = None) -> list[dict]:
         """Initialize the worker if not already done. Returns any messages received."""
         if self._initialized:
             return []
         messages = []
-        self.send_message({"type": "init"})
+        init_msg = {"type": "init"}
+        if packages:
+            init_msg["packages"] = packages
+        self.send_message(init_msg)
         while True:
             resp = self.read_line()
             if resp is None:
@@ -159,6 +162,23 @@ def _get_session_id() -> str:
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+
+@app.route("/api/init", methods=["POST"])
+def api_init():
+    """Initialize a session's worker with packages from the frontend config."""
+    session_id = _get_session_id()
+    data = request.get_json(force=True)
+    packages = data.get("packages", [])
+
+    session = get_or_create_session(session_id)
+    with session.lock:
+        try:
+            messages = session.ensure_initialized(packages=packages)
+            # Return all progress/stdout/stderr messages collected during init
+            return jsonify({"type": "ready", "messages": messages})
+        except Exception as e:
+            return jsonify({"type": "error", "error": str(e)}), 500
 
 
 @app.route("/api/exec", methods=["POST"])
