@@ -7,7 +7,7 @@
 
 # PathView - System Modeling in the Browser
 
-A web-based visual node editor for building and simulating dynamic systems with [PathSim](https://github.com/pathsim/pathsim) as the backend. Runs entirely in the browser via Pyodide - no server required. The UI is hosted at [view.pathsim.org](https://view.pathsim.org), free to use for everyone.
+A web-based visual node editor for building and simulating dynamic systems with [PathSim](https://github.com/pathsim/pathsim) as the backend. Runs entirely in the browser via Pyodide by default — no server required. Optionally, a Flask backend enables server-side Python execution with any packages (including those with native dependencies that Pyodide can't run). The UI is hosted at [view.pathsim.org](https://view.pathsim.org), free to use for everyone.
 
 ## Tech Stack
 
@@ -22,6 +22,15 @@ A web-based visual node editor for building and simulating dynamic systems with 
 ```bash
 npm install
 npm run dev
+```
+
+To use the Flask backend (server-side Python):
+
+```bash
+pip install -r server/requirements.txt
+npm run server   # Start Flask backend on port 5000
+npm run dev      # Start Vite dev server (separate terminal)
+# Open http://localhost:5173/?backend=flask
 ```
 
 For production:
@@ -61,7 +70,8 @@ src/
 │   ├── routing/           # Orthogonal wire routing (A* pathfinding)
 │   ├── pyodide/           # Python runtime (backend, bridge)
 │   │   └── backend/       # Modular backend system (registry, state, types)
-│   │       └── pyodide/   # Pyodide Web Worker implementation
+│   │       ├── pyodide/   # Pyodide Web Worker implementation
+│   │       └── flask/     # Flask HTTP/SSE backend implementation
 │   ├── schema/            # File I/O (save/load, component export)
 │   ├── simulation/        # Simulation metadata
 │   │   └── generated/     # Auto-generated defaults
@@ -71,6 +81,11 @@ src/
 │   └── utils/             # Utilities (colors, download, csvExport, codemirror)
 ├── routes/                # SvelteKit pages
 └── app.css                # Global styles with CSS variables
+
+server/
+├── app.py                 # Flask server (subprocess management, HTTP routes)
+├── worker.py              # REPL worker subprocess (Python execution)
+└── requirements.txt       # Server Python dependencies
 
 scripts/
 ├── config/                # Configuration files for extraction
@@ -100,8 +115,8 @@ scripts/
                                                         │
                                                         v
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Plot/Console   │<────│ bridge.ts       │<────│ REPL Worker     │
-│  (results)      │     │ (queue + rAF)   │     │ (Pyodide)       │
+│  Plot/Console   │<────│ bridge.ts       │<────│ Backend         │
+│  (results)      │     │ (queue + rAF)   │     │ (Pyodide/Flask) │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
@@ -153,6 +168,7 @@ Key files: `src/lib/routing/` (pathfinder, grid builder, route calculator)
 | **Backend** | Modular Python execution interface | `pyodide/backend/` |
 | **Backend Registry** | Factory for swappable backends | `pyodide/backend/registry.ts` |
 | **PyodideBackend** | Web Worker Pyodide implementation | `pyodide/backend/pyodide/` |
+| **FlaskBackend** | HTTP/SSE Flask server implementation | `pyodide/backend/flask/` |
 | **Simulation Bridge** | High-level simulation API | `pyodide/bridge.ts` |
 | **Schema** | File/component save/load operations | `schema/fileOps.ts`, `schema/componentOps.ts` |
 | **Export Utils** | SVG/CSV/Python file downloads | `utils/download.ts`, `export/svg/`, `utils/csvExport.ts` |
@@ -326,29 +342,36 @@ The Python runtime uses a modular backend architecture, allowing different execu
                      ┌──────────────┼──────────────┐
                      ▼              ▼              ▼
               ┌───────────┐  ┌───────────┐  ┌───────────┐
-              │ Pyodide   │  │ Local     │  │ Remote    │
+              │ Pyodide   │  │ Flask     │  │ Remote    │
               │ Backend   │  │ Backend   │  │ Backend   │
-              │ (Worker)  │  │ (Flask)   │  │ (Server)  │
+              │ (default) │  │ (HTTP)    │  │ (future)  │
               └───────────┘  └───────────┘  └───────────┘
-                   │              (future)      (future)
-                   ▼
-            ┌───────────┐
-            │ Web Worker│
-            │ (Pyodide) │
-            └───────────┘
+                   │              │
+                   ▼              ▼
+            ┌───────────┐  ┌───────────┐
+            │ Web Worker│  │ Flask     │──> Python subprocess
+            │ (Pyodide) │  │ Server   │    (one per session)
+            └───────────┘  └───────────┘
 ```
 
 ### Backend Registry
 
 ```typescript
-import { getBackend, switchBackend } from '$lib/pyodide/backend';
+import { getBackend, switchBackend, setFlaskHost } from '$lib/pyodide/backend';
 
 // Get current backend (defaults to Pyodide)
 const backend = getBackend();
 
-// Switch to a different backend type (future)
-// switchBackend('local');  // Use local Python via Flask
-// switchBackend('remote'); // Use remote server
+// Switch to Flask backend
+setFlaskHost('http://localhost:5000');
+switchBackend('flask');
+```
+
+Backend selection can also be controlled via URL parameters:
+
+```
+http://localhost:5173/?backend=flask                          # Flask on default port
+http://localhost:5173/?backend=flask&host=http://myserver:5000  # Custom host
 ```
 
 ### REPL Protocol
@@ -425,6 +448,52 @@ await stopSimulation();
 // Execute code during active simulation (queued between steps)
 execDuringStreaming('source.amplitude = 2.0');
 ```
+
+### Flask Backend
+
+The Flask backend enables server-side Python execution for packages that Pyodide can't run (e.g., FESTIM or other packages with native C/Fortran dependencies). It mirrors the Web Worker architecture: one subprocess per session with the same REPL protocol.
+
+```
+Browser Tab                     Flask Server                  Worker Subprocess
+┌──────────────┐               ┌──────────────────┐          ┌──────────────────┐
+│ FlaskBackend │  HTTP/SSE     │ app.py           │  stdin   │ worker.py        │
+│  exec()      │──POST────────→│  route → session │──JSON───→│  exec(code, ns)  │
+│  eval()      │──POST────────→│  subprocess mgr  │──JSON───→│  eval(expr, ns)  │
+│  stream()    │──POST (SSE)──→│  pipe SSE relay  │←─JSON────│  streaming loop  │
+│  inject()    │──POST────────→│  → code queue    │──JSON───→│  queue drain     │
+│  stop()      │──POST────────→│  → stop flag     │──JSON───→│  stop check      │
+└──────────────┘               └──────────────────┘          └──────────────────┘
+```
+
+**Setup:**
+
+```bash
+pip install -r server/requirements.txt
+npm run server   # Starts Flask on port 5000
+npm run dev      # Starts Vite dev server (separate terminal)
+```
+
+Then open `http://localhost:5173/?backend=flask`.
+
+**Key properties:**
+- **Process isolation** — each session gets its own Python subprocess
+- **Namespace persistence** — variables persist across exec/eval calls within a session
+- **Dynamic packages** — packages from `PYTHON_PACKAGES` (the same config used by Pyodide) are pip-installed on first init
+- **Session TTL** — stale sessions cleaned up after 1 hour of inactivity
+- **Streaming** — simulations stream via SSE, with the same code injection support as Pyodide
+
+**API routes:**
+
+| Route | Method | Action |
+|-------|--------|--------|
+| `/api/health` | GET | Health check |
+| `/api/init` | POST | Initialize worker with packages |
+| `/api/exec` | POST | Execute Python code |
+| `/api/eval` | POST | Evaluate expression, return JSON |
+| `/api/stream` | POST | Start streaming simulation (SSE) |
+| `/api/stream/exec` | POST | Inject code during streaming |
+| `/api/stream/stop` | POST | Stop streaming |
+| `/api/session` | DELETE | Kill session subprocess |
 
 ---
 
@@ -583,7 +652,8 @@ https://view.pathsim.org/?modelgh=pathsim/pathview/static/examples/feedback-syst
 
 | Script | Purpose |
 |--------|---------|
-| `npm run dev` | Start development server |
+| `npm run dev` | Start Vite development server |
+| `npm run server` | Start Flask backend server (port 5000) |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript/Svelte type checking |
@@ -665,7 +735,7 @@ Port labels show the name of each input/output port alongside the node. Toggle g
 
 2. **Subsystems are nested graphs** - The Interface node inside a subsystem mirrors its parent's ports (inverted direction).
 
-3. **No server required** - Everything runs client-side via Pyodide WebAssembly.
+3. **No server required by default** - Everything runs client-side via Pyodide. The optional Flask backend enables server-side execution for packages with native dependencies.
 
 4. **Registry pattern** - Nodes and events are registered centrally for extensibility.
 
