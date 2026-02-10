@@ -150,12 +150,37 @@ class Session:
 
         Must be called before any direct stdout reads (exec/eval) to prevent
         concurrent reads on the same pipe which cause JSONDecodeError.
+
+        Actively stops streaming if needed: sends stream-stop to the worker
+        so it sends stream-done, which unblocks the reader thread.
         """
         reader = self._stream_reader
-        if reader is not None and reader.is_alive():
+        if reader is None:
+            return
+
+        if reader.is_alive():
             self._streaming = False
+            # Ensure the worker stops streaming — stream-stop might not have
+            # been sent yet if api_stream_stop races with api_exec.
+            try:
+                self.send_message({"type": "stream-stop"})
+            except Exception:
+                pass
             reader.join(timeout)
+
+        # Send noop to unblock the worker's stdin reader thread so the
+        # worker main loop can resume processing exec/eval messages.
+        self.flush_worker_reader()
+
         self._stream_reader = None
+
+        # Drain stale stream messages (stream-data, stream-done) from the
+        # queue so they don't leak into subsequent poll responses.
+        while not self._stream_queue.empty():
+            try:
+                self._stream_queue.get_nowait()
+            except queue.Empty:
+                break
 
     def flush_worker_reader(self) -> None:
         """Send a noop message to unblock the worker's stdin reader thread.
