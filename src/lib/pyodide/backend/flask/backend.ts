@@ -200,15 +200,12 @@ export class FlaskBackend implements Backend {
 			signal: AbortSignal.timeout(timeout)
 		});
 
-		if (!resp.ok && resp.status >= 500) {
-			throw new Error(`Server error: ${resp.status}`);
-		}
-
 		const data = await resp.json();
 		if (data.stdout && this.stdoutCallback) this.stdoutCallback(data.stdout);
 		if (data.stderr && this.stderrCallback) this.stderrCallback(data.stderr);
 
 		if (data.type === 'error') {
+			this.handleWorkerError(data);
 			const errorMsg = data.traceback ? `${data.error}\n${data.traceback}` : data.error;
 			throw new Error(errorMsg);
 		}
@@ -228,15 +225,12 @@ export class FlaskBackend implements Backend {
 			signal: AbortSignal.timeout(timeout)
 		});
 
-		if (!resp.ok && resp.status >= 500) {
-			throw new Error(`Server error: ${resp.status}`);
-		}
-
 		const data = await resp.json();
 		if (data.stdout && this.stdoutCallback) this.stdoutCallback(data.stdout);
 		if (data.stderr && this.stderrCallback) this.stderrCallback(data.stderr);
 
 		if (data.type === 'error') {
+			this.handleWorkerError(data);
 			const errorMsg = data.traceback ? `${data.error}\n${data.traceback}` : data.error;
 			throw new Error(errorMsg);
 		}
@@ -360,6 +354,20 @@ export class FlaskBackend implements Backend {
 
 	private generateId(): string {
 		return `repl_${++this.messageId}`;
+	}
+
+	/**
+	 * Check if a response indicates the worker crashed or timed out.
+	 * If so, clear serverInitPromise so the next request triggers re-init.
+	 */
+	private handleWorkerError(data: Record<string, unknown>): void {
+		const errorType = data.errorType as string | undefined;
+		if (errorType === 'worker-crashed' || errorType === 'timeout') {
+			this.serverInitPromise = null;
+			if (this.stderrCallback) {
+				this.stderrCallback('Python worker crashed, restarting on next request...\n');
+			}
+		}
 	}
 
 	/**
