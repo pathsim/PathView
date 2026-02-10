@@ -145,6 +145,18 @@ class Session:
         """Signal the stream reader to stop."""
         self._streaming = False
 
+    def wait_for_stream_reader(self, timeout: float = 5) -> None:
+        """Wait for the stream reader thread to fully exit.
+
+        Must be called before any direct stdout reads (exec/eval) to prevent
+        concurrent reads on the same pipe which cause JSONDecodeError.
+        """
+        reader = self._stream_reader
+        if reader is not None and reader.is_alive():
+            self._streaming = False
+            reader.join(timeout)
+        self._stream_reader = None
+
     def flush_worker_reader(self) -> None:
         """Send a noop message to unblock the worker's stdin reader thread.
 
@@ -298,6 +310,9 @@ def create_app(serve_static: bool = False) -> Flask:
         session = get_or_create_session(session_id)
         with session.lock:
             try:
+                # Wait for any lingering stream reader thread to exit before
+                # reading stdout — prevents concurrent pipe reads / JSONDecodeError
+                session.wait_for_stream_reader()
                 session.ensure_initialized()
                 session.send_message({"type": "exec", "id": msg_id, "code": code})
 
@@ -347,6 +362,9 @@ def create_app(serve_static: bool = False) -> Flask:
         session = get_or_create_session(session_id)
         with session.lock:
             try:
+                # Wait for any lingering stream reader thread to exit before
+                # reading stdout — prevents concurrent pipe reads / JSONDecodeError
+                session.wait_for_stream_reader()
                 session.ensure_initialized()
                 session.send_message({"type": "eval", "id": msg_id, "expr": expr})
 

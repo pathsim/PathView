@@ -147,6 +147,66 @@ def test_streaming_lifecycle(client, session_headers):
     assert "stream-done" in types
 
 
+def test_stream_stop_then_exec(client, session_headers):
+    """Regression: exec after stream/stop must not crash with JSONDecodeError.
+
+    The stream reader thread must fully exit before exec reads stdout.
+    """
+    client.post("/api/init", json={"packages": []}, headers=session_headers)
+
+    # Set up a generator that never finishes on its own (needs manual stop)
+    client.post(
+        "/api/exec",
+        json={"code": "_counter = 0\ndef _infinite():\n    global _counter\n    _counter += 1\n    return {'result': _counter, 'done': False}"},
+        headers=session_headers,
+    )
+
+    # Start streaming
+    resp = client.post(
+        "/api/stream/start",
+        json={"expr": "_infinite()"},
+        headers=session_headers,
+    )
+    assert resp.status_code == 200
+
+    # Let a few polls go through
+    import time
+    for _ in range(5):
+        client.post("/api/stream/poll", headers=session_headers)
+        time.sleep(0.05)
+
+    # Stop streaming
+    client.post("/api/stream/stop", headers=session_headers)
+
+    # Poll until done
+    done = False
+    deadline = time.time() + 10
+    while not done and time.time() < deadline:
+        resp = client.post("/api/stream/poll", headers=session_headers)
+        data = resp.get_json()
+        done = data.get("done", False)
+        if not done:
+            time.sleep(0.1)
+
+    # Now exec should work without crashing
+    resp = client.post(
+        "/api/exec",
+        json={"code": "result_after_stop = 'ok'"},
+        headers=session_headers,
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["type"] == "ok"
+
+    # Verify the namespace is intact
+    resp = client.post(
+        "/api/eval",
+        json={"expr": "result_after_stop"},
+        headers=session_headers,
+    )
+    assert resp.status_code == 200
+    assert json.loads(resp.get_json()["value"]) == "ok"
+
+
 def test_exec_missing_session_id(client):
     resp = client.post("/api/exec", json={"code": "pass"})
     assert resp.status_code == 400
