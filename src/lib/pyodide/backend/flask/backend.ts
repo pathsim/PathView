@@ -16,6 +16,9 @@ import { PYTHON_PACKAGES } from '$lib/constants/dependencies';
 /** Polling interval for stream results (ms) */
 const STREAM_POLL_INTERVAL = 30;
 
+/** BroadcastChannel name for cross-tab session coordination */
+const SESSION_CHANNEL = 'flask-session';
+
 export class FlaskBackend implements Backend {
 	private host: string;
 	private sessionId: string;
@@ -23,6 +26,7 @@ export class FlaskBackend implements Backend {
 	private _isStreaming = false;
 	private streamPollTimer: ReturnType<typeof setTimeout> | null = null;
 	private serverInitPromise: Promise<void> | null = null;
+	private broadcastChannel: BroadcastChannel | null = null;
 
 	// Stream callbacks — same shape as PyodideBackend's streamState
 	private streamState: {
@@ -37,14 +41,25 @@ export class FlaskBackend implements Backend {
 
 	constructor(host: string) {
 		this.host = host.replace(/\/$/, '');
-		const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('flask-session-id') : null;
+		const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('flask-session-id') : null;
 		if (stored) {
 			this.sessionId = stored;
 		} else {
 			this.sessionId = crypto.randomUUID();
-			if (typeof sessionStorage !== 'undefined') {
-				sessionStorage.setItem('flask-session-id', this.sessionId);
+			if (typeof localStorage !== 'undefined') {
+				localStorage.setItem('flask-session-id', this.sessionId);
 			}
+		}
+
+		// Listen for session termination from other tabs
+		if (typeof BroadcastChannel !== 'undefined') {
+			this.broadcastChannel = new BroadcastChannel(SESSION_CHANNEL);
+			this.broadcastChannel.onmessage = (event) => {
+				if (event.data?.type === 'session-terminated') {
+					this.serverInitPromise = null;
+					backendState.reset();
+				}
+			};
 		}
 	}
 
@@ -118,6 +133,9 @@ export class FlaskBackend implements Backend {
 			method: 'DELETE',
 			headers: { 'X-Session-ID': this.sessionId }
 		}).catch(() => {});
+
+		// Notify other tabs that the session was terminated
+		this.broadcastChannel?.postMessage({ type: 'session-terminated' });
 
 		this.serverInitPromise = null;
 		backendState.reset();
