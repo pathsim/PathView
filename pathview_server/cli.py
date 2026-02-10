@@ -34,11 +34,19 @@ def main():
     app = create_app(serve_static=True)
 
     if not args.no_browser:
-        def open_browser():
-            time.sleep(1.5)
-            webbrowser.open(f"http://{args.host}:{args.port}")
+        def open_browser_when_ready():
+            import urllib.request
+            health_url = f"http://{args.host}:{args.port}/api/health"
+            deadline = time.time() + 10
+            while time.time() < deadline:
+                try:
+                    urllib.request.urlopen(health_url, timeout=1)
+                    webbrowser.open(f"http://{args.host}:{args.port}")
+                    return
+                except Exception:
+                    time.sleep(0.2)
 
-        threading.Thread(target=open_browser, daemon=True).start()
+        threading.Thread(target=open_browser_when_ready, daemon=True).start()
 
     print(f"PathView v{__version__}")
     print(f"Running at http://{args.host}:{args.port}")
