@@ -143,11 +143,10 @@ def initialize(packages: list[dict] | None = None) -> None:
 
     # Set up the namespace with common imports
     _namespace = {"__builtins__": __builtins__}
-    exec("import numpy as np", _namespace)
     exec("import gc", _namespace)
     exec("import json", _namespace)
 
-    # Install and import packages from the frontend config (single source of truth)
+    # Install packages FIRST (pathsim brings numpy as a dependency)
     if packages:
         send({"type": "progress", "value": "Installing dependencies..."})
         for pkg in packages:
@@ -159,6 +158,9 @@ def initialize(packages: list[dict] | None = None) -> None:
                         f"Failed to install required package {pkg.get('pip', pkg.get('import', '?'))}: {e}"
                     )
                 send({"type": "stderr", "value": f"Optional package {pkg.get('import', '?')} failed: {e}\n"})
+
+    # Import numpy AFTER packages are installed (numpy comes with pathsim)
+    exec("import numpy as np", _namespace)
 
     _initialized = True
     send({"type": "ready"})

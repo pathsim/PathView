@@ -7,6 +7,7 @@ import time
 import webbrowser
 
 from pathview_server import __version__
+from pathview_server.venv import VENV_DIR, ensure_venv
 
 
 def main():
@@ -29,9 +30,11 @@ def main():
 
     args = parser.parse_args()
 
+    ensure_venv()
+
     from pathview_server.app import create_app
 
-    app = create_app(serve_static=True)
+    app = create_app(serve_static=not args.debug)
 
     if not args.no_browser:
         def open_browser_when_ready():
@@ -49,6 +52,7 @@ def main():
         threading.Thread(target=open_browser_when_ready, daemon=True).start()
 
     print(f"PathView v{__version__}")
+    print(f"  Python venv: {VENV_DIR}")
     print(f"Running at http://{args.host}:{args.port}")
 
     if args.host == "0.0.0.0":

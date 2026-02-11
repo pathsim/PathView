@@ -21,6 +21,8 @@ from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
+from pathview_server.venv import get_venv_python
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -42,7 +44,7 @@ class Session:
         self.last_active = time.time()
         self.lock = threading.Lock()
         self.process = subprocess.Popen(
-            [sys.executable, "-u", WORKER_SCRIPT],
+            [get_venv_python(), "-u", WORKER_SCRIPT],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -152,21 +154,29 @@ class Session:
         concurrent reads on the same pipe which cause JSONDecodeError.
 
         Actively stops streaming if needed: sends stream-stop to the worker
-        so it sends stream-done, which unblocks the reader thread.
+        so it sends stream-done, which the reader thread reads naturally and
+        exits via its own loop termination. This ensures all final stream-data
+        messages are read into the queue before the reader exits.
         """
         reader = self._stream_reader
         if reader is None:
             return
 
         if reader.is_alive():
-            self._streaming = False
-            # Ensure the worker stops streaming — stream-stop might not have
-            # been sent yet if api_stream_stop races with api_exec.
+            # Do NOT set self._streaming = False here — that would cause the
+            # reader thread to exit early on its next loop check, missing the
+            # final stream-data and stream-done messages. Instead, send
+            # stream-stop so the worker sends stream-done, which the reader
+            # reads and exits naturally (line 137-139 in start_stream_reader).
             try:
                 self.send_message({"type": "stream-stop"})
             except Exception:
                 pass
             reader.join(timeout)
+            # If reader is still alive after timeout, force-stop it
+            if reader.is_alive():
+                self._streaming = False
+                reader.join(1)
 
         # Send noop to unblock the worker's stdin reader thread so the
         # worker main loop can resume processing exec/eval messages.
@@ -189,9 +199,19 @@ class Session:
         except Exception:
             pass
 
-    def drain_stream_queue(self) -> list[dict]:
-        """Drain all messages currently in the stream queue."""
-        messages = []
+    def drain_stream_queue(self, timeout: float = 0) -> list[dict]:
+        """Drain all messages from the stream queue.
+
+        If timeout > 0, blocks until at least one message arrives or
+        the timeout expires.  This turns polling into long-polling,
+        eliminating empty responses and reducing HTTP overhead.
+        """
+        messages: list[dict] = []
+        if timeout > 0 and self._stream_queue.empty():
+            try:
+                messages.append(self._stream_queue.get(timeout=timeout))
+            except queue.Empty:
+                return messages
         while True:
             try:
                 messages.append(self._stream_queue.get_nowait())
@@ -290,7 +310,7 @@ def create_app(serve_static: bool = False) -> Flask:
     _start_cleanup_thread()
 
     if not serve_static:
-        CORS(app)
+        CORS(app, max_age=3600)
 
     # -----------------------------------------------------------------------
     # API routes
@@ -425,9 +445,8 @@ def create_app(serve_static: bool = False) -> Flask:
     def api_stream_start():
         """Start streaming — sends stream-start to worker and returns immediately.
 
-        A background thread reads worker stdout into a queue.  The frontend
-        polls /api/stream/poll to drain that queue, mirroring how the Pyodide
-        worker sends stream-data / stream-done messages via postMessage.
+        A background thread reads worker stdout into a queue.  The
+        frontend long-polls /api/stream/poll to drain that queue.
         """
         session_id = _get_session_id()
         if not session_id:
@@ -448,7 +467,12 @@ def create_app(serve_static: bool = False) -> Flask:
 
     @app.route("/api/stream/poll", methods=["POST"])
     def api_stream_poll():
-        """Poll for stream messages — returns all queued messages since last poll."""
+        """Long-poll for stream messages.
+
+        Blocks up to 100 ms waiting for data before returning.
+        This eliminates empty responses and reduces HTTP overhead
+        compared to blind 30 ms polling.
+        """
         session_id = _get_session_id()
         if not session_id:
             return jsonify({"type": "error", "error": "Missing X-Session-ID header"}), 400
@@ -456,7 +480,7 @@ def create_app(serve_static: bool = False) -> Flask:
             session = _sessions.get(session_id)
         if not session:
             return jsonify({"messages": [], "done": True})
-        messages = session.drain_stream_queue()
+        messages = session.drain_stream_queue(timeout=0.1)
         done = any(m.get("type") in ("stream-done", "error") for m in messages)
         if done:
             # Send noop to unblock the worker's stdin reader thread
