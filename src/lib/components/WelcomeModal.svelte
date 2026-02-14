@@ -97,9 +97,9 @@
 				<span class="action-label">Issue</span>
 			</a>
 
-			<a href="https://github.com/sponsors/milanofthe" target="_blank" class="action-card">
-				<Icon name="heart" size={20} />
-				<span class="action-label">Sponsor</span>
+			<a href="https://milanrother.com/#services" target="_blank" class="action-card">
+				<Icon name="activity" size={20} />
+				<span class="action-label">Consulting</span>
 			</a>
 		</div>
 
