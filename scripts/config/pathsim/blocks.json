@@ -33,6 +33,8 @@
       "PID",
       "AntiWindupPID",
       "RateLimiter",
+      "Backlash",
+      "Deadband",
       "TransferFunctionNumDen",
       "TransferFunctionZPG",
       "ButterworthLowpassFilter",

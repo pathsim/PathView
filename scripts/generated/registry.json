@@ -227,6 +227,22 @@
         "f_max"
       ]
     },
+    "Backlash": {
+      "blockClass": "Backlash",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "width",
+        "f_max"
+      ]
+    },
+    "Deadband": {
+      "blockClass": "Deadband",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "lower",
+        "upper"
+      ]
+    },
     "TransferFunctionNumDen": {
       "blockClass": "TransferFunctionNumDen",
       "importPath": "pathsim.blocks",

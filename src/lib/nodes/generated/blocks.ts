@@ -681,6 +681,52 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
       "out"
     ]
   },
+  "Backlash": {
+    "blockClass": "Backlash",
+    "description": "Backlash (mechanical play) element.",
+    "docstringHtml": "<p>Backlash (mechanical play) element.</p>\n<p>Models the hysteresis-like behavior of mechanical backlash in gears,\ncouplings and other systems with play. The output only tracks the input\nafter the input has moved through the full backlash width.</p>\n<div class=\"math\">\n\\begin{equation*}\n\\dot{x} = f_\\mathrm{max} \\left((u - x) - \\mathrm{clip}(u - x,\\; -w/2,\\; w/2)\\right)\n\\end{equation*}\n</div>\n<p>where <cite>w</cite> is the total backlash width. Inside the dead zone <span class=\"math\">\\(|u - x| \\leq w/2\\)</span>\nthe output does not move. Once the input pushes past the edge, the output\ntracks with bandwidth <cite>f_max</cite>.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#backlash with 0.5 units of total play</span><span class=\"whitespace\">\n</span><span class=\"name\">bl</span> <span class=\"operator\">=</span> <span class=\"name\">Backlash</span><span class=\"punctuation\">(</span><span class=\"name\">width</span><span class=\"operator\">=</span><span class=\"literal number float\">0.5</span><span class=\"punctuation\">,</span> <span class=\"name\">f_max</span><span class=\"operator\">=</span><span class=\"literal number float\">1e3</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>width <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>total backlash width (play)</dd>\n<dt>f_max <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>tracking bandwidth parameter when engaged</dd>\n</dl>\n</div>\n",
+    "params": {
+      "width": {
+        "type": "number",
+        "default": "1.0",
+        "description": "total backlash width (play)"
+      },
+      "f_max": {
+        "type": "integer",
+        "default": "100",
+        "description": "tracking bandwidth parameter when engaged"
+      }
+    },
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
+  },
+  "Deadband": {
+    "blockClass": "Deadband",
+    "description": "Deadband (dead zone) element.",
+    "docstringHtml": "<p>Deadband (dead zone) element.</p>\n<p>Outputs zero when the input is within the dead zone, and passes\nthe signal shifted by the zone boundary otherwise:</p>\n<div class=\"math\">\n\\begin{equation*}\ny = \\begin{cases}\n    u - u_\\mathrm{upper} &amp; \\text{if } u &gt; u_\\mathrm{upper} \\\\\n    0 &amp; \\text{if } u_\\mathrm{lower} \\leq u \\leq u_\\mathrm{upper} \\\\\n    u - u_\\mathrm{lower} &amp; \\text{if } u &lt; u_\\mathrm{lower}\n\\end{cases}\n\\end{equation*}\n</div>\n<p>or equivalently <span class=\"math\">\\(y = u - \\mathrm{clip}(u,\\; u_\\mathrm{lower},\\; u_\\mathrm{upper})\\)</span>.</p>\n<div class=\"section\" id=\"example\">\n<h3>Example</h3>\n<p>The block is initialized like this:</p>\n<pre class=\"code python literal-block\">\n<span class=\"comment single\">#symmetric dead zone of width 0.2</span><span class=\"whitespace\">\n</span><span class=\"name\">db</span> <span class=\"operator\">=</span> <span class=\"name\">Deadband</span><span class=\"punctuation\">(</span><span class=\"name\">lower</span><span class=\"operator\">=-</span><span class=\"literal number float\">0.1</span><span class=\"punctuation\">,</span> <span class=\"name\">upper</span><span class=\"operator\">=</span><span class=\"literal number float\">0.1</span><span class=\"punctuation\">)</span>\n</pre>\n</div>\n<div class=\"section\" id=\"parameters\">\n<h3>Parameters</h3>\n<dl class=\"docutils\">\n<dt>lower <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>lower bound of the dead zone</dd>\n<dt>upper <span class=\"classifier-delimiter\">:</span> <span class=\"classifier\">float</span></dt>\n<dd>upper bound of the dead zone</dd>\n</dl>\n</div>\n",
+    "params": {
+      "lower": {
+        "type": "number",
+        "default": "-1.0",
+        "description": "lower bound of the dead zone"
+      },
+      "upper": {
+        "type": "number",
+        "default": "1.0",
+        "description": "upper bound of the dead zone"
+      }
+    },
+    "inputs": [
+      "in"
+    ],
+    "outputs": [
+      "out"
+    ]
+  },
   "TransferFunctionNumDen": {
     "blockClass": "TransferFunctionNumDen",
     "description": "This block defines a LTI (SISO) transfer function.",
@@ -1474,7 +1520,7 @@ export const extractedBlocks: Record<string, ExtractedBlock> =
 
 export const blockConfig: Record<string, string[]> = {
   Sources: ["Constant", "Source", "SinusoidalSource", "StepSource", "PulseSource", "TriangleWaveSource", "SquareWaveSource", "GaussianPulseSource", "ChirpPhaseNoiseSource", "ClockSource", "WhiteNoise", "PinkNoise", "RandomNumberGenerator"],
-  Dynamic: ["Integrator", "Differentiator", "Delay", "ODE", "DynamicalSystem", "StateSpace", "PT1", "PT2", "LeadLag", "PID", "AntiWindupPID", "RateLimiter", "TransferFunctionNumDen", "TransferFunctionZPG", "ButterworthLowpassFilter", "ButterworthHighpassFilter", "ButterworthBandpassFilter", "ButterworthBandstopFilter"],
+  Dynamic: ["Integrator", "Differentiator", "Delay", "ODE", "DynamicalSystem", "StateSpace", "PT1", "PT2", "LeadLag", "PID", "AntiWindupPID", "RateLimiter", "Backlash", "Deadband", "TransferFunctionNumDen", "TransferFunctionZPG", "ButterworthLowpassFilter", "ButterworthHighpassFilter", "ButterworthBandpassFilter", "ButterworthBandstopFilter"],
   Algebraic: ["Adder", "Multiplier", "Amplifier", "Function", "Sin", "Cos", "Tan", "Tanh", "Abs", "Sqrt", "Exp", "Log", "Log10", "Mod", "Clip", "Pow", "Switch", "LUT", "LUT1D"],
   Mixed: ["SampleHold", "FIR", "ADC", "DAC", "Counter", "CounterUp", "CounterDown", "Relay"],
   Recording: ["Scope", "Spectrum"],
@@ -1487,6 +1533,7 @@ export const blockImportPaths: Record<string, string> = {
   "Adder": "pathsim.blocks",
   "Amplifier": "pathsim.blocks",
   "AntiWindupPID": "pathsim.blocks",
+  "Backlash": "pathsim.blocks",
   "Bubbler4": "pathsim_chem.tritium",
   "ButterworthBandpassFilter": "pathsim.blocks",
   "ButterworthBandstopFilter": "pathsim.blocks",
@@ -1501,6 +1548,7 @@ export const blockImportPaths: Record<string, string> = {
   "CounterDown": "pathsim.blocks",
   "CounterUp": "pathsim.blocks",
   "DAC": "pathsim.blocks",
+  "Deadband": "pathsim.blocks",
   "Delay": "pathsim.blocks",
   "Differentiator": "pathsim.blocks",
   "DynamicalSystem": "pathsim.blocks",
