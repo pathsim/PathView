@@ -3,13 +3,11 @@
 import pytest
 
 from pathview_server.app import create_app, _sessions, _sessions_lock
-from pathview_server.venv import ensure_venv
 
 
 @pytest.fixture()
 def app():
     """Create a Flask test app (API-only, no static serving)."""
-    ensure_venv()
     application = create_app(serve_static=False)
     application.config["TESTING"] = True
     yield application

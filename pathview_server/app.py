@@ -21,8 +21,6 @@ from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-from pathview_server.venv import get_venv_python
-
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -44,7 +42,7 @@ class Session:
         self.last_active = time.time()
         self.lock = threading.Lock()
         self.process = subprocess.Popen(
-            [get_venv_python(), "-u", WORKER_SCRIPT],
+            [sys.executable, "-u", WORKER_SCRIPT],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

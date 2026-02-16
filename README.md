@@ -98,6 +98,7 @@ pathview_server/           # Python package (pip install pathview)
 ├── cli.py                 # CLI entry point (pathview serve)
 └── static/                # Bundled frontend (generated at build time)
 
+
 scripts/
 ├── config/                # Configuration files for extraction
 │   ├── schemas/           # JSON schemas for validation
@@ -496,8 +497,9 @@ npm run dev      # Starts Vite dev server (separate terminal)
 
 **Key properties:**
 - **Process isolation** — each session gets its own Python subprocess
+- **Host environment** — workers run with the same Python used to install pathview, so all packages in the user's environment are available in the code editor
 - **Namespace persistence** — variables persist across exec/eval calls within a session
-- **Dynamic packages** — packages from `PYTHON_PACKAGES` (the same config used by Pyodide) are pip-installed on first init
+- **Dynamic packages** — packages from `PYTHON_PACKAGES` (the same config used by Pyodide) are pip-installed on first init if not already present
 - **Session TTL** — stale sessions cleaned up after 1 hour of inactivity
 - **Streaming** — simulations stream via SSE, with the same code injection support as Pyodide
 

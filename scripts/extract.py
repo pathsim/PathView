@@ -694,6 +694,10 @@ class SimulationExtractor:
 class DependencyExtractor:
     """Extract and generate dependency configuration."""
 
+    # Packages managed by the extraction script in pyproject.toml.
+    # These are added/updated automatically; all other dependencies are left untouched.
+    MANAGED_PACKAGE_NAMES = {"pathsim", "pathsim-chem"}
+
     def __init__(self, config_loader: ConfigLoader):
         self.config = config_loader
 
@@ -734,6 +738,59 @@ class DependencyExtractor:
             "packages": pyodide_packages,
             "extracted_versions": extracted_versions
         }
+
+    def update_pyproject(self, packages: list[dict], project_root: Path) -> None:
+        """Update pyproject.toml dependencies with pinned package versions.
+
+        Adds/updates entries for packages from requirements-pyodide.txt
+        while leaving all other dependencies (flask, numpy, etc.) untouched.
+        """
+        pyproject_path = project_root / "pyproject.toml"
+        if not pyproject_path.exists():
+            print("  Warning: pyproject.toml not found, skipping")
+            return
+
+        text = pyproject_path.read_text(encoding="utf-8")
+
+        # Build pip specs for managed packages (e.g. "pathsim==0.17.0")
+        new_specs: list[str] = []
+        for pkg in packages:
+            base_name = pkg["pip"].split(">=")[0].split("==")[0].split("<=")[0].split("<")[0].split(">")[0]
+            if base_name in self.MANAGED_PACKAGE_NAMES:
+                new_specs.append(pkg["pip"])
+
+        # Parse the existing dependencies list
+        pattern = re.compile(
+            r'(dependencies\s*=\s*\[)(.*?)(\])',
+            re.DOTALL,
+        )
+        match = pattern.search(text)
+        if not match:
+            print("  Warning: Could not find dependencies in pyproject.toml, skipping")
+            return
+
+        existing_block = match.group(2)
+
+        # Keep non-managed dependencies
+        kept: list[str] = []
+        for line in existing_block.strip().splitlines():
+            dep = line.strip().strip(",").strip('"').strip("'")
+            if not dep:
+                continue
+            dep_name = re.split(r'[><=~!\[]', dep)[0].strip()
+            if dep_name not in self.MANAGED_PACKAGE_NAMES:
+                kept.append(dep)
+
+        # Append managed packages
+        all_deps = kept + new_specs
+
+        # Rebuild the dependencies block
+        dep_lines = ",\n".join(f'    "{d}"' for d in all_deps)
+        new_block = f"dependencies = [\n{dep_lines},\n]"
+        text = text[:match.start()] + new_block + text[match.end():]
+
+        pyproject_path.write_text(text, encoding="utf-8")
+        print(f"  Updated pyproject.toml dependencies: {', '.join(new_specs)}")
 
 
 # =============================================================================
@@ -1009,8 +1066,11 @@ Examples:
 
     if extract_all or args.deps:
         print("\nExtracting dependencies...")
-        deps = DependencyExtractor(config).extract()
+        dep_extractor = DependencyExtractor(config)
+        deps = dep_extractor.extract()
         generator.write_dependencies(deps)
+        project_root = Path(__file__).parent.parent
+        dep_extractor.update_pyproject(deps["packages"], project_root)
 
     # Track extracted data for registry generation
     blocks = None
