@@ -63,9 +63,6 @@ export const syncPortBlocks = new Set([
 	'Integrator',
 	'Differentiator',
 	'Delay',
-	'PID',
-	'PID_Antiwindup',
-
 	// Algebraic blocks (element-wise operations)
 	'Amplifier',
 	'Sin',

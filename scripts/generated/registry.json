@@ -171,6 +171,32 @@
         "initial_value"
       ]
     },
+    "PT1": {
+      "blockClass": "PT1",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T"
+      ]
+    },
+    "PT2": {
+      "blockClass": "PT2",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T",
+        "d"
+      ]
+    },
+    "LeadLag": {
+      "blockClass": "LeadLag",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T1",
+        "T2"
+      ]
+    },
     "PID": {
       "blockClass": "PID",
       "importPath": "pathsim.blocks",
@@ -191,6 +217,14 @@
         "f_max",
         "Ks",
         "limits"
+      ]
+    },
+    "RateLimiter": {
+      "blockClass": "RateLimiter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "rate",
+        "f_max"
       ]
     },
     "TransferFunctionNumDen": {
