@@ -80,6 +80,12 @@ export function createGraphFile(name?: string): GraphFile {
 	// Clean params from all nodes (remove internal UI params, empty values, dead params)
 	const cleanedNodes = nodes.map(n => cleanNodeForExport(n));
 
+	// Clean empty strings to null in settings so they round-trip correctly
+	// (empty strings are used internally for placeholder display but shouldn't be persisted)
+	const cleanedSettings = Object.fromEntries(
+		Object.entries(settings).map(([k, v]) => [k, v === '' ? null : v])
+	) as SimulationSettings;
+
 	return {
 		version: GRAPH_FILE_VERSION,
 		metadata: {
@@ -96,7 +102,7 @@ export function createGraphFile(name?: string): GraphFile {
 		codeContext: {
 			code
 		},
-		simulationSettings: settings
+		simulationSettings: cleanedSettings
 	};
 }
 
