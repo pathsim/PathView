@@ -1,6 +1,9 @@
 /**
  * Sparse grid for pathfinding - stores only obstacles, computes walkability on demand
  * Supports incremental updates for efficient node dragging
+ *
+ * Performance: spatial hash uses numeric bucket keys to avoid string GC
+ * in the hot isWalkableAt path (called thousands of times per A* run).
  */
 
 import type { RoutingContext, Bounds, PortStub } from './types';
@@ -9,6 +12,14 @@ import { GRID_SIZE, ROUTING_MARGIN } from './constants';
 
 /** Size of spatial hash buckets (in grid cells) */
 const SPATIAL_BUCKET_SIZE = 10;
+
+/**
+ * Encode bucket coordinates into a single number.
+ * Bucket coords are small (typically -50..+50), so 10_000 offset is plenty.
+ */
+function encodeBucket(bx: number, by: number): number {
+	return (bx + 10_000) * 20_001 + (by + 10_000);
+}
 
 /**
  * Convert world coordinates to grid coordinates
@@ -57,7 +68,7 @@ function boundsToObstacle(bounds: Bounds, offsetX: number, offsetY: number): Gri
 
 /**
  * Sparse grid that computes walkability on-demand from obstacle list
- * No matrix storage - O(obstacles) memory instead of O(width × height)
+ * No matrix storage - O(obstacles) memory instead of O(width x height)
  * Supports incremental updates - O(1) to update a single node
  * Effectively unbounded - only obstacles block movement
  */
@@ -71,8 +82,8 @@ export class SparseGrid {
 	/** Port stub obstacles (rebuilt when stubs change) */
 	private portStubObstacles: GridObstacle[] = [];
 
-	/** Spatial hash: bucket key -> set of node IDs with obstacles in that bucket */
-	private spatialHash: Map<string, Set<string>> = new Map();
+	/** Spatial hash: numeric bucket key -> set of node IDs with obstacles in that bucket */
+	private spatialHash: Map<number, Set<string>> = new Map();
 
 	constructor(context?: RoutingContext) {
 		if (context) {
@@ -80,16 +91,16 @@ export class SparseGrid {
 		}
 	}
 
-	/** Get bucket key for a grid coordinate */
-	private getBucketKey(gx: number, gy: number): string {
+	/** Get numeric bucket key for a grid coordinate */
+	private getBucketKey(gx: number, gy: number): number {
 		const bx = Math.floor(gx / SPATIAL_BUCKET_SIZE);
 		const by = Math.floor(gy / SPATIAL_BUCKET_SIZE);
-		return `${bx},${by}`;
+		return encodeBucket(bx, by);
 	}
 
 	/** Get all bucket keys that an obstacle overlaps */
-	private getObstacleBuckets(obs: GridObstacle): string[] {
-		const keys: string[] = [];
+	private getObstacleBuckets(obs: GridObstacle): number[] {
+		const keys: number[] = [];
 		const minBx = Math.floor(obs.minGx / SPATIAL_BUCKET_SIZE);
 		const maxBx = Math.floor(obs.maxGx / SPATIAL_BUCKET_SIZE);
 		const minBy = Math.floor(obs.minGy / SPATIAL_BUCKET_SIZE);
@@ -97,7 +108,7 @@ export class SparseGrid {
 
 		for (let bx = minBx; bx <= maxBx; bx++) {
 			for (let by = minBy; by <= maxBy; by++) {
-				keys.push(`${bx},${by}`);
+				keys.push(encodeBucket(bx, by));
 			}
 		}
 		return keys;
