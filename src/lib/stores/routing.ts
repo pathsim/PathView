@@ -53,6 +53,9 @@ function hashRouteInputs(
 	return `${sourcePos.x},${sourcePos.y}|${targetPos.x},${targetPos.y}|${sourceDir}|${targetDir}|${wpHash}`;
 }
 
+/** Number of routes to calculate per async batch before yielding to browser */
+const ASYNC_BATCH_SIZE = 8;
+
 interface RoutingState {
 	/** Cached routes by connection ID */
 	routes: Map<string, RouteResult>;
@@ -70,6 +73,9 @@ const state = writable<RoutingState>({
 	grid: null,
 	routeInputHashes: new Map()
 });
+
+/** Generation counter — incremented on each recalculateAllRoutes call to cancel stale async work */
+let routingGeneration = 0;
 
 /**
  * Routing store - manages route calculations and caching
@@ -259,7 +265,13 @@ export const routingStore = {
 	},
 
 	/**
-	 * Recalculate all routes with path overlap avoidance
+	 * Recalculate all routes using a two-pass strategy:
+	 *   Pass 1 (sync):  Fast route for every connection WITHOUT overlap avoidance.
+	 *                    Routes appear on screen immediately.
+	 *   Pass 2 (async): Refine routes WITH overlap avoidance, yielding to the
+	 *                    browser every ASYNC_BATCH_SIZE routes so the UI stays responsive.
+	 *                    Cancelled automatically if a newer recalculation starts.
+	 *
 	 * @param connections - All connections to route
 	 * @param getPortInfo - Function to get port world position and direction
 	 */
@@ -268,6 +280,9 @@ export const routingStore = {
 		getPortInfo: (nodeId: string, portIndex: number, isOutput: boolean) => PortInfo | null
 	): void {
 		const $state = get(state);
+
+		// Bump generation — any in-flight async pass with an older generation will bail out
+		const generation = ++routingGeneration;
 
 		// Memoize port info lookups for this batch (used during sorting and routing)
 		const portInfoCache = new Map<string, PortInfo | null>();
@@ -279,13 +294,12 @@ export const routingStore = {
 			return portInfoCache.get(key)!;
 		};
 
-		// Start with existing routes to preserve them if recalculation fails
+		// ── Pass 1: fast sync routing (no overlap avoidance) ─────────────
+
 		const routes = new Map<string, RouteResult>($state.routes);
 		const routeInputHashes = new Map<string, string>();
-		const usedCells = new Map<string, Set<Direction>>();
 
-		// Sort connections by Manhattan distance (longest first)
-		// Longer routes are less likely to block shorter ones
+		// Prepare sorted + grouped connections (shared by both passes)
 		const sortedConnections = [...connections].sort((a, b) => {
 			const aSource = getPortInfoCached(a.sourceNodeId, a.sourcePortIndex, true);
 			const aTarget = getPortInfoCached(a.targetNodeId, a.targetPortIndex, false);
@@ -311,20 +325,82 @@ export const routingStore = {
 			bySourcePort.set(key, group);
 		}
 
-		// Process each source port group
+		// Flat ordered list of connections for pass 2 batching
+		const orderedConnections: Connection[] = [];
+		for (const [, groupConns] of bySourcePort) {
+			orderedConnections.push(...groupConns);
+		}
+
+		// Pass 1: calculate every route without usedCells (fast)
+		for (const conn of orderedConnections) {
+			const sourceInfo = getPortInfoCached(conn.sourceNodeId, conn.sourcePortIndex, true);
+			const targetInfo = getPortInfoCached(conn.targetNodeId, conn.targetPortIndex, false);
+			if (!sourceInfo || !targetInfo) continue;
+
+			const userWaypoints = getUserWaypoints(conn.waypoints);
+			const result = computeRoute(
+				sourceInfo.position,
+				targetInfo.position,
+				sourceInfo.direction,
+				targetInfo.direction,
+				$state.grid,
+				userWaypoints
+				// no usedCells — fast path
+			);
+			routes.set(conn.id, result);
+			routeInputHashes.set(conn.id, hashRouteInputs(
+				sourceInfo.position,
+				targetInfo.position,
+				sourceInfo.direction,
+				targetInfo.direction,
+				userWaypoints
+			));
+		}
+
+		state.update((s) => ({ ...s, routes, routeInputHashes }));
+
+		// ── Pass 2: async overlap-aware refinement ───────────────────────
+		// Only needed when there are enough connections to overlap
+		if (orderedConnections.length > 1) {
+			this._refineRoutesAsync(
+				generation,
+				orderedConnections,
+				bySourcePort,
+				getPortInfoCached,
+				routeInputHashes
+			);
+		}
+	},
+
+	/**
+	 * Async pass 2 — recalculate routes with overlap avoidance in batches.
+	 * Yields to the browser every ASYNC_BATCH_SIZE routes.
+	 * Bails out if routingGeneration has advanced (newer routing started).
+	 */
+	async _refineRoutesAsync(
+		generation: number,
+		orderedConnections: Connection[],
+		bySourcePort: Map<string, Connection[]>,
+		getPortInfoCached: (nodeId: string, portIndex: number, isOutput: boolean) => PortInfo | null,
+		routeInputHashes: Map<string, string>
+	): Promise<void> {
+		const usedCells = new Map<string, Set<Direction>>();
+		const refinedRoutes = new Map<string, RouteResult>();
+		let processed = 0;
+
 		for (const [, groupConns] of bySourcePort) {
 			const groupCells: Map<string, Set<Direction>>[] = [];
 
-			// Calculate routes for all connections from this source port
 			for (const conn of groupConns) {
+				// Bail out if a newer recalculation has been triggered
+				if (generation !== routingGeneration) return;
+
+				const $state = get(state);
 				const sourceInfo = getPortInfoCached(conn.sourceNodeId, conn.sourcePortIndex, true);
 				const targetInfo = getPortInfoCached(conn.targetNodeId, conn.targetPortIndex, false);
-
 				if (!sourceInfo || !targetInfo) continue;
 
-				// Extract user waypoints from connection
 				const userWaypoints = getUserWaypoints(conn.waypoints);
-
 				const result = computeRoute(
 					sourceInfo.position,
 					targetInfo.position,
@@ -334,20 +410,18 @@ export const routingStore = {
 					userWaypoints,
 					usedCells
 				);
-				routes.set(conn.id, result);
+				refinedRoutes.set(conn.id, result);
 
-				// Store hash for future change detection
-				routeInputHashes.set(conn.id, hashRouteInputs(
-					sourceInfo.position,
-					targetInfo.position,
-					sourceInfo.direction,
-					targetInfo.direction,
-					userWaypoints
-				));
-
-				// Collect cells for this path (add to usedCells after processing whole group)
 				if (result.path.length > 0) {
 					groupCells.push(getPathCells(result.path, 2));
+				}
+
+				processed++;
+
+				// Yield to browser every ASYNC_BATCH_SIZE routes
+				if (processed % ASYNC_BATCH_SIZE === 0) {
+					await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+					if (generation !== routingGeneration) return;
 				}
 			}
 
@@ -362,7 +436,17 @@ export const routingStore = {
 			}
 		}
 
-		state.update((s) => ({ ...s, routes, routeInputHashes }));
+		// Final check before committing
+		if (generation !== routingGeneration) return;
+
+		// Merge refined routes into current state
+		state.update((s) => {
+			const routes = new Map(s.routes);
+			for (const [id, route] of refinedRoutes) {
+				routes.set(id, route);
+			}
+			return { ...s, routes, routeInputHashes: new Map(routeInputHashes) };
+		});
 	},
 
 	/**

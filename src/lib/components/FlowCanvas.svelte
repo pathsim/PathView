@@ -54,7 +54,17 @@
 		colorMode = theme;
 	});
 
-	
+	// Debounced routing context update — coalesces rapid connection changes
+	// (e.g. paste, undo, bulk delete) into a single recalculation
+	let routingContextTimer: ReturnType<typeof setTimeout> | null = null;
+	function scheduleRoutingUpdate() {
+		if (routingContextTimer !== null) clearTimeout(routingContextTimer);
+		routingContextTimer = setTimeout(() => {
+			routingContextTimer = null;
+			updateRoutingContext();
+		}, 0);
+	}
+
 	// Track mouse position for waypoint placement
 	let mousePosition = { x: 0, y: 0 };
 
@@ -238,7 +248,10 @@
 
 	// Cleanup function - will add subscriptions as they're defined
 	const cleanups: (() => void)[] = [unsubscribeTheme, unsubscribeNodeUpdates, unsubscribeClearSelection, unsubscribeNudge, unsubscribeSelectNode];
-	onDestroy(() => cleanups.forEach(fn => fn()));
+	onDestroy(() => {
+		cleanups.forEach(fn => fn());
+		if (routingContextTimer !== null) clearTimeout(routingContextTimer);
+	});
 
 	function clearPendingUpdates() {
 		pendingNodeUpdates = [];
@@ -248,7 +261,7 @@
 	// Returns handle tip position (accounting for handle offset from block edge)
 	// For inputs, also accounts for arrowhead so stub starts within arrow
 	function getPortInfo(nodeId: string, portIndex: number, isOutput: boolean): PortInfo | null {
-		const node = nodes.find(n => n.id === nodeId);
+		const node = nodeMap.get(nodeId);
 		if (!node) return null;
 
 		const nodeData = node.data as NodeInstance;
@@ -382,6 +395,8 @@
 	// Combined nodes for SvelteFlow
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
+	// O(1) node lookup map — kept in sync with nodes array via $effect
+	let nodeMap = $derived(new Map(nodes.map(n => [n.id, n])));
 
 	// Merge block, event, and annotation nodes when any changes
 	// Preserve position and selection from SvelteFlow's current state (except during undo/redo)
@@ -640,8 +655,8 @@
 			return edge;
 		});
 		// Recalculate routes when connections change
-		// Use setTimeout to ensure nodes are updated first
-		setTimeout(() => updateRoutingContext(), 0);
+		// Debounced to coalesce rapid changes (paste, undo, bulk operations)
+		scheduleRoutingUpdate();
 	}));
 
 	// Track last snapped positions during drag for discrete routing updates

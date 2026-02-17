@@ -1,5 +1,10 @@
 /**
  * A* pathfinding with turn penalty and no 180-degree turns
+ *
+ * Performance notes:
+ * - MinHeap uses a Map sidecar for O(1) membership/update lookups
+ * - Closed set and forced-walkable set use numeric keys to avoid string GC
+ * - Direction is encoded as 0-3 integer for fast hashing
  */
 
 import type { Position } from '$lib/types/common';
@@ -24,13 +29,30 @@ const EXIT_PATH_LENGTH = 3;
 /** Maximum iterations before giving up (prevents infinite search) */
 const MAX_ITERATIONS = 10000;
 
-/** Neighbor offsets with their directions */
-const NEIGHBORS: Array<{ dx: number; dy: number; dir: Direction }> = [
-	{ dx: 1, dy: 0, dir: 'right' },
-	{ dx: -1, dy: 0, dir: 'left' },
-	{ dx: 0, dy: 1, dir: 'down' },
-	{ dx: 0, dy: -1, dir: 'up' }
+/** Direction to integer index for numeric hashing */
+const DIR_INDEX: Record<Direction, number> = { right: 0, left: 1, down: 2, up: 3 };
+
+/** Neighbor offsets with their directions and precomputed direction index */
+const NEIGHBORS: Array<{ dx: number; dy: number; dir: Direction; dirIdx: number }> = [
+	{ dx: 1, dy: 0, dir: 'right', dirIdx: 0 },
+	{ dx: -1, dy: 0, dir: 'left', dirIdx: 1 },
+	{ dx: 0, dy: 1, dir: 'down', dirIdx: 2 },
+	{ dx: 0, dy: -1, dir: 'up', dirIdx: 3 }
 ];
+
+/**
+ * Encode (x, y, dirIdx) into a single number for use as Map key.
+ * Uses a large multiplier to avoid collisions in the expected coordinate range.
+ * Grid coordinates are typically -500..+500, so 20_000 provides ample space.
+ */
+function encodeState(x: number, y: number, dirIdx: number): number {
+	return ((x + 10_000) * 20_001 + (y + 10_000)) * 4 + dirIdx;
+}
+
+/** Encode (x, y) into a single number for walkability sets */
+function encodeCell(x: number, y: number): number {
+	return (x + 10_000) * 20_001 + (y + 10_000);
+}
 
 /** Priority queue node for A* with direction tracking */
 interface AStarNode {
@@ -41,22 +63,35 @@ interface AStarNode {
 	f: number; // Total cost (g + h)
 	parent: AStarNode | null;
 	direction: Direction; // Actual direction we arrived from
+	dirIdx: number; // Numeric direction index (0-3)
+	stateKey: number; // Precomputed encodeState key
+	heapIdx: number; // Current index in the heap array (maintained by MinHeap)
 }
 
-/** Simple binary min-heap for A* open set */
+/**
+ * Binary min-heap with O(1) membership test and O(log n) update.
+ * Uses a Map<stateKey, AStarNode> sidecar for fast lookups.
+ * Each node stores its current heap index so bubbleUp/bubbleDown can
+ * update the sidecar without re-scanning.
+ */
 class MinHeap {
 	private heap: AStarNode[] = [];
+	private index: Map<number, AStarNode> = new Map();
 
 	push(node: AStarNode): void {
+		node.heapIdx = this.heap.length;
 		this.heap.push(node);
-		this.bubbleUp(this.heap.length - 1);
+		this.index.set(node.stateKey, node);
+		this.bubbleUp(node.heapIdx);
 	}
 
 	pop(): AStarNode | undefined {
 		if (this.heap.length === 0) return undefined;
 		const min = this.heap[0];
+		this.index.delete(min.stateKey);
 		const last = this.heap.pop()!;
 		if (this.heap.length > 0) {
+			last.heapIdx = 0;
 			this.heap[0] = last;
 			this.bubbleDown(0);
 		}
@@ -67,49 +102,58 @@ class MinHeap {
 		return this.heap.length;
 	}
 
-	// Find and update node if better path found
-	updateIfBetter(x: number, y: number, dir: Direction, newG: number, parent: AStarNode): boolean {
-		for (let i = 0; i < this.heap.length; i++) {
-			const n = this.heap[i];
-			if (n.x === x && n.y === y && n.direction === dir) {
-				if (newG < n.g) {
-					n.g = newG;
-					n.f = newG + n.h;
-					n.parent = parent;
-					this.bubbleUp(i);
-					return true;
-				}
-				return false;
-			}
+	/** O(1) lookup + O(log n) re-heap if better */
+	updateIfBetter(stateKey: number, newG: number, newH: number, parent: AStarNode): boolean {
+		const existing = this.index.get(stateKey);
+		if (!existing) return false; // Not in open set
+		if (newG < existing.g) {
+			existing.g = newG;
+			existing.f = newG + existing.h;
+			existing.parent = parent;
+			this.bubbleUp(existing.heapIdx);
+			return true;
 		}
-		return false; // Not found
+		return false; // Existing path is better or equal
 	}
 
-	has(x: number, y: number, dir: Direction): boolean {
-		return this.heap.some(n => n.x === x && n.y === y && n.direction === dir);
+	/** O(1) membership test */
+	has(stateKey: number): boolean {
+		return this.index.has(stateKey);
 	}
 
 	private bubbleUp(i: number): void {
+		const heap = this.heap;
 		while (i > 0) {
-			const parent = Math.floor((i - 1) / 2);
-			if (this.heap[i].f >= this.heap[parent].f) break;
-			[this.heap[i], this.heap[parent]] = [this.heap[parent], this.heap[i]];
-			i = parent;
+			const parentIdx = (i - 1) >> 1;
+			if (heap[i].f >= heap[parentIdx].f) break;
+			this.swap(i, parentIdx);
+			i = parentIdx;
 		}
 	}
 
 	private bubbleDown(i: number): void {
-		const n = this.heap.length;
+		const heap = this.heap;
+		const n = heap.length;
 		while (true) {
 			const left = 2 * i + 1;
 			const right = 2 * i + 2;
 			let smallest = i;
-			if (left < n && this.heap[left].f < this.heap[smallest].f) smallest = left;
-			if (right < n && this.heap[right].f < this.heap[smallest].f) smallest = right;
+			if (left < n && heap[left].f < heap[smallest].f) smallest = left;
+			if (right < n && heap[right].f < heap[smallest].f) smallest = right;
 			if (smallest === i) break;
-			[this.heap[i], this.heap[smallest]] = [this.heap[smallest], this.heap[i]];
+			this.swap(i, smallest);
 			i = smallest;
 		}
+	}
+
+	private swap(a: number, b: number): void {
+		const heap = this.heap;
+		const nodeA = heap[a];
+		const nodeB = heap[b];
+		heap[a] = nodeB;
+		heap[b] = nodeA;
+		nodeA.heapIdx = b;
+		nodeB.heapIdx = a;
 	}
 }
 
@@ -144,41 +188,50 @@ export function findPathWithTurnPenalty(
 	const endGx = worldToGrid(end.x - offset.x);
 	const endGy = worldToGrid(end.y - offset.y);
 
-	// Cells that are forced walkable (start, end, exit path)
-	const forcedWalkable = new Set<string>();
-	forcedWalkable.add(`${startGx},${startGy}`);
-	forcedWalkable.add(`${endGx},${endGy}`);
+	// Precompute offset in grid units for usedCells lookup
+	const offsetGx = worldToGrid(offset.x);
+	const offsetGy = worldToGrid(offset.y);
+
+	// Cells that are forced walkable (start, end, exit path) — numeric keys
+	const forcedWalkable = new Set<number>();
+	forcedWalkable.add(encodeCell(startGx, startGy));
+	forcedWalkable.add(encodeCell(endGx, endGy));
 
 	// Force first few cells in initial direction walkable (exit path from port)
 	const initVec = NEIGHBORS.find((n) => n.dir === initialDir);
 	if (initVec) {
 		for (let i = 1; i <= EXIT_PATH_LENGTH; i++) {
-			forcedWalkable.add(`${startGx + initVec.dx * i},${startGy + initVec.dy * i}`);
+			forcedWalkable.add(encodeCell(startGx + initVec.dx * i, startGy + initVec.dy * i));
 		}
 	}
 
 	// Helper to check walkability (sparse grid + forced walkable)
 	const isWalkable = (gx: number, gy: number): boolean => {
-		const key = `${gx},${gy}`;
-		if (forcedWalkable.has(key)) return true;
+		if (forcedWalkable.has(encodeCell(gx, gy))) return true;
 		return grid.isWalkableAt(gx, gy);
 	};
 
-	// Initialize open (min-heap) and closed sets
+	// Initialize open (min-heap) and closed set (numeric keys)
 	const openSet = new MinHeap();
-	const closedSet = new Set<string>();
+	const closedSet = new Set<number>();
+
+	const initialDirIdx = DIR_INDEX[initialDir];
+	const startStateKey = encodeState(startGx, startGy, initialDirIdx);
+	const startH = manhattanDistance(startGx, startGy, endGx, endGy);
 
 	// Create start node
 	const startNode: AStarNode = {
 		x: startGx,
 		y: startGy,
 		g: 0,
-		h: manhattanDistance(startGx, startGy, endGx, endGy),
-		f: 0,
+		h: startH,
+		f: startH,
 		parent: null,
-		direction: initialDir
+		direction: initialDir,
+		dirIdx: initialDirIdx,
+		stateKey: startStateKey,
+		heapIdx: 0
 	};
-	startNode.f = startNode.g + startNode.h;
 	openSet.push(startNode);
 
 	let iterations = 0;
@@ -192,16 +245,15 @@ export function findPathWithTurnPenalty(
 		}
 
 		// Skip if already processed with this direction
-		const closedKey = `${current.x},${current.y},${current.direction}`;
-		if (closedSet.has(closedKey)) continue;
-		closedSet.add(closedKey);
+		if (closedSet.has(current.stateKey)) continue;
+		closedSet.add(current.stateKey);
 
 		// Get the direction we must NOT go (opposite = 180-degree turn)
 		const blockedDir = OPPOSITE_DIRECTION[current.direction];
 		const isStartNode = current.parent === null;
 
 		// Explore neighbors
-		for (const { dx, dy, dir } of NEIGHBORS) {
+		for (const { dx, dy, dir, dirIdx } of NEIGHBORS) {
 			if (dir === blockedDir) continue;
 			if (isStartNode && dir !== initialDir) continue;
 
@@ -212,8 +264,8 @@ export function findPathWithTurnPenalty(
 			if (!isWalkable(nx, ny)) continue;
 
 			// Skip if already closed with this direction
-			const neighborClosedKey = `${nx},${ny},${dir}`;
-			if (closedSet.has(neighborClosedKey)) continue;
+			const neighborStateKey = encodeState(nx, ny, dirIdx);
+			if (closedSet.has(neighborStateKey)) continue;
 
 			// Calculate movement cost
 			let moveCost = 1;
@@ -221,8 +273,8 @@ export function findPathWithTurnPenalty(
 
 			// Add penalty for cells used by other paths
 			if (usedCells) {
-				const worldGx = nx + worldToGrid(offset.x);
-				const worldGy = ny + worldToGrid(offset.y);
+				const worldGx = nx + offsetGx;
+				const worldGy = ny + offsetGy;
 				const existingDirs = usedCells.get(`${worldGx},${worldGy}`);
 				if (existingDirs) {
 					const isHorizontal = dir === 'left' || dir === 'right';
@@ -235,9 +287,9 @@ export function findPathWithTurnPenalty(
 
 			const tentativeG = current.g + moveCost;
 
-			// Try to update existing node or add new one
-			if (!openSet.updateIfBetter(nx, ny, dir, tentativeG, current)) {
-				if (!openSet.has(nx, ny, dir)) {
+			// Try to update existing node in open set, or add new one
+			if (!openSet.updateIfBetter(neighborStateKey, tentativeG, 0, current)) {
+				if (!openSet.has(neighborStateKey)) {
 					const h = manhattanDistance(nx, ny, endGx, endGy);
 					openSet.push({
 						x: nx,
@@ -246,7 +298,10 @@ export function findPathWithTurnPenalty(
 						h,
 						f: tentativeG + h,
 						parent: current,
-						direction: dir
+						direction: dir,
+						dirIdx,
+						stateKey: neighborStateKey,
+						heapIdx: 0
 					});
 				}
 			}
@@ -273,19 +328,20 @@ function manhattanDistance(x1: number, y1: number, x2: number, y2: number): numb
 
 /**
  * Reconstruct path from A* result
+ * Uses push + reverse instead of unshift to avoid O(n²) array shifting
  */
 function reconstructPath(endNode: AStarNode, offset: Position): Position[] {
 	const path: Position[] = [];
 	let current: AStarNode | null = endNode;
 
 	while (current !== null) {
-		path.unshift({
+		path.push({
 			x: gridToWorld(current.x) + offset.x,
 			y: gridToWorld(current.y) + offset.y
 		});
 		current = current.parent;
 	}
 
+	path.reverse();
 	return path;
 }
-

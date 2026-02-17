@@ -87,7 +87,11 @@ export function calculateSimpleRoute(
 
 /**
  * Extract grid cells used by a path with direction info (for overlap/crossing avoidance)
- * @param path - Path positions in world coordinates
+ *
+ * Optimized for simplified paths (corner-only): each segment is axis-aligned,
+ * so we compute the grid cell range directly instead of stepping every cell.
+ *
+ * @param path - Path positions in world coordinates (simplified = corners only)
  * @param skipStart - Number of cells to skip at start (for shared source ports)
  * @returns Map of cell key to set of directions traveled through that cell
  */
@@ -96,14 +100,12 @@ export function getPathCells(path: Position[], skipStart = 2): Map<string, Set<D
 	let cellCount = 0;
 
 	for (let i = 0; i < path.length - 1; i++) {
-		const start = path[i];
-		const end = path[i + 1];
-
-		const dx = end.x - start.x;
-		const dy = end.y - start.y;
-		const dist = Math.max(Math.abs(dx), Math.abs(dy));
+		const segStart = path[i];
+		const segEnd = path[i + 1];
 
 		// Determine direction of this segment
+		const dx = segEnd.x - segStart.x;
+		const dy = segEnd.y - segStart.y;
 		let dir: Direction;
 		if (Math.abs(dx) > Math.abs(dy)) {
 			dir = dx > 0 ? 'right' : 'left';
@@ -111,26 +113,26 @@ export function getPathCells(path: Position[], skipStart = 2): Map<string, Set<D
 			dir = dy > 0 ? 'down' : 'up';
 		}
 
-		if (dist < 1) {
-			cellCount++;
-			if (cellCount > skipStart) {
-				const key = `${worldToGrid(start.x)},${worldToGrid(start.y)}`;
-				if (!cells.has(key)) cells.set(key, new Set());
-				cells.get(key)!.add(dir);
-			}
-			continue;
-		}
+		// Compute grid range for this axis-aligned segment
+		const gx1 = worldToGrid(segStart.x);
+		const gy1 = worldToGrid(segStart.y);
+		const gx2 = worldToGrid(segEnd.x);
+		const gy2 = worldToGrid(segEnd.y);
 
-		const steps = Math.ceil(dist / GRID_SIZE);
-		for (let s = 0; s <= steps; s++) {
-			cellCount++;
-			if (cellCount > skipStart) {
-				const t = s / steps;
-				const x = start.x + dx * t;
-				const y = start.y + dy * t;
-				const key = `${worldToGrid(x)},${worldToGrid(y)}`;
-				if (!cells.has(key)) cells.set(key, new Set());
-				cells.get(key)!.add(dir);
+		const minGx = Math.min(gx1, gx2);
+		const maxGx = Math.max(gx1, gx2);
+		const minGy = Math.min(gy1, gy2);
+		const maxGy = Math.max(gy1, gy2);
+
+		// Iterate over the grid range (one axis is constant for orthogonal segments)
+		for (let gx = minGx; gx <= maxGx; gx++) {
+			for (let gy = minGy; gy <= maxGy; gy++) {
+				cellCount++;
+				if (cellCount > skipStart) {
+					const key = `${gx},${gy}`;
+					if (!cells.has(key)) cells.set(key, new Set());
+					cells.get(key)!.add(dir);
+				}
 			}
 		}
 	}
