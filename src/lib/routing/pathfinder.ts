@@ -328,18 +328,20 @@ function manhattanDistance(x1: number, y1: number, x2: number, y2: number): numb
 
 /**
  * Reconstruct path from A* result
+ * Uses push + reverse instead of unshift to avoid O(n²) array shifting
  */
 function reconstructPath(endNode: AStarNode, offset: Position): Position[] {
 	const path: Position[] = [];
 	let current: AStarNode | null = endNode;
 
 	while (current !== null) {
-		path.unshift({
+		path.push({
 			x: gridToWorld(current.x) + offset.x,
 			y: gridToWorld(current.y) + offset.y
 		});
 		current = current.parent;
 	}
 
+	path.reverse();
 	return path;
 }
