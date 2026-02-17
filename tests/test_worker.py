@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-WORKER_SCRIPT = str(Path(__file__).parent.parent / "pathview_server" / "worker.py")
+WORKER_SCRIPT = str(Path(__file__).parent.parent / "pathview" / "worker.py")
 
 
 def _start_worker():

@@ -6,7 +6,7 @@ import threading
 import time
 import webbrowser
 
-from pathview_server import __version__
+from pathview import __version__
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
 
     args = parser.parse_args()
 
-    from pathview_server.app import create_app
+    from pathview.app import create_app
 
     app = create_app(serve_static=not args.debug)
 

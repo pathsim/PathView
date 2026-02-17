@@ -2,7 +2,7 @@
 
 import pytest
 
-from pathview_server.app import create_app, _sessions, _sessions_lock
+from pathview.app import create_app, _sessions, _sessions_lock
 
 
 @pytest.fixture()
