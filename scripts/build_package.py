@@ -3,7 +3,7 @@
 Build script for the PathView PyPI package.
 
 1. Builds the SvelteKit frontend (vite build)
-2. Copies build/ output to pathview_server/static/
+2. Copies build/ output to pathview/static/
 3. Builds the Python wheel
 """
 
@@ -17,7 +17,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 BUILD_DIR = REPO_ROOT / "build"
-STATIC_DIR = REPO_ROOT / "pathview_server" / "static"
+STATIC_DIR = REPO_ROOT / "pathview" / "static"
 
 
 def _find_npx():
@@ -81,7 +81,7 @@ def main():
         print("ERROR: build/index.html not found")
         sys.exit(1)
 
-    print("[3/4] Copying frontend to pathview_server/static/...")
+    print("[3/4] Copying frontend to pathview/static/...")
     shutil.copytree(BUILD_DIR, STATIC_DIR)
     print(f"  Copied {sum(1 for _ in STATIC_DIR.rglob('*') if _.is_file())} files")
 

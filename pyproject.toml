@@ -34,10 +34,10 @@ Homepage = "https://view.pathsim.org"
 Repository = "https://github.com/pathsim/pathview"
 
 [project.scripts]
-pathview = "pathview_server.cli:main"
+pathview = "pathview.cli:main"
 
 [tool.setuptools]
-packages = ["pathview_server"]
+packages = ["pathview"]
 
 [tool.setuptools.package-data]
-pathview_server = ["static/**/*"]
+pathview = ["static/**/*", "data/*.json"]

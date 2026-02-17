@@ -1,0 +1,609 @@
+{
+  "blocks": {
+    "Constant": {
+      "blockClass": "Constant",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "value"
+      ]
+    },
+    "Source": {
+      "blockClass": "Source",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "func"
+      ]
+    },
+    "SinusoidalSource": {
+      "blockClass": "SinusoidalSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "frequency",
+        "amplitude",
+        "phase"
+      ]
+    },
+    "StepSource": {
+      "blockClass": "StepSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "amplitude",
+        "tau"
+      ]
+    },
+    "PulseSource": {
+      "blockClass": "PulseSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "amplitude",
+        "T",
+        "t_rise",
+        "t_fall",
+        "tau",
+        "duty"
+      ]
+    },
+    "TriangleWaveSource": {
+      "blockClass": "TriangleWaveSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "frequency",
+        "amplitude",
+        "phase"
+      ]
+    },
+    "SquareWaveSource": {
+      "blockClass": "SquareWaveSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "amplitude",
+        "frequency",
+        "phase"
+      ]
+    },
+    "GaussianPulseSource": {
+      "blockClass": "GaussianPulseSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "amplitude",
+        "f_max",
+        "tau"
+      ]
+    },
+    "ChirpPhaseNoiseSource": {
+      "blockClass": "ChirpPhaseNoiseSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "amplitude",
+        "f0",
+        "BW",
+        "T",
+        "phase",
+        "sig_cum",
+        "sig_white",
+        "sampling_period"
+      ]
+    },
+    "ClockSource": {
+      "blockClass": "ClockSource",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "T",
+        "tau"
+      ]
+    },
+    "WhiteNoise": {
+      "blockClass": "WhiteNoise",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "standard_deviation",
+        "spectral_density",
+        "sampling_period",
+        "seed"
+      ]
+    },
+    "PinkNoise": {
+      "blockClass": "PinkNoise",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "standard_deviation",
+        "spectral_density",
+        "num_octaves",
+        "sampling_period",
+        "seed"
+      ]
+    },
+    "RandomNumberGenerator": {
+      "blockClass": "RandomNumberGenerator",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "sampling_period"
+      ]
+    },
+    "Integrator": {
+      "blockClass": "Integrator",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "initial_value"
+      ]
+    },
+    "Differentiator": {
+      "blockClass": "Differentiator",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "f_max"
+      ]
+    },
+    "Delay": {
+      "blockClass": "Delay",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "tau"
+      ]
+    },
+    "ODE": {
+      "blockClass": "ODE",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "func",
+        "initial_value",
+        "jac"
+      ]
+    },
+    "DynamicalSystem": {
+      "blockClass": "DynamicalSystem",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "func_dyn",
+        "func_alg",
+        "initial_value",
+        "jac_dyn"
+      ]
+    },
+    "StateSpace": {
+      "blockClass": "StateSpace",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "initial_value"
+      ]
+    },
+    "PT1": {
+      "blockClass": "PT1",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T"
+      ]
+    },
+    "PT2": {
+      "blockClass": "PT2",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T",
+        "d"
+      ]
+    },
+    "LeadLag": {
+      "blockClass": "LeadLag",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "K",
+        "T1",
+        "T2"
+      ]
+    },
+    "PID": {
+      "blockClass": "PID",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Kp",
+        "Ki",
+        "Kd",
+        "f_max"
+      ]
+    },
+    "AntiWindupPID": {
+      "blockClass": "AntiWindupPID",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Kp",
+        "Ki",
+        "Kd",
+        "f_max",
+        "Ks",
+        "limits"
+      ]
+    },
+    "RateLimiter": {
+      "blockClass": "RateLimiter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "rate",
+        "f_max"
+      ]
+    },
+    "Backlash": {
+      "blockClass": "Backlash",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "width",
+        "f_max"
+      ]
+    },
+    "Deadband": {
+      "blockClass": "Deadband",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "lower",
+        "upper"
+      ]
+    },
+    "TransferFunctionNumDen": {
+      "blockClass": "TransferFunctionNumDen",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Num",
+        "Den"
+      ]
+    },
+    "TransferFunctionZPG": {
+      "blockClass": "TransferFunctionZPG",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Zeros",
+        "Poles",
+        "Gain"
+      ]
+    },
+    "ButterworthLowpassFilter": {
+      "blockClass": "ButterworthLowpassFilter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Fc",
+        "n"
+      ]
+    },
+    "ButterworthHighpassFilter": {
+      "blockClass": "ButterworthHighpassFilter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Fc",
+        "n"
+      ]
+    },
+    "ButterworthBandpassFilter": {
+      "blockClass": "ButterworthBandpassFilter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Fc",
+        "n"
+      ]
+    },
+    "ButterworthBandstopFilter": {
+      "blockClass": "ButterworthBandstopFilter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "Fc",
+        "n"
+      ]
+    },
+    "Adder": {
+      "blockClass": "Adder",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "operations"
+      ]
+    },
+    "Multiplier": {
+      "blockClass": "Multiplier",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Amplifier": {
+      "blockClass": "Amplifier",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "gain"
+      ]
+    },
+    "Function": {
+      "blockClass": "Function",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "func"
+      ]
+    },
+    "Sin": {
+      "blockClass": "Sin",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Cos": {
+      "blockClass": "Cos",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Tan": {
+      "blockClass": "Tan",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Tanh": {
+      "blockClass": "Tanh",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Abs": {
+      "blockClass": "Abs",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Sqrt": {
+      "blockClass": "Sqrt",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Exp": {
+      "blockClass": "Exp",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Log": {
+      "blockClass": "Log",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Log10": {
+      "blockClass": "Log10",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Mod": {
+      "blockClass": "Mod",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "modulus"
+      ]
+    },
+    "Clip": {
+      "blockClass": "Clip",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "min_val",
+        "max_val"
+      ]
+    },
+    "Pow": {
+      "blockClass": "Pow",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "exponent"
+      ]
+    },
+    "Switch": {
+      "blockClass": "Switch",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "state"
+      ]
+    },
+    "LUT": {
+      "blockClass": "LUT",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "points",
+        "values"
+      ]
+    },
+    "LUT1D": {
+      "blockClass": "LUT1D",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "points",
+        "values",
+        "fill_value"
+      ]
+    },
+    "SampleHold": {
+      "blockClass": "SampleHold",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "T",
+        "tau"
+      ]
+    },
+    "FIR": {
+      "blockClass": "FIR",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "coeffs",
+        "T",
+        "tau"
+      ]
+    },
+    "ADC": {
+      "blockClass": "ADC",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "n_bits",
+        "span",
+        "T",
+        "tau"
+      ]
+    },
+    "DAC": {
+      "blockClass": "DAC",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "n_bits",
+        "span",
+        "T",
+        "tau"
+      ]
+    },
+    "Counter": {
+      "blockClass": "Counter",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "start",
+        "threshold"
+      ]
+    },
+    "CounterUp": {
+      "blockClass": "CounterUp",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "start",
+        "threshold"
+      ]
+    },
+    "CounterDown": {
+      "blockClass": "CounterDown",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "start",
+        "threshold"
+      ]
+    },
+    "Relay": {
+      "blockClass": "Relay",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "threshold_up",
+        "threshold_down",
+        "value_up",
+        "value_down"
+      ]
+    },
+    "Scope": {
+      "blockClass": "Scope",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "sampling_period",
+        "t_wait",
+        "labels"
+      ]
+    },
+    "Spectrum": {
+      "blockClass": "Spectrum",
+      "importPath": "pathsim.blocks",
+      "params": [
+        "freq",
+        "t_wait",
+        "alpha",
+        "labels"
+      ]
+    },
+    "Subsystem": {
+      "blockClass": "Subsystem",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Interface": {
+      "blockClass": "Interface",
+      "importPath": "pathsim.blocks",
+      "params": []
+    },
+    "Process": {
+      "blockClass": "Process",
+      "importPath": "pathsim_chem.tritium",
+      "params": [
+        "tau",
+        "initial_value",
+        "source_term"
+      ]
+    },
+    "Bubbler4": {
+      "blockClass": "Bubbler4",
+      "importPath": "pathsim_chem.tritium",
+      "params": [
+        "conversion_efficiency",
+        "vial_efficiency",
+        "replacement_times"
+      ]
+    },
+    "Splitter": {
+      "blockClass": "Splitter",
+      "importPath": "pathsim_chem.tritium",
+      "params": [
+        "fractions"
+      ]
+    },
+    "GLC": {
+      "blockClass": "GLC",
+      "importPath": "pathsim_chem.tritium",
+      "params": [
+        "P_in",
+        "L",
+        "D",
+        "T",
+        "BCs",
+        "g",
+        "initial_nb_of_elements"
+      ]
+    }
+  },
+  "events": {
+    "ZeroCrossing": {
+      "eventClass": "ZeroCrossing",
+      "importPath": "pathsim.events",
+      "params": [
+        "func_evt",
+        "func_act",
+        "tolerance"
+      ]
+    },
+    "ZeroCrossingUp": {
+      "eventClass": "ZeroCrossingUp",
+      "importPath": "pathsim.events",
+      "params": [
+        "func_evt",
+        "func_act",
+        "tolerance"
+      ]
+    },
+    "ZeroCrossingDown": {
+      "eventClass": "ZeroCrossingDown",
+      "importPath": "pathsim.events",
+      "params": [
+        "func_evt",
+        "func_act",
+        "tolerance"
+      ]
+    },
+    "Schedule": {
+      "eventClass": "Schedule",
+      "importPath": "pathsim.events",
+      "params": [
+        "t_start",
+        "t_end",
+        "t_period",
+        "func_act",
+        "tolerance"
+      ]
+    },
+    "ScheduleList": {
+      "eventClass": "ScheduleList",
+      "importPath": "pathsim.events",
+      "params": [
+        "times_evt",
+        "func_act",
+        "tolerance"
+      ]
+    },
+    "Condition": {
+      "eventClass": "Condition",
+      "importPath": "pathsim.events",
+      "params": [
+        "func_evt",
+        "func_act",
+        "tolerance"
+      ]
+    }
+  }
+}

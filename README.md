@@ -92,10 +92,13 @@ src/
 ├── routes/                # SvelteKit pages
 └── app.css                # Global styles with CSS variables
 
-pathview_server/           # Python package (pip install pathview)
+pathview/                  # Python package (pip install pathview)
 ├── app.py                 # Flask server (subprocess management, HTTP routes)
 ├── worker.py              # REPL worker subprocess (Python execution)
 ├── cli.py                 # CLI entry point (pathview serve)
+├── converter.py           # PVM to Python converter (public API)
+├── data/                  # Bundled data files
+│   └── registry.json      # Block/event registry for converter
 └── static/                # Bundled frontend (generated at build time)
 
 

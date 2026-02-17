@@ -827,11 +827,15 @@ class RegistryGenerator:
 
         output_path = self.output_dir / "generated" / "registry.json"
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(
-            json.dumps(registry, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8"
-        )
+        registry_json = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
+        output_path.write_text(registry_json, encoding="utf-8")
         print(f"Generated: {output_path}")
+
+        # Also write to pathview/data/ for the bundled converter API
+        bundled_path = self.output_dir.parent / "pathview" / "data" / "registry.json"
+        bundled_path.parent.mkdir(parents=True, exist_ok=True)
+        bundled_path.write_text(registry_json, encoding="utf-8")
+        print(f"Generated: {bundled_path}")
 
 
 class TypeScriptGenerator:
