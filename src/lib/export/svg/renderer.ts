@@ -10,6 +10,8 @@
  * is self-contained and renders correctly in any viewer without fonts.
  */
 
+import { jsPDF } from 'jspdf';
+import 'svg2pdf.js';
 import { domToSvg } from '../dom2svg/index.js';
 import type { FontMapping } from '../dom2svg/index.js';
 import type { ExportOptions } from './types';
@@ -29,8 +31,15 @@ const EXCLUDE_SELECTORS = [
 /** KaTeX font CDN base URL */
 const KATEX_CDN = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts';
 
-/** KaTeX font mapping for dom2svg textToPath conversion */
-const KATEX_FONTS: FontMapping = {
+/** Font mapping for dom2svg textToPath conversion */
+const EXPORT_FONTS: FontMapping = {
+	// UI fonts — TTF for opentype.js compatibility (woff2 not supported by opentype.js v1.x)
+	Inter: { url: '/fonts/InterVariable.ttf' },
+	'JetBrains Mono': [
+		{ url: '/fonts/JetBrainsMono-Regular.ttf', weight: 400, style: 'normal' },
+		{ url: '/fonts/JetBrainsMono-Medium.ttf', weight: 500, style: 'normal' }
+	],
+	// KaTeX math fonts (CDN)
 	KaTeX_Main: [
 		{ url: `${KATEX_CDN}/KaTeX_Main-Regular.woff2`, weight: 'normal', style: 'normal' },
 		{ url: `${KATEX_CDN}/KaTeX_Main-Bold.woff2`, weight: 'bold', style: 'normal' },
@@ -120,6 +129,43 @@ function calculateBounds(container: HTMLElement, viewport: HTMLElement): Bounds 
 	return bounds;
 }
 
+/**
+ * Fix SVG z-order: move edge groups before node groups.
+ * SvelteFlow layers nodes above edges via CSS z-index, but SVG uses
+ * DOM order for paint order. Find the deepest group containing all
+ * content and reorder so edges come first.
+ */
+function fixEdgeNodeOrder(svg: SVGSVGElement): void {
+	// Find the viewport group (deepest group with multiple children)
+	let group: Element = svg;
+	while (true) {
+		const gChildren = Array.from(group.children).filter(c => c.tagName === 'g');
+		if (gChildren.length === 1) { group = gChildren[0]; continue; }
+		break;
+	}
+
+	// Partition children into edge groups and non-edge groups
+	const children = Array.from(group.children);
+	const edgeGroups: Element[] = [];
+	const otherGroups: Element[] = [];
+
+	for (const child of children) {
+		const hasEdge = child.querySelector('[aria-label^="Edge from"]');
+		if (hasEdge) {
+			edgeGroups.push(child);
+		} else {
+			otherGroups.push(child);
+		}
+	}
+
+	if (edgeGroups.length === 0) return;
+
+	// Reorder: edges first (painted below), then everything else (painted on top)
+	for (const el of [...edgeGroups, ...otherGroups]) {
+		group.appendChild(el);
+	}
+}
+
 export async function exportToSVG(options: ExportOptions = {}): Promise<string> {
 	const opts: Required<ExportOptions> = { ...DEFAULT_OPTIONS, ...options };
 	const padding = opts.padding;
@@ -173,13 +219,19 @@ export async function exportToSVG(options: ExportOptions = {}): Promise<string> 
 			exclude: EXCLUDE_SELECTORS,
 			flattenTransforms: true,
 			textToPath: true,
-			fonts: KATEX_FONTS
+			fonts: EXPORT_FONTS,
+			compat: opts.compat
 		});
 
 		// Crop SVG to the content area
 		result.svg.setAttribute('width', String(svgWidth));
 		result.svg.setAttribute('height', String(svgHeight));
 		result.svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+
+		// Fix z-order: SvelteFlow uses CSS z-index to layer nodes above edges,
+		// but SVG has no z-index — paint order is DOM order. Move edge groups
+		// before node groups so nodes render on top.
+		fixEdgeNodeOrder(result.svg);
 
 		return result.toString();
 	} finally {
@@ -192,4 +244,25 @@ export async function exportToSVG(options: ExportOptions = {}): Promise<string> 
 		element.style.minHeight = origMinHeight;
 		element.style.overflow = origOverflow;
 	}
+}
+
+export async function exportToPDF(options: ExportOptions = {}): Promise<void> {
+	const svgString = await exportToSVG(options);
+
+	// Parse SVG string into a DOM element
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(svgString, 'image/svg+xml');
+	const svgEl = doc.documentElement;
+
+	const width = parseFloat(svgEl.getAttribute('width') || '800');
+	const height = parseFloat(svgEl.getAttribute('height') || '600');
+
+	const pdf = new jsPDF({
+		orientation: width > height ? 'landscape' : 'portrait',
+		unit: 'pt',
+		format: [width, height]
+	});
+
+	await (pdf as any).svg(svgEl, { x: 0, y: 0, width, height });
+	pdf.save('pathview-graph.pdf');
 }

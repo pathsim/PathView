@@ -6,6 +6,21 @@ interface FontConfig {
 }
 /** Font mapping: family name → URL string, single config, or array of configs for multiple weights/styles */
 type FontMapping = Record<string, string | FontConfig | FontConfig[]>;
+/** SVG compatibility configuration flags */
+interface SvgCompatConfig {
+    useClipPathForOverflow: boolean;
+    stripFilters: boolean;
+    stripBoxShadows: boolean;
+    stripMaskImage: boolean;
+    stripTextShadows: boolean;
+    avoidStyleAttributes: boolean;
+    stripXmlSpace: boolean;
+    stripGroupOpacity: boolean;
+    inlineClipPathTransforms: boolean;
+    flattenNestedSvg: boolean;
+}
+/** SVG compatibility preset */
+type SvgCompat = 'full' | 'inkscape' | SvgCompatConfig;
 /** Options for domToSvg() */
 interface DomToSvgOptions {
     /** Map of font-family → URL or FontConfig for text-to-path conversion */
@@ -26,6 +41,8 @@ interface DomToSvgOptions {
      *  with nested CSS transforms (e.g. SvelteFlow, React Flow) where
      *  the default behaviour would double-apply transforms. */
     flattenTransforms?: boolean;
+    /** SVG compatibility preset or custom config (default: 'full') */
+    compat?: SvgCompat;
 }
 /** Internal render context passed through the tree */
 interface RenderContext {
@@ -37,6 +54,8 @@ interface RenderContext {
     idGenerator: IdGenerator;
     /** Options from the caller */
     options: DomToSvgOptions;
+    /** Resolved SVG compatibility config */
+    compat: SvgCompatConfig;
     /** Font cache (available when textToPath is enabled) */
     fontCache?: FontCache;
     /** Current inherited opacity */
@@ -72,4 +91,4 @@ interface DomToSvgResult {
  */
 declare function domToSvg(element: Element, options?: DomToSvgOptions): Promise<DomToSvgResult>;
 
-export { type DomToSvgOptions, type DomToSvgResult, type FontConfig, type FontMapping, domToSvg };
+export { type DomToSvgOptions, type DomToSvgResult, type FontConfig, type FontMapping, type SvgCompat, type SvgCompatConfig, domToSvg };

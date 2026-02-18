@@ -5,6 +5,6 @@
  * excluding UI elements (background, controls, minimap).
  */
 
-export { exportToSVG } from './renderer';
+export { exportToSVG, exportToPDF } from './renderer';
 export type { ExportOptions } from './types';
 export { DEFAULT_OPTIONS } from './types';

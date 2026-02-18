@@ -22,7 +22,7 @@ import { generateBlockCodeHeader, generateEventCodeHeader } from '$lib/utils/cod
 import { exportComponent } from '$lib/schema/componentOps';
 import { openImportDialog } from '$lib/schema/fileOps';
 import { hasExportableData, exportRecordingData } from '$lib/utils/csvExport';
-import { exportToSVG } from '$lib/export/svg';
+import { exportToSVG, exportToPDF } from '$lib/export/svg';
 import { downloadSvg } from '$lib/utils/download';
 import { plotSettingsStore, DEFAULT_BLOCK_SETTINGS } from '$lib/stores/plotSettings';
 import { portLabelsStore } from '$lib/stores/portLabels';
@@ -409,10 +409,21 @@ function buildCanvasMenu(
 			icon: 'image',
 			action: async () => {
 				try {
-					const svg = await exportToSVG();
+					const svg = await exportToSVG({ compat: 'inkscape' });
 					downloadSvg(svg, 'pathview-graph.svg');
 				} catch (e) {
 					console.error('SVG export failed:', e);
+				}
+			}
+		},
+		{
+			label: 'Export PDF',
+			icon: 'image',
+			action: async () => {
+				try {
+					await exportToPDF();
+				} catch (e) {
+					console.error('PDF export failed:', e);
 				}
 			}
 		}

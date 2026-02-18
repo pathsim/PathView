@@ -1026,6 +1026,7 @@
 		edgesFocusable
 		edgesSelectable
 		zoomOnDoubleClick={false}
+		elevateEdgesOnSelect={false}
 		proOptions={{ hideAttribution: true }}
 	>
 		<FlowUpdater pendingUpdates={pendingNodeUpdates} onUpdatesProcessed={clearPendingUpdates} />

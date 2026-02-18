@@ -2,5 +2,5 @@
  * Export module
  */
 
-export { exportToSVG } from './svg';
+export { exportToSVG, exportToPDF } from './svg';
 export type { ExportOptions } from './svg';

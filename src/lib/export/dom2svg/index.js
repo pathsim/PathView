@@ -1178,13 +1178,58 @@ function createSvgClipPath(shape, box, ctx) {
   const clipId = ctx.idGenerator.next("clip");
   const clipPath = createSvgElement(ctx.svgDocument, "clipPath");
   clipPath.setAttribute("id", clipId);
-  const svgShape = shapeToSvg(shape, box, ctx);
+  const svgShape = shapeToSvg(shape, box, ctx, ctx.compat.inlineClipPathTransforms);
   if (!svgShape) return null;
   clipPath.appendChild(svgShape);
   ctx.defs.appendChild(clipPath);
   return clipId;
 }
-function shapeToSvg(shape, box, ctx) {
+function translatePathData(d, dx, dy) {
+  return d.replace(/([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)/g, (_, cmd, args) => {
+    const nums = args.match(/-?\d*\.?\d+(?:e[+-]?\d+)?/gi)?.map(Number) ?? [];
+    if (nums.length === 0) return cmd + args;
+    switch (cmd) {
+      case "M":
+      case "L":
+      case "T":
+        for (let i = 0; i < nums.length - 1; i += 2) {
+          nums[i] += dx;
+          nums[i + 1] += dy;
+        }
+        break;
+      case "H":
+        for (let i = 0; i < nums.length; i++) nums[i] += dx;
+        break;
+      case "V":
+        for (let i = 0; i < nums.length; i++) nums[i] += dy;
+        break;
+      case "C":
+        for (let i = 0; i < nums.length - 1; i += 2) {
+          nums[i] += dx;
+          nums[i + 1] += dy;
+        }
+        break;
+      case "S":
+      case "Q":
+        for (let i = 0; i < nums.length - 1; i += 2) {
+          nums[i] += dx;
+          nums[i + 1] += dy;
+        }
+        break;
+      case "A":
+        for (let i = 0; i < nums.length; i += 7) {
+          if (i + 5 < nums.length) nums[i + 5] += dx;
+          if (i + 6 < nums.length) nums[i + 6] += dy;
+        }
+        break;
+      // Relative commands (lowercase) — leave unchanged
+      default:
+        return cmd + args;
+    }
+    return cmd + nums.join(" ");
+  });
+}
+function shapeToSvg(shape, box, ctx, inlineTransforms = false) {
   switch (shape.type) {
     case "inset": {
       const x = box.x + shape.left;
@@ -1242,8 +1287,12 @@ function shapeToSvg(shape, box, ctx) {
     }
     case "path": {
       const path = createSvgElement(ctx.svgDocument, "path");
-      path.setAttribute("d", shape.d);
-      path.setAttribute("transform", `translate(${box.x}, ${box.y})`);
+      if (inlineTransforms && (box.x !== 0 || box.y !== 0)) {
+        path.setAttribute("d", translatePathData(shape.d, box.x, box.y));
+      } else {
+        path.setAttribute("d", shape.d);
+        path.setAttribute("transform", `translate(${box.x}, ${box.y})`);
+      }
       return path;
     }
     default:
@@ -1255,7 +1304,27 @@ function shapeToSvg(shape, box, ctx) {
 async function renderHtmlElement(element, rootElement, ctx) {
   const group = createSvgElement(ctx.svgDocument, "g");
   const styles = window.getComputedStyle(element);
-  const box = getRelativeBox(element, rootElement);
+  let box = getRelativeBox(element, rootElement);
+  let visualTransform = null;
+  if (ctx.options.flattenTransforms && styles.transform && styles.transform !== "none") {
+    const angle = extractRotationDeg(styles.transform);
+    if (Math.abs(angle) > 0.5) {
+      const el = element;
+      const preW = el.offsetWidth;
+      const preH = el.offsetHeight;
+      if (preW > 0 && preH > 0 && (Math.abs(preW - box.width) > 1 || Math.abs(preH - box.height) > 1)) {
+        const cx = box.x + box.width / 2;
+        const cy = box.y + box.height / 2;
+        box = {
+          x: cx - preW / 2,
+          y: cy - preH / 2,
+          width: preW,
+          height: preH
+        };
+        visualTransform = `rotate(${angle.toFixed(2)}, ${cx.toFixed(2)}, ${cy.toFixed(2)})`;
+      }
+    }
+  }
   const radii = clampRadii(parseBorderRadii(styles), box.width, box.height);
   if (!ctx.options.flattenTransforms && styles.transform && styles.transform !== "none") {
     const svgTransform = cssTransformToSvg(
@@ -1277,17 +1346,19 @@ async function renderHtmlElement(element, rootElement, ctx) {
   }
   const hidden = isVisibilityHidden(styles);
   if (!hidden) {
-    if (styles.filter && styles.filter !== "none") {
+    if (!ctx.compat.stripFilters && styles.filter && styles.filter !== "none") {
       const filterId = createSvgFilter(styles.filter, ctx);
       if (filterId) {
         group.setAttribute("filter", `url(#${filterId})`);
       }
     }
-    const boxShadowValue = styles.boxShadow;
-    if (boxShadowValue && boxShadowValue !== "none") {
-      const shadows = parseBoxShadows(boxShadowValue);
-      if (shadows.length > 0) {
-        renderBoxShadows(shadows, box, radii, ctx, group);
+    if (!ctx.compat.stripBoxShadows) {
+      const boxShadowValue = styles.boxShadow;
+      if (boxShadowValue && boxShadowValue !== "none") {
+        const shadows = parseBoxShadows(boxShadowValue);
+        if (shadows.length > 0) {
+          renderBoxShadows(shadows, box, radii, ctx, group);
+        }
       }
     }
     const bgColor = parseBackgroundColor(styles);
@@ -1354,16 +1425,26 @@ async function renderHtmlElement(element, rootElement, ctx) {
     if (styles.display === "list-item") {
       renderListMarker(element, styles, box, ctx, group);
     }
-    const maskImage = styles.webkitMaskImage || styles.maskImage || styles.webkitMask || styles.mask;
-    if (maskImage && maskImage !== "none") {
-      await applyMaskImage(maskImage, styles, box, ctx, group);
+    if (!ctx.compat.stripMaskImage) {
+      const maskImage = styles.webkitMaskImage || styles.maskImage || styles.webkitMask || styles.mask;
+      if (maskImage && maskImage !== "none") {
+        await applyMaskImage(maskImage, styles, box, ctx, group);
+      }
     }
     await renderPseudoElement(element, "::before", rootElement, ctx, group);
   }
+  if (visualTransform) {
+    const visualGroup = createSvgElement(ctx.svgDocument, "g");
+    visualGroup.setAttribute("transform", visualTransform);
+    while (group.firstChild) {
+      visualGroup.appendChild(group.firstChild);
+    }
+    group.appendChild(visualGroup);
+  }
   if (hasOverflowClip(styles) && element !== rootElement) {
-    const maskGroup = createOverflowMask(box, radii, ctx);
-    group.appendChild(maskGroup);
-    group.__childTarget = maskGroup;
+    const clipGroup = ctx.compat.useClipPathForOverflow ? createOverflowClipPath(box, radii, ctx) : createOverflowMask(box, radii, ctx);
+    group.appendChild(clipGroup);
+    group.__childTarget = clipGroup;
   }
   return group;
 }
@@ -1471,6 +1552,17 @@ function createOverflowMask(box, radii, ctx) {
   masked.setAttribute("mask", `url(#${maskId})`);
   return masked;
 }
+function createOverflowClipPath(box, radii, ctx) {
+  const clipId = ctx.idGenerator.next("clip");
+  const clipPath = createSvgElement(ctx.svgDocument, "clipPath");
+  clipPath.setAttribute("id", clipId);
+  const clipShape = createBoxShape(box, radii, ctx);
+  clipPath.appendChild(clipShape);
+  ctx.defs.appendChild(clipPath);
+  const clipped = createSvgElement(ctx.svgDocument, "g");
+  clipped.setAttribute("clip-path", `url(#${clipId})`);
+  return clipped;
+}
 function applyClipMask(target, box, radii, ctx, group) {
   const maskId = ctx.idGenerator.next("mask");
   const mask = createSvgElement(ctx.svgDocument, "mask");
@@ -1508,7 +1600,9 @@ async function applyMaskImage(maskImage, styles, box, ctx, group) {
   const maskId = ctx.idGenerator.next("mask");
   const mask = createSvgElement(ctx.svgDocument, "mask");
   mask.setAttribute("id", maskId);
-  mask.setAttribute("style", "mask-type: alpha");
+  if (!ctx.compat.avoidStyleAttributes) {
+    mask.setAttribute("style", "mask-type: alpha");
+  }
   const imgEl = createSvgElement(ctx.svgDocument, "image");
   setAttributes(imgEl, {
     x: box.x,
@@ -1903,6 +1997,14 @@ async function renderPseudoElement(element, pseudo, rootElement, ctx, group) {
   textEl.textContent = text;
   group.appendChild(textEl);
 }
+function extractRotationDeg(transform) {
+  const match = transform.match(/^matrix\(([^,]+),\s*([^,]+)/);
+  if (!match) return 0;
+  const a = parseFloat(match[1]);
+  const b = parseFloat(match[2]);
+  if (isNaN(a) || isNaN(b)) return 0;
+  return Math.atan2(b, a) * (180 / Math.PI);
+}
 
 // src/renderers/svg-element.ts
 function renderSvgElement(element, ctx) {
@@ -1917,11 +2019,20 @@ function cloneWithNamespace(node, ctx, resolveDepth = 0) {
     const resolved = resolveUseElement(node, ctx, resolveDepth);
     if (resolved) return resolved;
   }
+  const flattenSvg = ctx.compat.flattenNestedSvg && node.localName === "svg" && node.ownerSVGElement !== null && !node.getAttribute("viewBox");
   const clone = ctx.svgDocument.createElementNS(
     node.namespaceURI || SVG_NS,
-    node.localName
+    flattenSvg ? "g" : node.localName
   );
+  const stripStyle = ctx.compat.avoidStyleAttributes;
+  const svgGeomAttrs = /* @__PURE__ */ new Set(["x", "y", "width", "height", "overflow", "viewBox"]);
   for (const attr of Array.from(node.attributes)) {
+    if (stripStyle && (attr.localName === "style" || attr.localName === "class")) {
+      continue;
+    }
+    if (flattenSvg && svgGeomAttrs.has(attr.localName)) {
+      continue;
+    }
     if (attr.namespaceURI === XLINK_NS) {
       clone.setAttributeNS(XLINK_NS, attr.localName, attr.value);
     } else if (attr.namespaceURI) {
@@ -1930,7 +2041,14 @@ function cloneWithNamespace(node, ctx, resolveDepth = 0) {
       clone.setAttribute(attr.localName, attr.value);
     }
   }
-  inlineSvgPresentationStyles(node, clone);
+  if (flattenSvg) {
+    const x = parseFloat(node.getAttribute("x") || "0") || 0;
+    const y = parseFloat(node.getAttribute("y") || "0") || 0;
+    if (x !== 0 || y !== 0) {
+      clone.setAttribute("transform", `translate(${x},${y})`);
+    }
+  }
+  inlineSvgPresentationStyles(node, clone, ctx);
   for (const child of Array.from(node.childNodes)) {
     if (child.nodeType === Node.ELEMENT_NODE) {
       clone.appendChild(cloneWithNamespace(child, ctx, resolveDepth));
@@ -1963,7 +2081,7 @@ function resolveUseElement(useEl, ctx, resolveDepth) {
     const existing = group.getAttribute("transform") || "";
     group.setAttribute("transform", `translate(${x},${y}) ${existing}`.trim());
   }
-  inlineSvgPresentationStyles(useEl, group);
+  inlineSvgPresentationStyles(useEl, group, ctx);
   if (refEl.localName === "symbol") {
     const viewBox = refEl.getAttribute("viewBox");
     const width = useEl.getAttribute("width") || refEl.getAttribute("width");
@@ -1984,7 +2102,7 @@ function resolveUseElement(useEl, ctx, resolveDepth) {
   }
   return group;
 }
-function inlineSvgPresentationStyles(source, clone) {
+function inlineSvgPresentationStyles(source, clone, ctx) {
   const styles = window.getComputedStyle(source);
   if (!clone.hasAttribute("fill")) {
     const fill = styles.fill;
@@ -2000,7 +2118,9 @@ function inlineSvgPresentationStyles(source, clone) {
   }
   if (!clone.hasAttribute("opacity")) {
     const opacity = styles.opacity;
-    if (opacity && opacity !== "1") {
+    if (opacity === "0") {
+      clone.setAttribute("opacity", "0");
+    } else if (!ctx.compat.stripGroupOpacity && opacity && opacity !== "1") {
       clone.setAttribute("opacity", opacity);
     }
   }
@@ -2350,18 +2470,20 @@ async function renderTextNode(textNode, rootElement, ctx) {
         x: line.x.toFixed(2),
         y: line.y.toFixed(2)
       });
-      applyTextStyles(textEl, styles);
+      applyTextStyles(textEl, styles, ctx);
       textEl.textContent = displayText;
       group.appendChild(textEl);
     }
   }
   if (group.childNodes.length === 0) return null;
-  const textShadowValue = styles.textShadow;
-  if (textShadowValue && textShadowValue !== "none") {
-    const shadows = parseTextShadows(textShadowValue);
-    const filterId = createTextShadowFilter(shadows, ctx);
-    if (filterId) {
-      group.setAttribute("filter", `url(#${filterId})`);
+  if (!ctx.compat.stripTextShadows) {
+    const textShadowValue = styles.textShadow;
+    if (textShadowValue && textShadowValue !== "none") {
+      const shadows = parseTextShadows(textShadowValue);
+      const filterId = createTextShadowFilter(shadows, ctx);
+      if (filterId) {
+        group.setAttribute("filter", `url(#${filterId})`);
+      }
     }
   }
   return group;
@@ -2508,7 +2630,7 @@ function applyTextTransform(text, transform) {
       return text;
   }
 }
-function applyTextStyles(textEl, styles) {
+function applyTextStyles(textEl, styles, ctx) {
   setAttributes(textEl, {
     "font-family": styles.fontFamily,
     "font-size": styles.fontSize,
@@ -2516,7 +2638,9 @@ function applyTextStyles(textEl, styles) {
     "font-style": styles.fontStyle,
     fill: styles.color
   });
-  textEl.setAttribute("xml:space", "preserve");
+  if (!ctx.compat.stripXmlSpace) {
+    textEl.setAttribute("xml:space", "preserve");
+  }
   if (styles.letterSpacing && styles.letterSpacing !== "normal") {
     textEl.setAttribute("letter-spacing", styles.letterSpacing);
   }
@@ -2562,9 +2686,13 @@ async function walkElement(element, rootElement, ctx) {
   }
   const group = await renderHtmlElement(element, rootElement, ctx);
   const childTarget = getChildTarget(group);
-  const opacity = parseFloat(styles.opacity);
-  if (opacity < 1) {
-    group.setAttribute("opacity", String(opacity));
+  {
+    const opacity = parseFloat(styles.opacity);
+    if (opacity === 0) {
+      group.setAttribute("opacity", "0");
+    } else if (!ctx.compat.stripGroupOpacity && opacity < 1) {
+      group.setAttribute("opacity", String(opacity));
+    }
   }
   const sortedChildren = sortChildrenByPaintOrder(element);
   for (const child of sortedChildren) {
@@ -2632,6 +2760,37 @@ function shouldExclude(element, ctx) {
   return exclude(element);
 }
 
+// src/compat.ts
+var FULL_PRESET = {
+  useClipPathForOverflow: false,
+  stripFilters: false,
+  stripBoxShadows: false,
+  stripMaskImage: false,
+  stripTextShadows: false,
+  avoidStyleAttributes: false,
+  stripXmlSpace: false,
+  stripGroupOpacity: false,
+  inlineClipPathTransforms: false,
+  flattenNestedSvg: false
+};
+var INKSCAPE_PRESET = {
+  useClipPathForOverflow: true,
+  stripFilters: true,
+  stripBoxShadows: true,
+  stripMaskImage: true,
+  stripTextShadows: true,
+  avoidStyleAttributes: true,
+  stripXmlSpace: true,
+  stripGroupOpacity: true,
+  inlineClipPathTransforms: true,
+  flattenNestedSvg: true
+};
+function resolveCompat(compat) {
+  if (!compat || compat === "full") return FULL_PRESET;
+  if (compat === "inkscape") return INKSCAPE_PRESET;
+  return compat;
+}
+
 // src/index.ts
 async function domToSvg(element, options = {}) {
   const padding = options.padding ?? 0;
@@ -2665,6 +2824,7 @@ async function domToSvg(element, options = {}) {
     defs,
     idGenerator: createIdGenerator(),
     options,
+    compat: resolveCompat(options.compat),
     opacity: 1
   };
   if (options.textToPath && options.fonts) {
