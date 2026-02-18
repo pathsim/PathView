@@ -21,14 +21,13 @@ from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
-SESSION_TTL = 3600  # 1 hour of inactivity before cleanup
-CLEANUP_INTERVAL = 60  # Check for stale sessions every 60 seconds
-EXEC_TIMEOUT = 35  # Server-side timeout for exec/eval (slightly > worker's 30s)
-WORKER_SCRIPT = str(Path(__file__).parent / "worker.py")
+from pathview.config import (
+    WORKER_SCRIPT,
+    SERVER_TIMEOUT,
+    INIT_TIMEOUT,
+    SESSION_TTL,
+    CLEANUP_INTERVAL,
+)
 
 # ---------------------------------------------------------------------------
 # Session management
@@ -80,7 +79,7 @@ class Session:
             except json.JSONDecodeError:
                 continue
 
-    def read_line_timeout(self, timeout: float = EXEC_TIMEOUT) -> dict | None:
+    def read_line_timeout(self, timeout: float = SERVER_TIMEOUT) -> dict | None:
         """Read one JSON line with a timeout. Returns None on EOF or timeout.
 
         Raises TimeoutError if no response within the timeout period.
@@ -116,7 +115,7 @@ class Session:
             init_msg["packages"] = packages
         self.send_message(init_msg)
         while True:
-            resp = self.read_line()
+            resp = self.read_line_timeout(timeout=INIT_TIMEOUT)
             if resp is None:
                 raise RuntimeError("Worker process died during initialization")
             messages.append(resp)
@@ -480,7 +479,8 @@ def create_app(serve_static: bool = False) -> Flask:
         if not session:
             return jsonify({"error": "No active session"}), 404
         try:
-            session.send_message({"type": "stream-exec", "code": code})
+            with session.lock:
+                session.send_message({"type": "stream-exec", "code": code})
             return jsonify({"status": "queued"})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
@@ -497,7 +497,8 @@ def create_app(serve_static: bool = False) -> Flask:
         if not session:
             return jsonify({"status": "stopped"})
         try:
-            session.send_message({"type": "stream-stop"})
+            with session.lock:
+                session.send_message({"type": "stream-stop"})
             return jsonify({"status": "stopped"})
         except Exception as e:
             return jsonify({"error": str(e)}), 500

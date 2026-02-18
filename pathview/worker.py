@@ -23,6 +23,8 @@ import traceback
 import queue
 import ctypes
 
+from pathview.config import EXEC_TIMEOUT
+
 # Lock for thread-safe stdout writing (protocol messages only)
 _stdout_lock = threading.Lock()
 
@@ -40,9 +42,6 @@ os.close(_devnull_fd)
 # Worker state
 _namespace = {}
 _initialized = False
-
-# Default timeout for exec/eval (seconds)
-EXEC_TIMEOUT = 30
 
 # Streaming state
 _streaming_active = False
@@ -335,9 +334,17 @@ def run_streaming_loop(msg_id: str, expr: str) -> None:
                 except Exception as e:
                     send({"type": "stderr", "value": f"Stream exec error: {e}"})
 
-            # Step the generator
-            exec_code_str = f"_eval_result = {expr}"
-            exec(exec_code_str, _namespace)
+            # Step the generator (with timeout so a stuck C extension
+            # doesn't hang the worker forever)
+            try:
+                _run_with_timeout(
+                    lambda: exec(f"_eval_result = {expr}", _namespace),
+                    timeout=EXEC_TIMEOUT,
+                )
+            except TimeoutError:
+                send({"type": "error", "id": msg_id,
+                      "error": f"Simulation step timed out after {EXEC_TIMEOUT}s"})
+                break
             raw_result = _namespace["_eval_result"]
             done = raw_result.get("done", False) if isinstance(raw_result, dict) else False
 
