@@ -1,0 +1,246 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2026-01-25T00:44:51.546Z",
+    "modified": "2026-01-25T00:44:51.546Z",
+    "name": "feedback-system"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "type": "Adder",
+        "name": "Difference",
+        "position": {
+          "x": 840,
+          "y": 400
+        },
+        "inputs": [
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-input-0",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-input-1",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "c03d0b76-28b8-4406-8f0a-ef81b732854d-output-0",
+            "nodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "operations": "\"+-\""
+        }
+      },
+      {
+        "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "type": "Amplifier",
+        "name": "Feedback",
+        "position": {
+          "x": 910,
+          "y": 460
+        },
+        "inputs": [
+          {
+            "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f-input-0",
+            "nodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f-output-0",
+            "nodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "gain": "g",
+          "_rotation": 2
+        }
+      },
+      {
+        "id": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "type": "Integrator",
+        "name": "Integrator",
+        "position": {
+          "x": 970,
+          "y": 400
+        },
+        "inputs": [
+          {
+            "id": "353e895d-8dfa-4c17-a752-043d1fc38749-input-0",
+            "nodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "353e895d-8dfa-4c17-a752-043d1fc38749-output-0",
+            "nodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "initial_value": "x0"
+        }
+      },
+      {
+        "id": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "type": "StepSource",
+        "name": "Unit Step",
+        "position": {
+          "x": 700,
+          "y": 390
+        },
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9-output-0",
+            "nodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+            "name": "out 0",
+            "direction": "output",
+            "index": 0,
+            "color": "#969696"
+          }
+        ],
+        "params": {
+          "amplitude": 1,
+          "tau": "tau",
+          "_rotation": 0
+        }
+      },
+      {
+        "id": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+        "type": "Scope",
+        "name": "Result",
+        "position": {
+          "x": 1110,
+          "y": 390
+        },
+        "inputs": [
+          {
+            "id": "c584e30b-577b-4e0d-86f5-19f53f93e697-input-0",
+            "nodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+            "name": "in 0",
+            "direction": "input",
+            "index": 0,
+            "color": "#969696"
+          },
+          {
+            "id": "c584e30b-577b-4e0d-86f5-19f53f93e697-input-1",
+            "nodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+            "name": "in 1",
+            "direction": "input",
+            "index": 1,
+            "color": "#969696"
+          }
+        ],
+        "outputs": [],
+        "params": {
+          "_rotation": 0
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c47a35bc-3030-4699-ab4a-d7aabca093d8",
+        "sourceNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "sourcePortIndex": 0,
+        "targetNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "8bef47d0-b56f-4c2a-8ccf-50fbdc35c2f8",
+        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "sourcePortIndex": 0,
+        "targetNodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "dbf00304-ed99-450f-b9eb-a74c8c838d7f",
+        "sourceNodeId": "e0f91e8f-e0ec-48e5-a2eb-68bb72f6152f",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "e69b73e0-344a-459d-9b5b-4bd5944fc824",
+        "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c03d0b76-28b8-4406-8f0a-ef81b732854d",
+        "targetPortIndex": 0
+      },
+      {
+        "id": "20a10f29-2b97-4215-9199-b748cc598407",
+        "sourceNodeId": "353e895d-8dfa-4c17-a752-043d1fc38749",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+        "targetPortIndex": 1
+      },
+      {
+        "id": "3171aea1-d803-47a2-bb51-9cc688dd79ee",
+        "sourceNodeId": "fa58ae1f-437a-4e9e-bf12-9c6b0ccb52e9",
+        "sourcePortIndex": 0,
+        "targetNodeId": "c584e30b-577b-4e0d-86f5-19f53f93e697",
+        "targetPortIndex": 0
+      }
+    ],
+    "annotations": [
+      {
+        "id": "a0d9ddea-c4f8-4363-9c0a-5e19e6c52491",
+        "position": {
+          "x": 660,
+          "y": 260
+        },
+        "content": "# Linear Feedback System\n\nA linear feedback system with a delayed step excitation and some decaying initial conditions. Check the code editor (E) for the global system parameters.",
+        "width": 500,
+        "height": 80
+      }
+    ]
+  },
+  "events": [],
+  "codeContext": {
+    "code": "# random feedback gain\ng = np.random.rand() + 1\n\n# random step delay\ntau = np.random.rand() + 2\n\n# random initial value\nx0 = np.random.rand()"
+  },
+  "simulationSettings": {
+    "duration": "10",
+    "dt": "0.01",
+    "solver": "RKBS32",
+    "adaptive": true,
+    "atol": "1e-6",
+    "rtol": "1e-4",
+    "ftol": "1e-9",
+    "dt_min": "",
+    "dt_max": "0.1",
+    "ghostTraces": 6,
+    "plotResults": true
+  }
+}
