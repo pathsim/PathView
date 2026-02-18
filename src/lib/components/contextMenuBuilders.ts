@@ -409,22 +409,10 @@ function buildCanvasMenu(
 			icon: 'image',
 			action: async () => {
 				try {
-					const svg = await exportToSVG();
+					const svg = await exportToSVG({ compat: 'inkscape' });
 					downloadSvg(svg, 'pathview-graph.svg');
 				} catch (e) {
 					console.error('SVG export failed:', e);
-				}
-			}
-		},
-		{
-			label: 'Export SVG (LaTeX)',
-			icon: 'image',
-			action: async () => {
-				try {
-					const svg = await exportToSVG({ compat: 'inkscape' });
-					downloadSvg(svg, 'pathview-graph-latex.svg');
-				} catch (e) {
-					console.error('SVG export (LaTeX) failed:', e);
 				}
 			}
 		}

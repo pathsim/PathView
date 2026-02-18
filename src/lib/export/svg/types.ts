@@ -11,7 +11,7 @@ export interface ExportOptions {
 	background?: 'transparent' | 'solid';
 	/** Padding around content in pixels */
 	padding?: number;
-	/** SVG compatibility preset (default: 'full') */
+	/** SVG compatibility preset (default: 'inkscape') */
 	compat?: SvgCompat;
 }
 
@@ -19,5 +19,5 @@ export interface ExportOptions {
 export const DEFAULT_OPTIONS: Required<ExportOptions> = {
 	background: 'transparent',
 	padding: EXPORT_PADDING,
-	compat: 'full'
+	compat: 'inkscape'
 };

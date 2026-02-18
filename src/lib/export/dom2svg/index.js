@@ -2019,13 +2019,18 @@ function cloneWithNamespace(node, ctx, resolveDepth = 0) {
     const resolved = resolveUseElement(node, ctx, resolveDepth);
     if (resolved) return resolved;
   }
+  const flattenSvg = ctx.compat.flattenNestedSvg && node.localName === "svg" && node.ownerSVGElement !== null && !node.getAttribute("viewBox");
   const clone = ctx.svgDocument.createElementNS(
     node.namespaceURI || SVG_NS,
-    node.localName
+    flattenSvg ? "g" : node.localName
   );
   const stripStyle = ctx.compat.avoidStyleAttributes;
+  const svgGeomAttrs = /* @__PURE__ */ new Set(["x", "y", "width", "height", "overflow", "viewBox"]);
   for (const attr of Array.from(node.attributes)) {
     if (stripStyle && (attr.localName === "style" || attr.localName === "class")) {
+      continue;
+    }
+    if (flattenSvg && svgGeomAttrs.has(attr.localName)) {
       continue;
     }
     if (attr.namespaceURI === XLINK_NS) {
@@ -2034,6 +2039,13 @@ function cloneWithNamespace(node, ctx, resolveDepth = 0) {
       clone.setAttributeNS(attr.namespaceURI, attr.localName, attr.value);
     } else {
       clone.setAttribute(attr.localName, attr.value);
+    }
+  }
+  if (flattenSvg) {
+    const x = parseFloat(node.getAttribute("x") || "0") || 0;
+    const y = parseFloat(node.getAttribute("y") || "0") || 0;
+    if (x !== 0 || y !== 0) {
+      clone.setAttribute("transform", `translate(${x},${y})`);
     }
   }
   inlineSvgPresentationStyles(node, clone, ctx);
@@ -2104,9 +2116,11 @@ function inlineSvgPresentationStyles(source, clone, ctx) {
       clone.setAttribute("stroke", stroke);
     }
   }
-  if (!ctx.compat.stripGroupOpacity && !clone.hasAttribute("opacity")) {
+  if (!clone.hasAttribute("opacity")) {
     const opacity = styles.opacity;
-    if (opacity && opacity !== "1") {
+    if (opacity === "0") {
+      clone.setAttribute("opacity", "0");
+    } else if (!ctx.compat.stripGroupOpacity && opacity && opacity !== "1") {
       clone.setAttribute("opacity", opacity);
     }
   }
@@ -2672,9 +2686,11 @@ async function walkElement(element, rootElement, ctx) {
   }
   const group = await renderHtmlElement(element, rootElement, ctx);
   const childTarget = getChildTarget(group);
-  if (!ctx.compat.stripGroupOpacity) {
+  {
     const opacity = parseFloat(styles.opacity);
-    if (opacity < 1) {
+    if (opacity === 0) {
+      group.setAttribute("opacity", "0");
+    } else if (!ctx.compat.stripGroupOpacity && opacity < 1) {
       group.setAttribute("opacity", String(opacity));
     }
   }
@@ -2754,7 +2770,8 @@ var FULL_PRESET = {
   avoidStyleAttributes: false,
   stripXmlSpace: false,
   stripGroupOpacity: false,
-  inlineClipPathTransforms: false
+  inlineClipPathTransforms: false,
+  flattenNestedSvg: false
 };
 var INKSCAPE_PRESET = {
   useClipPathForOverflow: true,
@@ -2765,7 +2782,8 @@ var INKSCAPE_PRESET = {
   avoidStyleAttributes: true,
   stripXmlSpace: true,
   stripGroupOpacity: true,
-  inlineClipPathTransforms: true
+  inlineClipPathTransforms: true,
+  flattenNestedSvg: true
 };
 function resolveCompat(compat) {
   if (!compat || compat === "full") return FULL_PRESET;

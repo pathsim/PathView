@@ -17,6 +17,7 @@ interface SvgCompatConfig {
     stripXmlSpace: boolean;
     stripGroupOpacity: boolean;
     inlineClipPathTransforms: boolean;
+    flattenNestedSvg: boolean;
 }
 /** SVG compatibility preset */
 type SvgCompat = 'full' | 'inkscape' | SvgCompatConfig;
