@@ -63,11 +63,22 @@ class Session:
         self.process.stdin.flush()
 
     def read_line(self) -> dict | None:
-        """Read one JSON line from the subprocess stdout."""
-        line = self.process.stdout.readline()
-        if not line:
-            return None
-        return json.loads(line.strip())
+        """Read one JSON line from the subprocess stdout.
+
+        Skips blank or non-JSON lines that may leak from native C/C++
+        libraries writing directly to the OS-level stdout fd.
+        """
+        while True:
+            line = self.process.stdout.readline()
+            if not line:
+                return None
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                return json.loads(stripped)
+            except json.JSONDecodeError:
+                continue
 
     def read_line_timeout(self, timeout: float = EXEC_TIMEOUT) -> dict | None:
         """Read one JSON line with a timeout. Returns None on EOF or timeout.

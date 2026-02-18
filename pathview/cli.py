@@ -46,6 +46,8 @@ def _cmd_serve(args):
         if args.debug:
             app.run(host=args.host, port=args.port, debug=True, threaded=True)
         else:
+            import logging
+            logging.getLogger("waitress.queue").setLevel(logging.ERROR)
             from waitress import serve
             serve(app, host=args.host, port=args.port, threads=4)
     except KeyboardInterrupt:

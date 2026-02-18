@@ -15,6 +15,7 @@ Threading model:
 """
 
 import sys
+import os
 import json
 import subprocess
 import threading
@@ -26,7 +27,15 @@ import ctypes
 _stdout_lock = threading.Lock()
 
 # Keep a reference to the real stdout pipe — protocol messages go here.
-_real_stdout = sys.stdout
+# We dup() fd 1 so that _real_stdout survives the fd-level redirect below.
+_real_stdout_fd = os.dup(1)
+_real_stdout = os.fdopen(_real_stdout_fd, "w")
+
+# Redirect OS-level fd 1 to devnull so that C/C++ libraries (e.g. jsbsim)
+# writing directly to stdout via printf/cout cannot corrupt the JSON protocol.
+_devnull_fd = os.open(os.devnull, os.O_WRONLY)
+os.dup2(_devnull_fd, 1)
+os.close(_devnull_fd)
 
 # Worker state
 _namespace = {}
