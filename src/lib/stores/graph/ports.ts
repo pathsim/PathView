@@ -16,6 +16,7 @@ import {
 	updateNodeById,
 	updateCurrentNodesAndConnections
 } from './state';
+import { queueRemoveConnection } from '$lib/pyodide/mutationQueue';
 
 type PortDirection = 'input' | 'output';
 
@@ -174,6 +175,17 @@ function removePort(nodeId: string, direction: PortDirection, syncFollowUp = fal
 
 	// Remove port and affected connections
 	const removedIndex = currentPorts.length - 1;
+
+	// Queue removal of connections affected by port removal
+	const graph = getCurrentGraph();
+	for (const c of graph.connections) {
+		const isAffected = config.connectionKey === 'targetNodeId'
+			? c.targetNodeId === nodeId && c.targetPortIndex >= removedIndex
+			: c.sourceNodeId === nodeId && c.sourcePortIndex >= removedIndex;
+		if (isAffected) {
+			queueRemoveConnection(c.id);
+		}
+	}
 
 	updateCurrentNodesAndConnections(
 		// Map updater for nodes (root)
