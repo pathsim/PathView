@@ -1469,18 +1469,13 @@
 
 	.icon-crossfade {
 		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 16px;
-		height: 16px;
-		overflow: visible;
+		display: grid;
+		place-items: center;
 	}
 
 	.icon-crossfade-item {
-		position: absolute;
+		grid-area: 1 / 1;
 		display: flex;
-		overflow: visible;
 	}
 
 	/* Logo overlay */
