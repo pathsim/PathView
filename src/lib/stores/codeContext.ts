@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { queueUpdateSetting, isActive as isMutationQueueActive } from '$lib/pyodide/mutationQueue';
 
 const code = writable<string>('');
 const lastError = writable<string | null>(null);
@@ -40,6 +41,11 @@ export const codeContextStore = {
 	setCode(newCode: string): void {
 		code.set(newCode);
 		lastError.set(null);
+
+		// Queue code context re-execution as a mutation
+		if (isMutationQueueActive() && newCode.trim()) {
+			queueUpdateSetting('code_context', newCode.trim());
+		}
 	},
 
 	/**
