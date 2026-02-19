@@ -7,10 +7,9 @@
  * On "Continue": queue is flushed → executed in worker → then new streaming generator starts.
  */
 
-import type { NodeInstance, Connection, SimulationSettings } from '$lib/nodes/types';
-import type { EventInstance } from '$lib/events/types';
+import type { NodeInstance, Connection } from '$lib/nodes/types';
 import { nodeRegistry } from '$lib/nodes/registry';
-import { sanitizeName, generateNamedConnections } from './codeBuilder';
+import { sanitizeName } from './codeBuilder';
 
 /**
  * A queued mutation — a Python code string to execute in the worker namespace.
@@ -67,17 +66,27 @@ export function hasPendingMutations(): boolean {
 	return queue.length > 0;
 }
 
+/**
+ * Check if the mutation queue is active (a simulation has been run).
+ */
+export function isActive(): boolean {
+	return activeNodeVars.size > 0;
+}
+
 // --- Mutation generators ---
 
 /**
  * Queue adding a new block to the simulation.
  */
-export function queueAddBlock(node: NodeInstance, existingVarNames: string[]): void {
+export function queueAddBlock(node: NodeInstance): void {
+	if (!isActive()) return;
+
 	const typeDef = nodeRegistry.get(node.type);
 	if (!typeDef) return;
 
+	const existingNames = new Set(activeNodeVars.values());
 	let varName = sanitizeName(node.name);
-	if (!varName || existingVarNames.includes(varName) || activeNodeVars.has(node.id)) {
+	if (!varName || existingNames.has(varName)) {
 		varName = `block_dyn_${dynamicConnCounter++}`;
 	}
 	activeNodeVars.set(node.id, varName);
@@ -129,6 +138,8 @@ export function queueRemoveBlock(nodeId: string): void {
  * Queue adding a new connection to the simulation.
  */
 export function queueAddConnection(conn: Connection): void {
+	if (!isActive()) return;
+
 	const sourceVar = activeNodeVars.get(conn.sourceNodeId);
 	const targetVar = activeNodeVars.get(conn.targetNodeId);
 	if (!sourceVar || !targetVar) return;
@@ -181,6 +192,8 @@ export function queueUpdateParam(nodeId: string, paramName: string, value: strin
  * Queue a simulation setting change.
  */
 export function queueUpdateSetting(settingName: string, value: string): void {
+	if (!isActive()) return;
+
 	queue.push({
 		type: 'update-setting',
 		code: `sim.${settingName} = ${value}`

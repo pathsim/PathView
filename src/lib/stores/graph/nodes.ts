@@ -26,6 +26,7 @@ import { regenerateGraphIds, createPorts } from './helpers';
 import { syncPortNamesFromLabels } from './ports';
 import { triggerSelectNodes } from '$lib/stores/viewActions';
 import { getPortLabelConfigs } from '$lib/nodes/uiConfig';
+import { queueAddBlock, queueRemoveBlock, queueAddConnection, queueRemoveConnection, queueUpdateParam } from '$lib/pyodide/mutationQueue';
 
 /**
  * Add a new node to the current graph context
@@ -72,6 +73,9 @@ export function addNode(
 
 	addNodeToCurrentLevel(node);
 
+	// Queue mutation for runtime graph changes (no-op if no simulation active)
+	queueAddBlock(node);
+
 	return node;
 }
 
@@ -88,6 +92,14 @@ export function removeNode(id: string): void {
 		console.warn('Interface blocks cannot be deleted');
 		return;
 	}
+
+	// Queue mutations for connections being removed with this node
+	for (const conn of currentGraph.connections) {
+		if (conn.sourceNodeId === id || conn.targetNodeId === id) {
+			queueRemoveConnection(conn.id);
+		}
+	}
+	queueRemoveBlock(id);
 
 	// Remove node and its connections
 	updateCurrentNodesAndConnections(
@@ -205,6 +217,13 @@ export function updateNodeColor(id: string, color: string | undefined): void {
  */
 export function updateNodeParams(id: string, params: Record<string, unknown>): void {
 	updateNodeById(id, node => ({ ...node, params: { ...node.params, ...params } }));
+
+	// Queue parameter mutations (no-op if no simulation active)
+	for (const [paramName, value] of Object.entries(params)) {
+		if (value === null || value === undefined || value === '') continue;
+		if (paramName.startsWith('_')) continue;
+		queueUpdateParam(id, paramName, String(value));
+	}
 
 	// Sync port names if this block has label-driven ports
 	const node = getCurrentGraph().nodes.get(id);
@@ -349,6 +368,14 @@ export function duplicateSelected(): string[] {
 		}
 	}
 
+	// Queue mutations for duplicated nodes and connections
+	for (const node of nodesToAdd) {
+		queueAddBlock(node);
+	}
+	for (const conn of newConnections) {
+		queueAddConnection(conn);
+	}
+
 	// Add all nodes and connections in one update
 	if (nodesToAdd.length > 0 || newConnections.length > 0) {
 		updateCurrentNodesAndConnections(
@@ -436,6 +463,14 @@ export function pasteNodes(
 	if (nodes.length === 0) return [];
 
 	const newNodeIds = nodes.map(n => n.id);
+
+	// Queue mutations for pasted nodes and connections
+	for (const node of nodes) {
+		queueAddBlock(node);
+	}
+	for (const conn of connections) {
+		queueAddConnection(conn);
+	}
 
 	// Add all nodes and connections
 	updateCurrentNodesAndConnections(

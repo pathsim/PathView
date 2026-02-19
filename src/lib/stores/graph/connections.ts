@@ -11,6 +11,7 @@ import {
 	getCurrentGraph,
 	updateCurrentConnections
 } from './state';
+import { queueAddConnection, queueRemoveConnection } from '$lib/pyodide/mutationQueue';
 
 /**
  * Add a connection between two ports
@@ -56,6 +57,9 @@ export function addConnection(
 
 	updateCurrentConnections(c => [...c, connection]);
 
+	// Queue mutation for runtime graph changes (no-op if no simulation active)
+	queueAddConnection(connection);
+
 	return connection;
 }
 
@@ -63,6 +67,7 @@ export function addConnection(
  * Remove a connection
  */
 export function removeConnection(id: string): void {
+	queueRemoveConnection(id);
 	updateCurrentConnections(c => c.filter(conn => conn.id !== id));
 }
 
