@@ -8,6 +8,7 @@ export {
 	initPyodide,
 	runStreamingSimulation,
 	continueStreamingSimulation,
+	stageMutations,
 	resetSimulation,
 	validateGraph,
 	stopSimulation,

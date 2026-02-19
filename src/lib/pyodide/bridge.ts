@@ -496,6 +496,26 @@ if 'sim' not in dir() or sim is None:
 }
 
 /**
+ * Stage pending graph mutations into the simulation.
+ * If streaming: injects via execDuringStreaming (applied between generator steps).
+ * If paused: executes directly via exec.
+ * Returns true if mutations were applied, false if nothing to stage.
+ */
+export async function stageMutations(): Promise<boolean> {
+	const code = flushQueue();
+	if (!code) return false;
+
+	if (streamingActive) {
+		execDuringStreaming(code);
+		consoleStore.info('Staged changes (applied during streaming)');
+	} else {
+		await exec(code);
+		consoleStore.info('Staged changes applied');
+	}
+	return true;
+}
+
+/**
  * Reset simulation state completely.
  * Use when loading a new model or creating a new graph.
  * Stops any running simulation, clears results, and clears Python state.

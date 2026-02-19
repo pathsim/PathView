@@ -1,19 +1,21 @@
 /**
  * Mutation Queue
- * Tracks graph changes (add/remove blocks, connections, events, parameter/settings changes)
- * as Python code strings to be applied to the worker namespace on "Continue".
+ * Collects graph changes (add/remove blocks, connections, parameter/setting changes)
+ * as Python code strings. Changes are NOT applied automatically — the user
+ * explicitly stages them via a "Stage Changes" action.
  *
  * On "Run": queue is cleared, mappings initialized from code generation result.
- * On "Continue": queue is flushed → executed in worker → then new streaming generator starts.
+ * On "Stage": queue is flushed → applied to worker (via exec or execDuringStreaming).
+ * On "Continue": remaining queued mutations are flushed before the new generator starts.
  *
  * Design:
  * - Structural mutations (add/remove block/connection) are queued in order.
- * - Parameter and setting updates are coalesced: only the latest value per key is kept.
- * - Each mutation is wrapped in try/except so one failure doesn't block the rest.
- * - The queue count is exposed as a Svelte store for UI reactivity.
+ * - Parameter and setting updates are coalesced: only the latest value per key.
+ * - Each mutation is wrapped in try/except for error isolation on flush.
+ * - pendingMutationCount is a Svelte store for UI reactivity (badge on stage button).
  */
 
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { NodeInstance, Connection } from '$lib/nodes/types';
 import { nodeRegistry } from '$lib/nodes/registry';
 import { isSubsystem } from '$lib/nodes/shapes';
@@ -34,7 +36,7 @@ const structuralQueue: string[] = [];
 /** Coalesced parameter updates: "nodeId:paramName" → Python assignment */
 const paramUpdates = new Map<string, string>();
 
-/** Coalesced setting updates: pathsimAttr → Python assignment */
+/** Coalesced setting updates: key → Python code */
 const settingUpdates = new Map<string, string>();
 
 /** Reactive store: number of pending mutations */
