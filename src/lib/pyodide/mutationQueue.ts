@@ -3,68 +3,50 @@
  * Tracks graph changes (add/remove blocks, connections, events, parameter/settings changes)
  * as Python code strings to be applied to the worker namespace on "Continue".
  *
- * On "Run": queue is cleared (fresh namespace).
+ * On "Run": queue is cleared, mappings initialized from code generation result.
  * On "Continue": queue is flushed → executed in worker → then new streaming generator starts.
+ *
+ * Design:
+ * - Structural mutations (add/remove block/connection) are queued in order.
+ * - Parameter and setting updates are coalesced: only the latest value per key is kept.
+ * - Each mutation is wrapped in try/except so one failure doesn't block the rest.
+ * - The queue count is exposed as a Svelte store for UI reactivity.
  */
 
+import { writable, get } from 'svelte/store';
 import type { NodeInstance, Connection } from '$lib/nodes/types';
 import { nodeRegistry } from '$lib/nodes/registry';
+import { isSubsystem } from '$lib/nodes/shapes';
 import { sanitizeName } from './codeBuilder';
 
-/**
- * A queued mutation — a Python code string to execute in the worker namespace.
- */
-interface Mutation {
-	type: 'add-block' | 'remove-block' | 'add-connection' | 'remove-connection' |
-		  'add-event' | 'remove-event' | 'update-param' | 'update-setting';
-	code: string;
-}
+// --- Internal state ---
 
 /** Active variable name mappings from the last run */
 let activeNodeVars = new Map<string, string>();   // nodeId → Python var name
 let activeConnVars = new Map<string, string>();    // connectionId → Python var name
 
-/** Counter for dynamically added connections */
-let dynamicConnCounter = 0;
+/** Counter for dynamically added variables */
+let dynamicVarCounter = 0;
 
-/** The pending mutation queue */
-const queue: Mutation[] = [];
+/** Ordered structural mutations (add/remove block/connection) */
+const structuralQueue: string[] = [];
 
-/**
- * Initialize mappings from a fresh run's code generation result.
- * Called when "Run" starts.
- */
-export function initMappings(nodeVars: Map<string, string>, connVars: Map<string, string>): void {
-	activeNodeVars = new Map(nodeVars);
-	activeConnVars = new Map(connVars);
-	dynamicConnCounter = 0;
-	queue.length = 0;
+/** Coalesced parameter updates: "nodeId:paramName" → Python assignment */
+const paramUpdates = new Map<string, string>();
+
+/** Coalesced setting updates: pathsimAttr → Python assignment */
+const settingUpdates = new Map<string, string>();
+
+/** Reactive store: number of pending mutations */
+export const pendingMutationCount = writable(0);
+
+function updateCount(): void {
+	pendingMutationCount.set(
+		structuralQueue.length + paramUpdates.size + settingUpdates.size
+	);
 }
 
-/**
- * Clear the mutation queue (on fresh Run).
- */
-export function clearQueue(): void {
-	queue.length = 0;
-}
-
-/**
- * Get all pending mutations and clear the queue.
- * Returns a single Python code string to execute.
- */
-export function flushQueue(): string | null {
-	if (queue.length === 0) return null;
-	const code = queue.map(m => m.code).join('\n');
-	queue.length = 0;
-	return code;
-}
-
-/**
- * Check if there are pending mutations.
- */
-export function hasPendingMutations(): boolean {
-	return queue.length > 0;
-}
+// --- Public API ---
 
 /**
  * Check if the mutation queue is active (a simulation has been run).
@@ -73,13 +55,78 @@ export function isActive(): boolean {
 	return activeNodeVars.size > 0;
 }
 
+/**
+ * Initialize mappings from a fresh run's code generation result.
+ * Called when "Run" starts. Clears all pending mutations.
+ */
+export function initMappings(nodeVars: Map<string, string>, connVars: Map<string, string>): void {
+	activeNodeVars = new Map(nodeVars);
+	activeConnVars = new Map(connVars);
+	dynamicVarCounter = 0;
+	structuralQueue.length = 0;
+	paramUpdates.clear();
+	settingUpdates.clear();
+	updateCount();
+}
+
+/**
+ * Clear the mutation queue (on fresh Run).
+ */
+export function clearQueue(): void {
+	structuralQueue.length = 0;
+	paramUpdates.clear();
+	settingUpdates.clear();
+	updateCount();
+}
+
+/**
+ * Get all pending mutations as a Python code string and clear the queue.
+ * Each mutation is wrapped in try/except for error isolation.
+ * Order: settings first, then structural mutations, then parameter updates.
+ */
+export function flushQueue(): string | null {
+	const allCode: string[] = [];
+
+	// 1. Settings (apply before structural changes)
+	for (const code of settingUpdates.values()) {
+		allCode.push(wrapTryExcept(code));
+	}
+
+	// 2. Structural mutations (add/remove in order)
+	for (const code of structuralQueue) {
+		allCode.push(wrapTryExcept(code));
+	}
+
+	// 3. Parameter updates (apply after blocks exist)
+	for (const code of paramUpdates.values()) {
+		allCode.push(wrapTryExcept(code));
+	}
+
+	structuralQueue.length = 0;
+	paramUpdates.clear();
+	settingUpdates.clear();
+	updateCount();
+
+	if (allCode.length === 0) return null;
+	return allCode.join('\n');
+}
+
+/**
+ * Check if there are pending mutations.
+ */
+export function hasPendingMutations(): boolean {
+	return structuralQueue.length > 0 || paramUpdates.size > 0 || settingUpdates.size > 0;
+}
+
 // --- Mutation generators ---
 
 /**
  * Queue adding a new block to the simulation.
+ * Skips subsystem nodes (they require recursive internal graph creation).
  */
 export function queueAddBlock(node: NodeInstance): void {
 	if (!isActive()) return;
+	if (isSubsystem(node)) return;
 
 	const typeDef = nodeRegistry.get(node.type);
 	if (!typeDef) return;
@@ -87,7 +134,7 @@ export function queueAddBlock(node: NodeInstance): void {
 	const existingNames = new Set(activeNodeVars.values());
 	let varName = sanitizeName(node.name);
 	if (!varName || existingNames.has(varName)) {
-		varName = `block_dyn_${dynamicConnCounter++}`;
+		varName = `block_dyn_${dynamicVarCounter++}`;
 	}
 	activeNodeVars.set(node.id, varName);
 
@@ -102,16 +149,14 @@ export function queueAddBlock(node: NodeInstance): void {
 	const params = paramParts.join(', ');
 	const constructor = params ? `${typeDef.blockClass}(${params})` : `${typeDef.blockClass}()`;
 
-	queue.push({
-		type: 'add-block',
-		code: [
-			`${varName} = ${constructor}`,
-			`sim.add_block(${varName})`,
-			`blocks.append(${varName})`,
-			`_node_id_map[id(${varName})] = "${node.id}"`,
-			`_node_name_map["${node.id}"] = "${node.name.replace(/"/g, '\\"')}"`
-		].join('\n')
-	});
+	structuralQueue.push([
+		`${varName} = ${constructor}`,
+		`sim.add_block(${varName})`,
+		`blocks.append(${varName})`,
+		`_node_id_map[id(${varName})] = "${node.id}"`,
+		`_node_name_map["${node.id}"] = "${node.name.replace(/"/g, '\\"')}"`
+	].join('\n'));
+	updateCount();
 }
 
 /**
@@ -121,17 +166,21 @@ export function queueRemoveBlock(nodeId: string): void {
 	const varName = activeNodeVars.get(nodeId);
 	if (!varName) return;
 
-	queue.push({
-		type: 'remove-block',
-		code: [
-			`sim.remove_block(${varName})`,
-			`blocks.remove(${varName})`,
-			`_node_id_map.pop(id(${varName}), None)`,
-			`_node_name_map.pop("${nodeId}", None)`
-		].join('\n')
-	});
-
+	structuralQueue.push([
+		`sim.remove_block(${varName})`,
+		`blocks.remove(${varName})`,
+		`_node_id_map.pop(id(${varName}), None)`,
+		`_node_name_map.pop("${nodeId}", None)`
+	].join('\n'));
 	activeNodeVars.delete(nodeId);
+
+	// Remove any coalesced param updates for this block
+	for (const key of paramUpdates.keys()) {
+		if (key.startsWith(nodeId + ':')) {
+			paramUpdates.delete(key);
+		}
+	}
+	updateCount();
 }
 
 /**
@@ -144,17 +193,15 @@ export function queueAddConnection(conn: Connection): void {
 	const targetVar = activeNodeVars.get(conn.targetNodeId);
 	if (!sourceVar || !targetVar) return;
 
-	const varName = `conn_dyn_${dynamicConnCounter++}`;
+	const varName = `conn_dyn_${dynamicVarCounter++}`;
 	activeConnVars.set(conn.id, varName);
 
-	queue.push({
-		type: 'add-connection',
-		code: [
-			`${varName} = Connection(${sourceVar}[${conn.sourcePortIndex}], ${targetVar}[${conn.targetPortIndex}])`,
-			`sim.add_connection(${varName})`,
-			`connections.append(${varName})`
-		].join('\n')
-	});
+	structuralQueue.push([
+		`${varName} = Connection(${sourceVar}[${conn.sourcePortIndex}], ${targetVar}[${conn.targetPortIndex}])`,
+		`sim.add_connection(${varName})`,
+		`connections.append(${varName})`
+	].join('\n'));
+	updateCount();
 }
 
 /**
@@ -164,52 +211,52 @@ export function queueRemoveConnection(connId: string): void {
 	const varName = activeConnVars.get(connId);
 	if (!varName) return;
 
-	queue.push({
-		type: 'remove-connection',
-		code: [
-			`sim.remove_connection(${varName})`,
-			`connections.remove(${varName})`
-		].join('\n')
-	});
-
+	structuralQueue.push([
+		`sim.remove_connection(${varName})`,
+		`connections.remove(${varName})`
+	].join('\n'));
 	activeConnVars.delete(connId);
+	updateCount();
 }
 
 /**
  * Queue a block parameter change.
+ * Coalesced: only the latest value per (nodeId, paramName) is kept.
  */
 export function queueUpdateParam(nodeId: string, paramName: string, value: string): void {
 	const varName = activeNodeVars.get(nodeId);
 	if (!varName) return;
 
-	queue.push({
-		type: 'update-param',
-		code: `${varName}.${paramName} = ${value}`
-	});
+	paramUpdates.set(`${nodeId}:${paramName}`, `${varName}.${paramName} = ${value}`);
+	updateCount();
 }
 
 /**
  * Queue a simulation setting change.
+ * Coalesced: only the latest code per setting key is kept.
+ * @param key - Coalescing key (e.g. 'dt', 'solver')
+ * @param code - Full Python code to execute (e.g. 'sim.dt = 0.01')
  */
-export function queueUpdateSetting(settingName: string, value: string): void {
+export function queueUpdateSetting(key: string, code: string): void {
 	if (!isActive()) return;
 
-	queue.push({
-		type: 'update-setting',
-		code: `sim.${settingName} = ${value}`
-	});
+	settingUpdates.set(key, code);
+	updateCount();
 }
 
-/**
- * Get the Python variable name for a node.
- */
+// --- Lookup ---
+
 export function getNodeVar(nodeId: string): string | undefined {
 	return activeNodeVars.get(nodeId);
 }
 
-/**
- * Get the Python variable name for a connection.
- */
 export function getConnVar(connId: string): string | undefined {
 	return activeConnVars.get(connId);
+}
+
+// --- Internal helpers ---
+
+function wrapTryExcept(code: string): string {
+	const indented = code.split('\n').map(line => `    ${line}`).join('\n');
+	return `try:\n${indented}\nexcept Exception as _e:\n    print(f"Mutation error: {_e}", file=__import__('sys').stderr)`;
 }

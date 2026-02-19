@@ -63,6 +63,7 @@ export {
 	queueUpdateSetting,
 	hasPendingMutations,
 	isActive as isMutationQueueActive,
+	pendingMutationCount,
 	getNodeVar,
 	getConnVar
 } from './mutationQueue';
