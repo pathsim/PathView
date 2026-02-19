@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
     import { base } from '$app/paths';
-	import { fly, fade, scale } from 'svelte/transition';
+	import { fly, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import FlowCanvas from '$lib/components/FlowCanvas.svelte';
 	import SimulationPanel from '$lib/components/panels/SimulationPanel.svelte';
@@ -1036,17 +1036,7 @@
 				use:tooltip={{ text: $currentFileName ? `Save '${$currentFileName}'` : "Save", shortcut: "Ctrl+S" }}
 				aria-label="Save"
 			>
-				<span class="icon-crossfade">
-					{#if saveFlash === 'save'}
-						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-							<Icon name="check" size={16} />
-						</span>
-					{:else}
-						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-							<Icon name="upload" size={16} />
-						</span>
-					{/if}
-				</span>
+				<Icon name={saveFlash === 'save' ? 'check' : 'upload'} size={16} />
 			</button>
 			<button
 				class="toolbar-btn"
@@ -1054,17 +1044,7 @@
 				use:tooltip={{ text: "Save As", shortcut: "Ctrl+Shift+S" }}
 				aria-label="Save As"
 			>
-				<span class="icon-crossfade">
-					{#if saveFlash === 'save-as'}
-						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-							<Icon name="check" size={16} />
-						</span>
-					{:else}
-						<span class="icon-crossfade-item" in:fade={{ duration: 200 }} out:fade={{ duration: 200 }}>
-							<Icon name="upload-plus" size={16} />
-						</span>
-					{/if}
-				</span>
+				<Icon name={saveFlash === 'save-as' ? 'check' : 'upload-plus'} size={16} />
 			</button>
 			<button class="toolbar-btn" onclick={() => exportDialogOpen = true} use:tooltip={{ text: "Python Code", shortcut: "Ctrl+E" }} aria-label="View Python Code">
 				<Icon name="braces" size={16} />
@@ -1465,17 +1445,6 @@
 		line-height: 16px;
 		text-align: center;
 		pointer-events: none;
-	}
-
-	.icon-crossfade {
-		position: relative;
-		display: grid;
-		place-items: center;
-	}
-
-	.icon-crossfade-item {
-		grid-area: 1 / 1;
-		display: flex;
 	}
 
 	/* Logo overlay */
