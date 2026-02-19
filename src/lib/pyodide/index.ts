@@ -23,6 +23,7 @@ export {
 // Code generation
 export {
 	generatePythonCode,
+	type CodeGenResult,
 	runGraphStreamingSimulation,
 	exportToPython,
 	validateGraphSimulation,

@@ -22,6 +22,7 @@ import {
 import {
 	generateParamString,
 	generateConnectionLines,
+	generateNamedConnections,
 	generateListDefinition,
 	sanitizeName
 } from './codeBuilder';
@@ -289,6 +290,13 @@ function generateSubsystemCode(
 		}
 	}
 
+	// Connection variables (named for mutation support)
+	const subConnPrefix = `${subsystemVarName}_conn`;
+	const subConnResult = generateNamedConnections(childConnections, internalNodeVars, subConnPrefix);
+	for (const line of subConnResult.lines) {
+		lines.push(line);
+	}
+
 	// Create Subsystem with inline blocks and connections using kwargs
 	lines.push(`${subsystemVarName} = Subsystem(`);
 
@@ -299,11 +307,10 @@ function generateSubsystemCode(
 	}
 	lines.push('    ],');
 
-	// Connections list (grouped by source for multi-target syntax)
+	// Connections list (referencing named variables)
 	lines.push('    connections=[');
-	const connLines = generateConnectionLines(childConnections, internalNodeVars, '        ');
-	for (const line of connLines) {
-		lines.push(line);
+	for (const connVarName of subConnResult.varNames) {
+		lines.push(`        ${connVarName},`);
 	}
 	lines.push('    ],');
 
@@ -351,6 +358,13 @@ function groupNodesByCategory(
  * @param includeNodeIdMap - Include node ID mapping for web data extraction (default: true)
  * @param includeRun - Append sim.run() call (default: true, false for streaming)
  */
+/** Result of Python code generation, includes variable mappings for mutation support */
+export interface CodeGenResult {
+	code: string;
+	nodeVars: Map<string, string>;   // nodeId → Python variable name
+	connVars: Map<string, string>;   // connectionId → Python variable name
+}
+
 export function generatePythonCode(
 	nodes: NodeInstance[],
 	connections: Connection[],
@@ -359,7 +373,7 @@ export function generatePythonCode(
 	includeNodeIdMap: boolean = true,
 	events: EventInstance[] = [],
 	includeRun: boolean = true
-): string {
+): CodeGenResult {
 	const lines: string[] = [];
 
 	// Check if we have any subsystems
@@ -465,14 +479,13 @@ export function generatePythonCode(
 		lines.push('');
 	}
 
-	// 4. Connections (grouped by source for multi-target syntax)
+	// 4. Connections (named variables for mutation support)
 	lines.push('# CONNECTIONS');
-	lines.push('connections = [');
-	const connLines = generateConnectionLines(connections, nodeVars, '    ');
-	for (const line of connLines) {
+	const connResult = generateNamedConnections(connections, nodeVars);
+	for (const line of connResult.lines) {
 		lines.push(line);
 	}
-	lines.push(']');
+	lines.push(...generateListDefinition('connections', connResult.varNames));
 	lines.push('');
 
 	// 5. Events (if any)
@@ -495,7 +508,7 @@ export function generatePythonCode(
 		lines.push(`sim.run(duration=${getSettingOrDefault(settings, 'duration')}, reset=True)`);
 	}
 
-	return lines.join('\n');
+	return { code: lines.join('\n'), nodeVars, connVars: connResult.connVars };
 }
 
 /**
@@ -677,16 +690,16 @@ function generateFormattedPythonCode(
 	lines.push(divider);
 	lines.push('');
 
-	// Connections (grouped by source for multi-target syntax)
+	// Connections (named variables for mutation support)
 	if (connections.length === 0) {
 		lines.push('connections = []');
 	} else {
-		lines.push('connections = [');
-		const connLines = generateConnectionLines(connections, nodeVars, '    ');
-		for (const line of connLines) {
+		const connResult = generateNamedConnections(connections, nodeVars);
+		for (const line of connResult.lines) {
 			lines.push(line);
 		}
-		lines.push(']');
+		lines.push('');
+		lines.push(...generateListDefinition('connections', connResult.varNames));
 	}
 	lines.push('');
 
@@ -741,9 +754,9 @@ export async function runGraphStreamingSimulation(
 	onUpdate?: (result: SimulationResult) => void
 ): Promise<SimulationResult | null> {
 	// Generate code without sim.run() - streaming will handle execution
-	const code = generatePythonCode(nodes, connections, settings, codeContext, true, events, false);
+	const result = generatePythonCode(nodes, connections, settings, codeContext, true, events, false);
 	const duration = getSettingOrDefault(settings, 'duration');
-	return runStreamingSimulation(code, String(duration), onUpdate);
+	return runStreamingSimulation(result.code, String(duration), onUpdate);
 }
 
 /**

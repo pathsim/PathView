@@ -84,7 +84,7 @@ export function groupConnectionsBySource(
 }
 
 /**
- * Generate connection lines from grouped connections
+ * Generate connection lines from grouped connections (anonymous, for inline use)
  *
  * @param connections - Array of connections
  * @param nodeVars - Map of nodeId to variable name
@@ -105,6 +105,40 @@ export function generateConnectionLines(
 	}
 
 	return lines;
+}
+
+/**
+ * Generate named connection variable definitions.
+ * Each edge gets its own named variable for individual mutation support.
+ *
+ * @param connections - Array of connections
+ * @param nodeVars - Map of nodeId to variable name
+ * @param prefix - Variable name prefix (default 'conn')
+ * @returns Object with definition lines, variable names list, and id-to-varname map
+ */
+export function generateNamedConnections(
+	connections: Connection[],
+	nodeVars: Map<string, string>,
+	prefix: string = 'conn'
+): { lines: string[]; varNames: string[]; connVars: Map<string, string> } {
+	const lines: string[] = [];
+	const varNames: string[] = [];
+	const connVars = new Map<string, string>();
+
+	let idx = 0;
+	for (const conn of connections) {
+		const sourceVar = nodeVars.get(conn.sourceNodeId);
+		const targetVar = nodeVars.get(conn.targetNodeId);
+		if (!sourceVar || !targetVar) continue;
+
+		const varName = `${prefix}_${idx}`;
+		lines.push(`${varName} = Connection(${sourceVar}[${conn.sourcePortIndex}], ${targetVar}[${conn.targetPortIndex}])`);
+		varNames.push(varName);
+		connVars.set(conn.id, varName);
+		idx++;
+	}
+
+	return { lines, varNames, connVars };
 }
 
 /**
