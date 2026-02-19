@@ -1009,19 +1009,15 @@
 			>
 				<Icon name="skip-forward-filled" size={16} />
 			</button>
-			{#if hasRunSimulation}
+			{#if hasRunSimulation && $pendingMutationCount > 0}
 				<button
-					class="toolbar-btn stage-btn"
-					class:active={$pendingMutationCount > 0}
+					class="toolbar-btn stage-btn active"
 					onclick={() => stageMutations()}
-					disabled={$pendingMutationCount === 0}
 					use:tooltip={"Stage Changes"}
 					aria-label="Stage Changes"
 				>
 					<Icon name="stage" size={16} />
-					{#if $pendingMutationCount > 0}
-						<span class="mutation-badge">{$pendingMutationCount}</span>
-					{/if}
+					<span class="mutation-badge">{$pendingMutationCount}</span>
 				</button>
 			{/if}
 		</div>
